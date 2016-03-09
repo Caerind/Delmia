@@ -3,4 +3,4 @@
 
 Real Time Strategy Game
 
- - Actual in thinking state - 
+ -> Actually on thinking state
