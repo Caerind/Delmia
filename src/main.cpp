@@ -53,6 +53,19 @@ class Map : public NActor
             return mRoadComponent.getTileId(coords);
         }
 
+        void load(pugi::xml_node& node)
+        {
+            mMapComponent.load(node,"Map");
+            mRoadComponent.load(node,"Road");
+        }
+
+        void save(pugi::xml_node& node)
+        {
+            node.append_attribute("type") = "Map";
+            mMapComponent.save(node,"Map");
+            mRoadComponent.save(node,"Road");
+        }
+
     private:
         NLayerComponent mMapComponent;
         NLayerComponent mRoadComponent;
@@ -73,29 +86,42 @@ class Building : public Entity
 
         Building()
         {
+            mCoords = sf::Vector2i(0,0);
+            setPosition(NMapUtility::Isometric::coordsToWorld(mCoords));
+
+            attachComponent(&mSprite);
+
+            mSprite.setTexture(NWorld::getResources().getTexture("building"));
+            mSprite.setTextureRect(sf::IntRect(0,0,256,256));
+            mSprite.setOrigin(128,192);
         }
 
         void setCoords(sf::Vector2i coords)
         {
             mCoords = coords;
-            for (std::size_t i = 0; i < mSprites.size(); i++)
-            {
-                mSprites[i].second.setPosition(NMapUtility::Isometric::coordsToWorld(mCoords + mSprites[i].first));
-            }
+            setPosition(NMapUtility::Isometric::coordsToWorld(mCoords));
         }
 
-        void addSprite(sf::Vector2i coords, sf::IntRect rect)
+        void setRect(sf::IntRect rect)
         {
-            mSprites.emplace_back();
-            mSprites.back().first = coords;
-            mSprites.back().second.setTexture(NWorld::getResources().getTexture("building"));
-            mSprites.back().second.setTextureRect(rect);
-            mSprites.back().second.setOrigin(128,192);
-            mSprites.back().second.setPosition(NMapUtility::Isometric::coordsToWorld(mCoords + coords));
+            mSprite.setTextureRect(rect);
+        }
+
+        void load(pugi::xml_node& node)
+        {
+            setCoords(NVector::NToSFML2I(NString::toVector(node.attribute("coords").value())));
+            setRect(NString::toIntRect(node.attribute("rect").value()));
+        }
+
+        void save(pugi::xml_node& node)
+        {
+            node.append_attribute("type") = "Building";
+            node.append_attribute("coords") = NString::toString(NVector::SFML2IToN(mCoords)).c_str();
+            node.append_attribute("rect") = NString::toString(mSprite.getTextureRect()).c_str();
         }
 
         sf::Vector2i mCoords;
-        std::vector<std::pair<sf::Vector2i,NSpriteComponent>> mSprites;
+        NSpriteComponent mSprite;
 };
 
 class Unit : public Entity
@@ -111,6 +137,15 @@ class Unit : public Entity
             mSprite.setOrigin(64,100);
         }
 
+        void load(pugi::xml_node& node)
+        {
+        }
+
+        void save(pugi::xml_node& node)
+        {
+            node.append_attribute("type") = "Unit";
+        }
+
         NSpriteComponent mSprite;
 };
 
@@ -119,33 +154,42 @@ class EState : public ah::State
     public:
         EState(ah::StateManager& manager) : ah::State(manager)
         {
-            mMap = NWorld::createActor<Map>();
+            NWorld::registerActor<Map>();
+            NWorld::registerActor<Unit>();
+            NWorld::registerActor<Building>();
 
-            auto house = NWorld::createActor<Building>();
-            house->setCoords(sf::Vector2i(1,1));
-            house->addSprite(sf::Vector2i(0,0),sf::IntRect(0,0,256,256));
-            mMap->setRoadId(sf::Vector2i(2,2),2);
+            if (!NWorld::load("test.xml"))
+            {
+                mMap = NWorld::createActor<Map>();
 
-            auto gold = NWorld::createActor<Building>();
-            gold->setCoords(sf::Vector2i(2,6));
-            gold->addSprite(sf::Vector2i(0,0),sf::IntRect(256,0,256,256));
+                auto house = NWorld::createActor<Building>();
+                house->setCoords(sf::Vector2i(1,1));
+                house->setRect(sf::IntRect(0,0,256,256));
+                mMap->setRoadId(sf::Vector2i(2,2),2);
 
-            auto forest = NWorld::createActor<Building>();
-            forest->setCoords(sf::Vector2i(4,6));
-            forest->addSprite(sf::Vector2i(0,0),sf::IntRect(512,0,256,256));
+                auto gold = NWorld::createActor<Building>();
+                gold->setCoords(sf::Vector2i(2,6));
+                gold->setRect(sf::IntRect(256,0,256,256));
 
-            auto fish = NWorld::createActor<Building>();
-            fish->setCoords(sf::Vector2i(13,13));
-            fish->addSprite(sf::Vector2i(0,0),sf::IntRect(768,0,256,256));
+                auto forest = NWorld::createActor<Building>();
+                forest->setCoords(sf::Vector2i(4,6));
+                forest->setRect(sf::IntRect(512,0,256,256));
 
-            auto unit1 = NWorld::createActor<Unit>();
-            unit1->setPosition(430,180);
+                auto fish = NWorld::createActor<Building>();
+                fish->setCoords(sf::Vector2i(13,13));
+                fish->setRect(sf::IntRect(768,0,256,256));
 
-            auto unit2 = NWorld::createActor<Unit>();
-            unit2->setPosition(580,375);
+                auto unit1 = NWorld::createActor<Unit>();
+                unit1->setPosition(430,180);
 
-            auto unit3 = NWorld::createActor<Unit>();
-            unit3->setPosition(620,190);
+                auto unit2 = NWorld::createActor<Unit>();
+                unit2->setPosition(580,375);
+
+                auto unit3 = NWorld::createActor<Unit>();
+                unit3->setPosition(620,190);
+
+                NWorld::save("test.xml");
+            }
         }
 
         bool handleEvent(sf::Event const& event)
@@ -154,8 +198,21 @@ class EState : public ah::State
 
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
             {
-                sf::Vector2i c = NMapUtility::Hexagonal::worldToCoords(NWorld::getPointerPositionView());
-                mMap->setTileId(c,1);
+                //sf::Vector2i c = NMapUtility::Hexagonal::worldToCoords(NWorld::getPointerPositionView());
+                //mMap->setTileId(c,1);
+            }
+
+            // Zoom
+            if (event.type == sf::Event::MouseWheelScrolled && event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+            {
+                if (event.mouseWheelScroll.delta < 1)
+                {
+                    NWorld::getCameraManager().getView().zoom(1.2f);
+                }
+                else
+                {
+                    NWorld::getCameraManager().getView().zoom(0.8f);
+                }
             }
 
             return true;

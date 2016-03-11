@@ -41,6 +41,11 @@ void NSpriteComponent::setTextureRect(sf::IntRect const& rect)
     mSprite.setTextureRect(rect);
 }
 
+sf::IntRect NSpriteComponent::getTextureRect() const
+{
+    return mSprite.getTextureRect();
+}
+
 void NSpriteComponent::render(sf::RenderTarget& target)
 {
     sf::RenderStates states;

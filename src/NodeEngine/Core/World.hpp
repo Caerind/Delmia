@@ -38,6 +38,11 @@ class NWorld
         // Update the world : use temp array and then clear them
         static void update();
 
+        #ifdef N_DESKTOP_PLATFORM
+        template <typename T>
+        static bool registerActor();
+        #endif // N_DESKTOP_PLATFORM
+
         template<typename T>
         static bool registerActor(std::string const& type);
 
@@ -116,6 +121,14 @@ std::shared_ptr<T> NWorld::createActor()
     instance().mActors.add(actor);
     return actor;
 }
+
+#ifdef N_DESKTOP_PLATFORM
+template <typename T>
+bool NWorld::registerActor()
+{
+    return registerActor<T>(NString::type<T>());
+}
+#endif // N_DESKTOP_PLATFORM
 
 template<typename T>
 bool NWorld::registerActor(std::string const& type)

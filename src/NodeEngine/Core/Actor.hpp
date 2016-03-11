@@ -11,8 +11,8 @@ class NActor : public NComponent
 
         typedef std::shared_ptr<NActor> Ptr;
 
-        virtual void load(pugi::xml_node& node, std::string const& name = "");
-        virtual void save(pugi::xml_node& node, std::string const& name = "");
+        virtual void load(pugi::xml_node& node);
+        virtual void save(pugi::xml_node& node);
 
         std::string getId() const;
 
