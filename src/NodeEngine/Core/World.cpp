@@ -91,11 +91,6 @@ void NWorld::update()
     instance().mEvents.clear();
 
     // Renderables
-    for (std::size_t i = 0; i < instance().mRenderablesAdditions.size(); i++)
-    {
-        instance().mRenderables.add(instance().mRenderablesAdditions[i]);
-    }
-    instance().mRenderablesAdditions.clear();
     for (std::size_t i = 0; i < instance().mRenderablesDeletions.size(); i++)
     {
         instance().mRenderables.remove(instance().mRenderablesDeletions[i]);
@@ -280,7 +275,7 @@ void NWorld::stopTimer(std::string const& handle)
 
 void NWorld::addRenderable(NSceneComponent* renderable)
 {
-    mRenderablesAdditions.add(renderable);
+    instance().mRenderables.add(renderable);
 }
 
 void NWorld::removeRenderable(NSceneComponent* renderable)

@@ -8,7 +8,7 @@ class NSceneComponent : public NComponent
 {
     public:
         NSceneComponent();
-        ~NSceneComponent();
+        virtual ~NSceneComponent();
 
         virtual void render(sf::RenderTarget& target);
 };

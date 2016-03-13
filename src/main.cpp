@@ -3,6 +3,9 @@
 #include "NodeEngine/Core/MapUtility.hpp"
 #include "NodeEngine/Core/SpriteComponent.hpp"
 #include "NodeEngine/Core/LayerComponent.hpp"
+#include "NodeEngine/Utils/Log.hpp"
+
+#include <iostream>
 
 class Map : public NActor
 {
@@ -86,42 +89,74 @@ class Building : public Entity
 
         Building()
         {
-            mCoords = sf::Vector2i(0,0);
-            setPosition(NMapUtility::Isometric::coordsToWorld(mCoords));
-
-            attachComponent(&mSprite);
-
-            mSprite.setTexture(NWorld::getResources().getTexture("building"));
-            mSprite.setTextureRect(sf::IntRect(0,0,256,256));
-            mSprite.setOrigin(128,192);
+            setCoords(0,0);
         }
 
-        void setCoords(sf::Vector2i coords)
+        ~Building()
         {
-            mCoords = coords;
-            setPosition(NMapUtility::Isometric::coordsToWorld(mCoords));
+            for (std::size_t i = 0; i < mSprites.size(); i++)
+            {
+                delete mSprites[i].second;
+            }
+            mSprites.clear();
         }
 
-        void setRect(sf::IntRect rect)
+        void setCoords(int x, int y)
         {
-            mSprite.setTextureRect(rect);
+            mCoords = sf::Vector2i(x,y);
+            setPosition(NMapUtility::Isometric::coordsToWorld(mCoords) - NMapUtility::Isometric::coordsToWorld(sf::Vector2i(0,0)));
+        }
+
+        sf::Vector2i getCoords()
+        {
+            return mCoords;
+        }
+
+        void addSprite(int x, int y, sf::IntRect rect)
+        {
+            sf::Vector2i coords = sf::Vector2i(x,y);
+
+            std::pair<sf::Vector2i,NSpriteComponent*> pair;
+            pair.first = coords;
+            pair.second = new NSpriteComponent();
+            pair.second->setTexture("building",rect);
+            pair.second->setOrigin(128,192);
+
+            pair.second->setPosition(NMapUtility::Isometric::coordsToWorld(coords));
+
+            attachComponent(pair.second);
+
+            mSprites.push_back(pair);
         }
 
         void load(pugi::xml_node& node)
         {
-            setCoords(NVector::NToSFML2I(NString::toVector(node.attribute("coords").value())));
-            setRect(NString::toIntRect(node.attribute("rect").value()));
+            std::size_t size = node.attribute("size").as_uint();
+            for (std::size_t i = 0; i < size; i++)
+            {
+                std::string name = "Sprite" + std::to_string(i);
+                pugi::xml_node n = node.child(name.c_str());
+                sf::Vector2i coords = NVector::NToSFML2I(NString::toVector(n.attribute("coords").value()));
+                sf::IntRect rect = NString::toIntRect(n.attribute("rect").value());
+                addSprite(coords.x,coords.y,rect);
+            }
         }
 
         void save(pugi::xml_node& node)
         {
             node.append_attribute("type") = "Building";
-            node.append_attribute("coords") = NString::toString(NVector::SFML2IToN(mCoords)).c_str();
-            node.append_attribute("rect") = NString::toString(mSprite.getTextureRect()).c_str();
+            node.append_attribute("size") = mSprites.size();
+            for (std::size_t i = 0; i < mSprites.size(); i++)
+            {
+                std::string name = "Sprite" + std::to_string(i);
+                pugi::xml_node n = node.append_child(name.c_str());
+                n.append_attribute("coords") = NString::toString(NVector::SFML2IToN(mSprites[i].first)).c_str();
+                n.append_attribute("rect") = NString::toString(mSprites[i].second->getTextureRect()).c_str();
+            }
         }
 
         sf::Vector2i mCoords;
-        NSpriteComponent mSprite;
+        std::vector<std::pair<sf::Vector2i,NSpriteComponent*>> mSprites;
 };
 
 class Unit : public Entity
@@ -158,48 +193,35 @@ class EState : public ah::State
             NWorld::registerActor<Unit>();
             NWorld::registerActor<Building>();
 
-            if (!NWorld::load("test.xml"))
-            {
-                mMap = NWorld::createActor<Map>();
+            mMap = NWorld::createActor<Map>();
 
-                auto house = NWorld::createActor<Building>();
-                house->setCoords(sf::Vector2i(1,1));
-                house->setRect(sf::IntRect(0,0,256,256));
-                mMap->setRoadId(sf::Vector2i(2,2),2);
+            mHouse = NWorld::createActor<Building>();
+            mHouse->setCoords(2,3);
+            mHouse->addSprite(0,0,sf::IntRect(0,0,256,256));
+            mHouse->addSprite(0,-1,sf::IntRect(0,0,256,256));
+            mHouse->addSprite(1,-2,sf::IntRect(0,0,256,256));
+            mHouse->addSprite(1,-1,sf::IntRect(0,0,256,256));
+            mHouse->addSprite(0,1,sf::IntRect(0,0,256,256));
 
-                auto gold = NWorld::createActor<Building>();
-                gold->setCoords(sf::Vector2i(2,6));
-                gold->setRect(sf::IntRect(256,0,256,256));
-
-                auto forest = NWorld::createActor<Building>();
-                forest->setCoords(sf::Vector2i(4,6));
-                forest->setRect(sf::IntRect(512,0,256,256));
-
-                auto fish = NWorld::createActor<Building>();
-                fish->setCoords(sf::Vector2i(13,13));
-                fish->setRect(sf::IntRect(768,0,256,256));
-
-                auto unit1 = NWorld::createActor<Unit>();
-                unit1->setPosition(430,180);
-
-                auto unit2 = NWorld::createActor<Unit>();
-                unit2->setPosition(580,375);
-
-                auto unit3 = NWorld::createActor<Unit>();
-                unit3->setPosition(620,190);
-
-                NWorld::save("test.xml");
-            }
+            NWorld::save("test.xml");
         }
 
         bool handleEvent(sf::Event const& event)
         {
             NWorld::addEvent(event);
 
+            sf::Vector2i c = NMapUtility::Isometric::worldToCoords(NWorld::getPointerPositionView());
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
+            {
+                mHouse->addSprite(c.x,c.y,sf::IntRect(0,0,256,256));
+            }
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Middle)
+            {
+                //mMap->setTileId(c,1);
+            }
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
             {
-                //sf::Vector2i c = NMapUtility::Hexagonal::worldToCoords(NWorld::getPointerPositionView());
-                //mMap->setTileId(c,1);
+                NWorld::createActor<Unit>()->setPosition(NWorld::getPointerPositionView());
             }
 
             // Zoom
@@ -243,10 +265,18 @@ class EState : public ah::State
             NWorld::getCameraManager().getView().move(dt.asSeconds() * 400.f * mvt);
 
             NVector m = NWorld::getPointerPositionView();
+            m.x = (int)m.x;
+            m.y = (int)m.y;
             NVector t = NVector::SFML2IToN(NMapUtility::Isometric::worldToCoords(m));
+            t.x = (int)t.x;
+            t.y = (int)t.y;
 
             NWorld::getWindow().setDebugInfo("mouse",NString::toString(m));
             NWorld::getWindow().setDebugInfo("tile",NString::toString(t));
+
+            NWorld::getWindow().setDebugInfo("actors",std::to_string(NWorld::getActorCount()));
+            NWorld::getWindow().setDebugInfo("tickables",std::to_string(NWorld::getTickableCount()));
+            NWorld::getWindow().setDebugInfo("renderables",std::to_string(NWorld::getRenderableCount()));
 
             return true;
         }
@@ -258,6 +288,7 @@ class EState : public ah::State
 
     private:
         Map::Ptr mMap;
+        Building::Ptr mHouse;
 };
 
 int main()

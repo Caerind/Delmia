@@ -100,7 +100,6 @@ class NWorld
         NArray<std::string> mActorsDeletions;
 
         NArray<NSceneComponent*> mRenderables;
-        NArray<NSceneComponent*> mRenderablesAdditions;
         NArray<NSceneComponent*> mRenderablesDeletions;
 
         NArray<NTickable*> mTickables;
