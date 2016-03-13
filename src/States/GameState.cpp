@@ -31,7 +31,7 @@ bool GameState::handleEvent(sf::Event const& event)
     }
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
-        NWorld::createActor<Forest>()->init(c.x,c.y,NMath::random(1,6));
+        NWorld::createActor<Forest>(c.x,c.y);
     }
 
     // Zoom

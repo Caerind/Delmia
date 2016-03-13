@@ -10,8 +10,7 @@ class Forest : public Building
 
     public:
         Forest();
-
-        void init(int x, int y, std::size_t size);
+        Forest(int x, int y);
 };
 
 #endif // FOREST_HPP

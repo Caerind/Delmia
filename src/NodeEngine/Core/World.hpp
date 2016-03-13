@@ -47,8 +47,8 @@ class NWorld
         template<typename T>
         static bool registerActor(std::string const& type);
 
-        template <typename T>
-        static std::shared_ptr<T> createActor();
+        template <typename T, typename ... Args>
+        static std::shared_ptr<T> createActor(Args&& ... args);
 
         // Add an actor
         static void addActor(NActor::Ptr actor);
@@ -114,10 +114,10 @@ class NWorld
         NMap<std::string,std::function<NActor::Ptr()>> mActorFactory;
 };
 
-template <typename T>
-std::shared_ptr<T> NWorld::createActor()
+template <typename T, typename ... Args>
+std::shared_ptr<T> NWorld::createActor(Args&& ... args)
 {
-    std::shared_ptr<T> actor = std::make_shared<T>();
+    std::shared_ptr<T> actor = std::make_shared<T>(std::forward<Args>(args)...);
     instance().mActors.add(actor);
     return actor;
 }

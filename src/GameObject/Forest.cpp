@@ -2,19 +2,14 @@
 
 Forest::Forest()
 {
+    setCoords(0,0);
+    addSprite(0,0,sf::IntRect(512,0,256,256));
+    addResource(0,1000); // TODO : Resources
 }
 
-void Forest::init(int x, int y, std::size_t size)
+Forest::Forest(int x, int y)
 {
     setCoords(x,y);
-    for (std::size_t i = 0; i < size; i++)
-    {
-        sf::Vector2i c = sf::Vector2i(0,0);
-        do
-        {
-            c.x = NMath::random(-1,1);
-            c.y = NMath::random(-1,1);
-        } while (0); // TODO : Fix it
-        addSprite(c.x,c.y,sf::IntRect(512,0,256,256));
-    }
+    addSprite(0,0,sf::IntRect(512,0,256,256));
+    addResource(0,1000); // TODO : Resources
 }
