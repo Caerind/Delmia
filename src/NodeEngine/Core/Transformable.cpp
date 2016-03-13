@@ -28,6 +28,16 @@ void NTransformable::setPosition(float x, float y, float z)
     setPosition(NVector(x,y,z));
 }
 
+void NTransformable::move(NVector const& movement)
+{
+    setPosition(movement + getPosition());
+}
+
+void NTransformable::move(float x, float y, float z)
+{
+    move(NVector(x,y,z));
+}
+
 NVector NTransformable::getScale() const
 {
     return NVector::SFML2FToN(mTransformable.getScale());

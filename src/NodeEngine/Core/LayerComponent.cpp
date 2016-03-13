@@ -36,7 +36,7 @@ void NLayerComponent::create(std::string const& textureName, sf::Vector2i mapSiz
             }
             else if (isHexagonal())
             {
-                int sSize = (std::max(mTileSize.x,mTileSize.y) - mHexSide) /2; // TODO : round to upper if not divisible by 2
+                int sSize = (std::max(mTileSize.x,mTileSize.y) - mHexSide) /2;
                 if (mTileSize.x > mTileSize.y)
                 {
                     if (j % 2 == 0)

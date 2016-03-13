@@ -14,6 +14,8 @@ class NTransformable
         virtual void setPosition(NVector const& position);
         virtual void setPosition(sf::Vector2f const& position, float z = 0.f);
         virtual void setPosition(float x, float y, float z = 0.f);
+        void move(NVector const& movement);
+        void move(float x, float y, float z = 0.f);
 
         virtual NVector getScale() const;
         virtual void setScale(NVector const& scale);

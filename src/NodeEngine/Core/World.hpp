@@ -14,6 +14,7 @@
 #include "../Utils/Map.hpp"
 #include "../Utils/Pugixml.hpp"
 #include "../Utils/Timer.hpp"
+#include "../Utils/Log.hpp"
 
 #include "../Application/Application.hpp"
 
