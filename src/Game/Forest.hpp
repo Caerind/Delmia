@@ -1,7 +1,7 @@
 #ifndef FOREST_HPP
 #define FOREST_HPP
 
-#include "../GameCore/Building.hpp"
+#include "Building.hpp"
 
 class Forest : public Building
 {

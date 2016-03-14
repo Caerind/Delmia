@@ -1,14 +1,10 @@
 #ifndef GAMESTATE_HPP
 #define GAMESTATE_HPP
 
-#include "../NodeEngine/Application/Application.hpp"
-#include "../NodeEngine/Core/World.hpp"
-#include "../NodeEngine/Core/MapUtility.hpp"
+#include "../../NodeEngine/Core/World.hpp"
+#include "../../NodeEngine/Core/MapUtility.hpp"
 
-#include "../GameCore/Unit.hpp"
-#include "../GameCore/Building.hpp"
-#include "../GameCore/Map.hpp"
-#include "../GameObject/Forest.hpp"
+#include "../../Game.hpp"
 
 class GameState : public ah::State
 {

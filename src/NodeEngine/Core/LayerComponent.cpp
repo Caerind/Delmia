@@ -74,6 +74,16 @@ void NLayerComponent::create(std::string const& textureName, sf::Vector2i mapSiz
     }
 }
 
+sf::Vector2i NLayerComponent::getMapSize() const
+{
+    return mMapSize;
+}
+
+sf::Vector2i NLayerComponent::getTileSize() const
+{
+    return mTileSize;
+}
+
 void NLayerComponent::render(sf::RenderTarget& target)
 {
     sf::RenderStates states;

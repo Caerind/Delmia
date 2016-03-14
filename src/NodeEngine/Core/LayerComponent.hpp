@@ -21,6 +21,9 @@ class NLayerComponent : public NSceneComponent
 
         void create(std::string const& textureName, sf::Vector2i mapSize, sf::Vector2i tileSize, int type = Type::Orthogonal, int hexSide = 0);
 
+        sf::Vector2i getMapSize() const;
+        sf::Vector2i getTileSize() const;
+
         void render(sf::RenderTarget& target);
 
         sf::FloatRect getBounds() const;

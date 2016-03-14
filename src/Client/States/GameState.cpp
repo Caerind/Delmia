@@ -3,9 +3,7 @@
 GameState::GameState(ah::StateManager& manager)
 : ah::State(manager)
 {
-    NWorld::registerActor<Map>();
-    NWorld::registerActor<Unit>();
-    NWorld::registerActor<Building>();
+    registerGameClasses();
 
     NWorld::createActor<Map>();
 

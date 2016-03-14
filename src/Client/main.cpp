@@ -1,6 +1,6 @@
-#include "NodeEngine/Application/Application.hpp"
+#include "../NodeEngine/Application/Application.hpp"
 
-#include "States/GameState.hpp"
+#include "States.hpp"
 
 int main()
 {
@@ -14,7 +14,8 @@ int main()
     ah::Application::getWindow().setDebugInfoFont(&ah::Application::getResources().getFont("coolveticca"));
     ah::Application::getWindow().setDebugInfoColor(sf::Color::White);
 
-    ah::Application::getStates().registerState<GameState>();
+    registerStates();
+
     ah::Application::getStates().pushState<GameState>();
 
     ah::Application::run();

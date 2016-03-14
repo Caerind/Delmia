@@ -13,17 +13,26 @@ class Map : public NActor
     public:
         Map();
 
+        sf::Vector2i getChunkSize() const;
+        sf::Vector2i getTileSize() const;
+
         void setTileId(int x, int y, int id);
         void setRoadId(int x, int y, int id);
         int getTileId(int x, int y);
         int getRoadId(int x, int y);
 
+        struct Chunk
+        {
+            sf::Vector2i coords;
+            NLayerComponent map;
+            NLayerComponent road;
+        };
+
         void load(pugi::xml_node& node);
         void save(pugi::xml_node& node);
 
     private:
-        NLayerComponent mMapComponent;
-        NLayerComponent mRoadComponent;
+        std::vector<Chunk*> mChunks;
 };
 
 #endif // MAP_HPP
