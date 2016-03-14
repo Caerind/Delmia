@@ -38,4 +38,9 @@ sf::IpAddress Client::getRemoteAddress()
     return getSocketOut().getRemoteAddress();
 }
 
+std::string Client::getUsername() const
+{
+    return mUsername;
+}
+
 } // namespace on

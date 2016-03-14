@@ -21,7 +21,11 @@ class Client : public Connection
 
         sf::IpAddress getRemoteAddress();
 
+        std::string getUsername() const;
+
     protected:
+        std::string mUsername;
+
         sf::Thread mThread;
 
         std::map<sf::Int32,std::function<void(sf::Packet&)>> mPacketResponses;

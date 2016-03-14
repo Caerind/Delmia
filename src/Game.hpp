@@ -8,6 +8,4 @@
 
 #include "Game/Forest.hpp"
 
-void registerGameClasses();
-
 #endif // GAME_HPP

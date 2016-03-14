@@ -3,7 +3,11 @@
 GameState::GameState(ah::StateManager& manager)
 : ah::State(manager)
 {
-    registerGameClasses();
+    NWorld::registerActor<Entity>();
+    NWorld::registerActor<Building>();
+    NWorld::registerActor<Unit>();
+    NWorld::registerActor<Map>();
+    NWorld::registerActor<Forest>();
 
     NWorld::createActor<Map>();
 
@@ -14,8 +18,6 @@ GameState::GameState(ah::StateManager& manager)
     house->addSprite(1,-2,sf::IntRect(0,0,256,256));
     house->addSprite(1,-1,sf::IntRect(0,0,256,256));
     house->addSprite(0,1,sf::IntRect(0,0,256,256));
-
-    NWorld::save("test.xml");
 }
 
 bool GameState::handleEvent(sf::Event const& event)

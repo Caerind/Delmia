@@ -2,6 +2,8 @@
 
 #include "States.hpp"
 
+#include "Client.hpp"
+
 int main()
 {
     ah::Application::getResources().loadTexture("iso","assets/textures/iso.png");
@@ -14,11 +16,28 @@ int main()
     ah::Application::getWindow().setDebugInfoFont(&ah::Application::getResources().getFont("coolveticca"));
     ah::Application::getWindow().setDebugInfoColor(sf::Color::White);
 
-    registerStates();
+    ah::Application::getStates().registerState<GameState>();
+    ah::Application::getStates().registerState<LoginState>();
+    ah::Application::getStates().registerState<ListState>();
+    ah::Application::getStates().pushState<LoginState>();
 
-    ah::Application::getStates().pushState<GameState>();
-
-    ah::Application::run();
+    int retry = 3;
+    while (retry > 0)
+    {
+        std::cout << "Connecting..." << std::endl;
+        if (Client::instance().connect(sf::IpAddress::LocalHost,4567,"Cmdu76","test"))
+        {
+            std::cout << "Connected !" << std::endl;
+            ah::Application::run();
+            retry = 0;
+            std::cout << "Disconnected" << std::endl;
+        }
+        else
+        {
+            std::cout << "Connection failed" << std::endl;
+            retry--;
+        }
+    }
 
     return 0;
 }

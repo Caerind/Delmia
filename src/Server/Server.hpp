@@ -97,7 +97,7 @@ class Server
 
 };
 
-} // namespace
+} // namespace on
 
 #include "Server.inl"
 

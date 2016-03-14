@@ -2,13 +2,16 @@
 #define MAINSERVER_HPP
 
 #include "../Server/Server.hpp"
+#include "../PacketType.hpp"
+#include "MainPeer.hpp"
 
 class MainServer : public on::Server<MainPeer>
 {
     public:
         MainServer();
-    protected:
-    private:
+
+        void initPacketResponses();
+        void initCommands();
 };
 
 #endif // MAINSERVER_HPP
