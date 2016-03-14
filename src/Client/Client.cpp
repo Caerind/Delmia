@@ -63,20 +63,28 @@ void Client::disconnect(bool sendPacket)
     }
 }
 
-bool Client::pollPacket(sf::Packet& packet)
-{
-    if (mPackets.size() >= 0)
-    {
-        packet = mPackets.front();
-        mPackets.pop();
-        return true;
-    }
-    return false;
-}
-
 Client::Client() : on::Client()
 {
     setTimeout(sf::seconds(3.f));
+
+    mPacketResponses[Packet::Type::MS_ClientJoined] = [&](sf::Packet& packet)
+    {
+    };
+
+    mPacketResponses[Packet::Type::MS_ClientLeft] = [&](sf::Packet& packet)
+    {
+    };
+
+    mPacketResponses[Packet::Type::MS_ServerStopped] = [&](sf::Packet& packet)
+    {
+    };
+
+    mPacketResponses[Packet::Type::MS_ServerMessage] = [&](sf::Packet& packet)
+    {
+        on::Message msg;
+        packet >> msg;
+        std::cout << msg << std::endl;
+    };
 }
 
 Client::~Client()

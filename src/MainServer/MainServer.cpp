@@ -1,7 +1,10 @@
 #include "MainServer.hpp"
 
-MainServer::MainServer()
+MainServer::MainServer() : on::Server<MainPeer>()
 {
+    mMaxPlayers = 50;
+    mUpdateInterval = sf::seconds(1.f);
+
     initPacketResponses();
     initCommands();
 }
@@ -78,4 +81,49 @@ void MainServer::initCommands()
         packet << Packet::Type::MS_ServerMessage << on::Message("[Server]",args);
         sendToAll(packet);
     });
+
+    mCommands["list"] = on::Command("list",[&](std::string const& args, std::string const& executant, bool isServer)
+    {
+        if (isServer)
+        {
+            write("[Server] Listing users : ");
+            for (std::size_t i = 0; i < mPeers.size(); i++)
+            {
+                if (mPeers[i]->isConnected() && mPeers[i]->getUsername() != "")
+                {
+                    write(" " + mPeers[i]->getUsername());
+                }
+            }
+        }
+    },false);
+}
+
+void MainServer::load()
+{
+    on::Server<MainPeer>::load();
+}
+
+void MainServer::start()
+{
+    on::Server<MainPeer>::start();
+}
+
+void MainServer::stop()
+{
+    on::Server<MainPeer>::stop();
+}
+
+void MainServer::update(sf::Time dt)
+{
+    on::Server<MainPeer>::update(dt);
+}
+
+void MainServer::onConnection(MainPeer& peer)
+{
+    write("[Server] " + peer.getUsername() + " joined the server");
+}
+
+void MainServer::onDisconnection(MainPeer& peer)
+{
+    write("[Server] " + peer.getUsername() + " left the server");
 }

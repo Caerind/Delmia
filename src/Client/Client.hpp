@@ -17,7 +17,6 @@ class Client : public on::Client
         void disconnect(bool sendPacket);
 
         void initPacketResponses(); // Some packets are automagically handled
-        bool pollPacket(sf::Packet& packet); // Some others need are waiting for specific handling
 
     private:
         static Client* mInstance;
@@ -26,8 +25,6 @@ class Client : public on::Client
         virtual ~Client();
 
         std::string mPassword; // Hashed password, useful for auto reconnection
-
-        std::queue<sf::Packet> mPackets;
 };
 
 #endif // CLIENT_HPP

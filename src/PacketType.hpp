@@ -34,6 +34,12 @@ enum Type
     GS_Disconnect,
     GS_ClientMessage,
 
+    // GameServer To MainServer
+    GS_Register_MS,
+
+
+    // MainServer To GameServer
+    MS_TransferUser_GS,
 };
 
 } // namespace Packet

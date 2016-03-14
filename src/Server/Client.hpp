@@ -1,11 +1,10 @@
 #ifndef ON_CLIENT_HPP
 #define ON_CLIENT_HPP
 
-// Standards Libs
 #include <functional>
 #include <map>
+#include <queue>
 
-// Own files
 #include "Connection.hpp"
 
 namespace on
@@ -18,6 +17,7 @@ class Client : public Connection
         virtual ~Client();
 
         void handlePackets();
+        bool pollPacket(sf::Int32& packetType, sf::Packet& packet);
 
         sf::IpAddress getRemoteAddress();
 
@@ -29,8 +29,10 @@ class Client : public Connection
         sf::Thread mThread;
 
         std::map<sf::Int32,std::function<void(sf::Packet&)>> mPacketResponses;
+
+        std::queue<std::pair<sf::Int32,sf::Packet>> mUnhandledPackets;
 };
 
-}
+} // namespace on
 
 #endif // ON_CLIENT_HPP

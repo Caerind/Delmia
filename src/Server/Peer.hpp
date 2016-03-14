@@ -1,7 +1,6 @@
 #ifndef ON_PEER_HPP
 #define ON_PEER_HPP
 
-// Own files
 #include "Connection.hpp"
 
 namespace on

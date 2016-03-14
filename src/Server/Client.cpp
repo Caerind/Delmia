@@ -29,8 +29,26 @@ void Client::handlePackets()
             {
                 itr->second(packet);
             }
+            else
+            {
+                mUnhandledPackets.emplace();
+                mUnhandledPackets.back().first = packetType;
+                mUnhandledPackets.back().second = packet;
+            }
         }
     }
+}
+
+bool Client::pollPacket(sf::Int32& packetType, sf::Packet& packet)
+{
+    if (mUnhandledPackets.size() >= 0)
+    {
+        packetType = mUnhandledPackets.front().first;
+        packet = mUnhandledPackets.front().second;
+        mUnhandledPackets.pop();
+        return true;
+    }
+    return false;
 }
 
 sf::IpAddress Client::getRemoteAddress()

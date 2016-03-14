@@ -1,21 +1,18 @@
 #ifndef ON_CONNECTION_HPP
 #define ON_CONNECTION_HPP
 
-// Standards Libs
 #include <queue>
 
-// SFML Network
-#include <SFML/Network/IpAddress.hpp>
-#include <SFML/Network/Packet.hpp>
-#include <SFML/Network/SocketSelector.hpp>
-#include <SFML/Network/TcpSocket.hpp>
-
-// SFML System
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Lock.hpp>
 #include <SFML/System/Mutex.hpp>
 #include <SFML/System/Thread.hpp>
 #include <SFML/System/Time.hpp>
+
+#include <SFML/Network/IpAddress.hpp>
+#include <SFML/Network/Packet.hpp>
+#include <SFML/Network/SocketSelector.hpp>
+#include <SFML/Network/TcpSocket.hpp>
 
 namespace on
 {
