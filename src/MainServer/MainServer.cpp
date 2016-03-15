@@ -5,16 +5,137 @@ namespace MainServer
 
 MainServer::MainServer()
 : mRunning(false)
-, mClientThread(&MainServer::runClient,this)
-, mServerThread(&MainServer::runServer,this)
-, mClients()
-, mServers()
+, mClients(Packet::Type::MS_Stopped,Packet::Type::MS_None,4567,sf::seconds(60.f))
+, mServers(Packet::Type::MS_Stopped,Packet::Type::MS_None,4568,sf::seconds(60.f))
 , mLog("")
-, mClientPort(4567)
-, mServerPort(4568)
-, mClientTimeout(sf::seconds(60.f))
-, mServerTimeout(sf::seconds(60.f))
 {
+    mCommands["stop"] = [&](std::string args, sf::IpAddress const& address, sf::Uint16 port)
+    {
+        stop();
+    };
+
+    mClients.setPacketResponse(Packet::Type::C_Disconnect,[&](sf::Packet& packet, sf::IpAddress const& address, sf::Uint16 port)
+    {
+        int id = mClients.getPeerId(address,port);
+        if (id >= 0)
+        {
+            Client* c = mClients.getPeer(id);
+            if (c != nullptr)
+            {
+                write(c->getUsername() + " left the server");
+                c->setConnected(false);
+            }
+        }
+    });
+
+    mClients.setPacketResponse(Packet::Type::C_Login,[&](sf::Packet& packet, sf::IpAddress const& address, sf::Uint16 port)
+    {
+        int id = mClients.getPeerId(address,port);
+        if (id < 0)
+        {
+            std::string username;
+            std::string password;
+
+            packet >> username >> password;
+
+            bool valid = true; // TODO : DB checking
+            if (valid)
+            {
+                // New client
+                Client newClient;
+                newClient.setAddress(address);
+                newClient.setPort(port);
+                newClient.setConnected(true);
+                newClient.setUsername(username);
+                mClients.addPeer(newClient);
+
+                 // Send Login Valid
+                packet.clear();
+                packet << Packet::Type::MS_LoginValid;
+                mClients.send(packet,address,port);
+
+                // Send Server List
+                packet.clear();
+                packet << Packet::Type::MS_ServerList;
+                // TODO : Server List
+                mClients.send(packet,address,port);
+
+                write(username + " joined the server");
+            }
+            else
+            {
+                // Send Login Failed
+                packet.clear();
+                packet << Packet::Type::MS_LoginFailed;
+                mClients.send(packet,address,port);
+
+                write("Login failed for client (" + address.toString() + ")");
+            }
+        }
+    });
+
+    mClients.setPacketResponse(Packet::Type::C_RequestServerList,[&](sf::Packet& packet, sf::IpAddress const& address, sf::Uint16 port)
+    {
+        packet.clear();
+        packet << Packet::Type::MS_ServerList;
+        // TODO : Server List
+        mClients.send(packet,address,port);
+
+        int id = mClients.getPeerId(address,port);
+        if (id >= 0)
+        {
+            Client* c = mClients.getPeer(id);
+            if (c != nullptr)
+            {
+                write(c->getUsername() + " requested server list");
+            }
+        }
+    });
+
+    mClients.setPacketResponse(Packet::Type::C_RequestGameServer,[&](sf::Packet& packet, sf::IpAddress const& address, sf::Uint16 port)
+    {
+        // TODO : Transfer User
+
+        int id = mClients.getPeerId(address,port);
+        if (id >= 0)
+        {
+            Client* c = mClients.getPeer(id);
+            if (c != nullptr)
+            {
+                write(c->getUsername() + " requested to move to a game server");
+            }
+        }
+    });
+
+    mServers.setPacketResponse(Packet::Type::GS_Stopped,[&](sf::Packet& packet, sf::IpAddress const& address, sf::Uint16 port)
+    {
+        int id = mServers.getPeerId(address,port);
+        if (id >= 0)
+        {
+            GameServer* gs = mServers.getPeer(id);
+            if (gs != nullptr)
+            {
+                gs->setConnected(false);
+
+                write("Server (" + address.toString() + ") disconnected");
+            }
+        }
+    });
+
+    mServers.setPacketResponse(Packet::Type::GS_Register,[&](sf::Packet& packet, sf::IpAddress const& address, sf::Uint16 port)
+    {
+        int id = mServers.getPeerId(address,port);
+        if (id < 0)
+        {
+            GameServer newServer;
+            newServer.setAddress(address);
+            newServer.setPort(port);
+            newServer.setConnected(true);
+            mServers.addPeer(newServer);
+
+            write("Server (" + address.toString() + ") joined");
+        }
+    });
 }
 
 MainServer::~MainServer()
@@ -22,48 +143,48 @@ MainServer::~MainServer()
     stop();
 }
 
-void MainServer::start()
+bool MainServer::start()
 {
     if (!mRunning)
     {
         sf::Clock clock;
         write("Loading server...");
 
+        // Run
+        mRunning = true;
+
         // Ip
         write("Ip : " + sf::IpAddress::getPublicAddress().toString());
 
         // Client socket
-        if (mClientSocket.bind(mClientPort) == sf::Socket::Done)
+        if (mClients.start())
         {
-            write("Client Port : " + std::to_string(mClientPort));
+            write("Client Port : " + std::to_string(mClients.getPort()));
         }
         else
         {
-            write("ERROR : Unable to bind player socket");
+            write("ERROR : Can't bind Client socket");
+            stop();
+            return false;
         }
 
         // Server socket
-        if (mServerSocket.bind(mServerPort) == sf::Socket::Done)
+        if (mServers.start())
         {
-            write("Server Port : " + std::to_string(mServerPort));
+            write("Server Port : " + std::to_string(mServers.getPort()));
         }
         else
         {
-            write("ERROR : Unable to bind server socket");
+            write("ERROR : Can't bind Server socket");
+            stop();
+            return false;
         }
-
-        // Non-blocking sockets
-        mClientSocket.setBlocking(false);
-        mServerSocket.setBlocking(false);
-
-        // Run
-        mRunning = true;
-        mClientThread.launch();
-        mServerThread.launch();
 
         // Loaded
         write("Server loaded in " + std::to_string(clock.restart().asSeconds()) + "s");
     }
+
+    return mRunning;
 }
 
 void MainServer::stop()
@@ -72,18 +193,10 @@ void MainServer::stop()
     {
         write("Stopping server...");
 
-        sf::Packet packet;
-        packet << Packet::Type::MS_Stopped;
-        sendToAllClients(packet);
-        sendToAllServers(packet);
-
-        mClientSocket.unbind();
-        mServerSocket.unbind();
+        mClients.stop();
+        mServers.stop();
 
         mRunning = false;
-
-        mClientThread.wait();
-        mServerThread.wait();
 
         write("Server stopped");
 
@@ -96,58 +209,34 @@ bool MainServer::isRunning() const
     return mRunning;
 }
 
-void MainServer::listClients()
+void MainServer::handleCommand(std::string command, sf::IpAddress const& address, sf::Uint16 port)
 {
-    for (std::size_t i = 0; i < mClients.size(); i++)
-    {
-        write(" - " + mClients[i].getUsername() + " (" + mClients[i].getAddress().toString() + ":" + std::to_string(mClients[i].getPort()) + ")");
-    }
-}
+    std::string commandName;
+    std::string commandArgs;
 
-void MainServer::listServers()
-{
-    for (std::size_t i = 0; i < mServers.size(); i++)
+    std::size_t foundSpace = command.find_first_of(" ");
+    if (foundSpace != std::string::npos)
     {
-        write(" - " + mServers[i].getAddress().toString() + ":" + std::to_string(mServers[i].getPort()));
+        commandName = command.substr(0, foundSpace);
+        commandArgs = command.substr(foundSpace + 1);
     }
-}
+    else
+    {
+        commandName = command;
+        commandArgs = "";
+    }
 
-void MainServer::handleCommand(std::string const& command)
-{
-    if (command == "stop")
+    auto itr = mCommands.find(commandName);
+    if (itr != mCommands.end())
     {
-        stop();
-    }
-    if (command == "clist")
-    {
-        listClients();
-    }
-    if (command == "slist")
-    {
-        listServers();
-    }
-}
-
-void MainServer::sendToAllClients(sf::Packet& packet)
-{
-    for (std::size_t i = 0; i < mClients.size(); i++)
-    {
-        if (mClientSocket.send(packet,mClients[i].getAddress(),mClients[i].getPort()) == sf::Socket::Done)
+        if (itr->second)
         {
-            mClients[i].resetLastPacketTime();
+            itr->second(commandArgs,address,port);
         }
     }
-}
 
-void MainServer::sendToAllServers(sf::Packet& packet)
-{
-    for (std::size_t i = 0; i < mServers.size(); i++)
-    {
-        if (mServerSocket.send(packet,mServers[i].getAddress(),mServers[i].getPort()) == sf::Socket::Done)
-        {
-            mServers[i].resetLastPacketTime();
-        }
-    }
+    mClients.handleCommand(command);
+    mServers.handleCommand(command);
 }
 
 void MainServer::write(std::string const& message)
@@ -166,211 +255,6 @@ void MainServer::write(std::string const& message)
     if (mLog.is_open())
     {
         mLog << str << std::endl;
-    }
-}
-
-int MainServer::getClientId(sf::IpAddress address, sf::Uint16 port)
-{
-    for (std::size_t i = 0; i < mClients.size(); i++)
-    {
-        if (mClients[i].getAddress() == address && mClients[i].getPort() == port)
-        {
-            return (int)i;
-        }
-    }
-    return -1;
-}
-
-int MainServer::getServerId(sf::IpAddress address, sf::Uint16 port)
-{
-    for (std::size_t i = 0; i < mServers.size(); i++)
-    {
-        if (mServers[i].getAddress() == address && mServers[i].getPort() == port)
-        {
-            return (int)i;
-        }
-    }
-    return -1;
-}
-
-void MainServer::runClient()
-{
-    sf::Clock connectionClock;
-    while (isRunning())
-    {
-        // Handle Packets
-        sf::IpAddress address;
-        sf::Uint16 port;
-        sf::Packet packet;
-        while (mClientSocket.receive(packet,address,port) == sf::Socket::Done)
-        {
-            sf::Int32 packetType;
-            packet >> packetType;
-
-            int id = getClientId(address,port);
-            if (id >= 0) // Existing client
-            {
-                mClients[id].resetLastPacketTime();
-
-                switch (packetType)
-                {
-                    case Packet::Type::C_Disconnect:
-                    {
-                        mClients[id].setConnected(false);
-                    } break;
-
-                    case Packet::Type::C_RequestServerList:
-                    {
-                        writeServerList(packet);
-                        mClientSocket.send(packet,address,port);
-                    } break;
-
-                    case Packet::Type::C_RequestGameServer:
-                    {
-                        // TODO : Transfer User
-                    } break;
-                }
-            }
-            else // New client
-            {
-                if (packetType == Packet::Type::C_Login)
-                {
-                    std::string username, password;
-                    packet >> username >> password;
-
-                    // TODO : DB checking
-                    bool valid = true;
-                    if (valid)
-                    {
-                        // Add the client
-                        Client newClient;
-                        newClient.setAddress(address);
-                        newClient.setPort(port);
-                        newClient.setConnected(true);
-                        newClient.setUsername(username);
-                        mClients.push_back(newClient);
-
-                        // Send Login Valid
-                        packet.clear();
-                        packet << Packet::Type::MS_LoginValid;
-                        mClientSocket.send(packet,address,port);
-
-                        // Send Server List
-                        writeServerList(packet);
-                        mClientSocket.send(packet,address,port);
-                    }
-                    else
-                    {
-                        // Send Login Failed
-                        packet.clear();
-                        packet << Packet::Type::MS_LoginFailed;
-                        mClientSocket.send(packet,address,port);
-                    }
-                }
-            }
-
-            packet.clear();
-        }
-
-        // Handle Connection Checking
-        if (connectionClock.getElapsedTime() >= 0.7f * mClientTimeout)
-        {
-            packet.clear();
-            packet << Packet::Type::MS_None;
-            sendToAllClients(packet);
-            connectionClock.restart();
-        }
-
-        // Handle Disconnections
-        for (auto itr = mClients.begin(); itr != mClients.end();)
-        {
-            if (!(*itr).isConnected() || (*itr).getLastPacketTime() >= mClientTimeout)
-            {
-                itr = mClients.erase(itr);
-            }
-            else
-            {
-                itr++;
-            }
-        }
-
-        // Sleep
-        sf::sleep(sf::milliseconds(100));
-    }
-}
-
-void MainServer::runServer()
-{
-    sf::Clock connectionClock;
-    while (isRunning())
-    {
-        // Handle Packets
-        sf::IpAddress address;
-        sf::Uint16 port;
-        sf::Packet packet;
-        while (mServerSocket.receive(packet,address,port) == sf::Socket::Done)
-        {
-            sf::Int32 packetType;
-            packet >> packetType;
-
-            int id = getServerId(address,port);
-            if (id >= 0) // Existing server
-            {
-                mServers[id].resetLastPacketTime();
-
-                switch (packetType)
-                {
-                }
-            }
-            else // New server
-            {
-                if (packetType == Packet::Type::GS_Register)
-                {
-                    // Add the server
-                    GameServer newServer;
-                    newServer.setAddress(address);
-                    newServer.setPort(port);
-                    newServer.setConnected(true);
-                    mServers.push_back(newServer);
-                }
-            }
-        }
-
-        // Handle Connection Checking
-        if (connectionClock.getElapsedTime() >= 0.7f * mServerTimeout)
-        {
-            packet.clear();
-            packet << Packet::Type::MS_None;
-            sendToAllServers(packet);
-            connectionClock.restart();
-        }
-
-        // Handle Disconnections
-        for (auto itr = mServers.begin(); itr != mServers.end();)
-        {
-            if (!(*itr).isConnected() || (*itr).getLastPacketTime() >= mServerTimeout)
-            {
-                itr = mServers.erase(itr);
-            }
-            else
-            {
-                itr++;
-            }
-        }
-
-        // Sleep
-        sf::sleep(sf::milliseconds(100));
-    }
-}
-
-void MainServer::writeServerList(sf::Packet& packet)
-{
-    packet.clear();
-    packet << Packet::Type::MS_ServerList;
-    packet << mServers.size();
-    for (std::size_t i = 0; i < mServers.size(); i++)
-    {
-        packet << mServers[i].getAddress().toString() << mServers[i].getPort();
     }
 }
 
