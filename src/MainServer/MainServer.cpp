@@ -96,6 +96,38 @@ bool MainServer::isRunning() const
     return mRunning;
 }
 
+void MainServer::listClients()
+{
+    for (std::size_t i = 0; i < mClients.size(); i++)
+    {
+        write(" - " + mClients[i].getUsername() + " (" + mClients[i].getAddress().toString() + ":" + std::to_string(mClients[i].getPort()) + ")");
+    }
+}
+
+void MainServer::listServers()
+{
+    for (std::size_t i = 0; i < mServers.size(); i++)
+    {
+        write(" - " + mServers[i].getAddress().toString() + ":" + std::to_string(mServers[i].getPort()));
+    }
+}
+
+void MainServer::handleCommand(std::string const& command)
+{
+    if (command == "stop")
+    {
+        stop();
+    }
+    if (command == "clist")
+    {
+        listClients();
+    }
+    if (command == "slist")
+    {
+        listServers();
+    }
+}
+
 void MainServer::sendToAllClients(sf::Packet& packet)
 {
     for (std::size_t i = 0; i < mClients.size(); i++)
@@ -189,9 +221,7 @@ void MainServer::runClient()
 
                     case Packet::Type::C_RequestServerList:
                     {
-                        packet.clear();
-                        packet << Packet::Type::MS_ServerList;
-                        // TODO : Server List
+                        writeServerList(packet);
                         mClientSocket.send(packet,address,port);
                     } break;
 
@@ -226,9 +256,7 @@ void MainServer::runClient()
                         mClientSocket.send(packet,address,port);
 
                         // Send Server List
-                        packet.clear();
-                        packet << Packet::Type::MS_ServerList;
-                        // TODO : Server List
+                        writeServerList(packet);
                         mClientSocket.send(packet,address,port);
                     }
                     else
@@ -332,6 +360,17 @@ void MainServer::runServer()
 
         // Sleep
         sf::sleep(sf::milliseconds(100));
+    }
+}
+
+void MainServer::writeServerList(sf::Packet& packet)
+{
+    packet.clear();
+    packet << Packet::Type::MS_ServerList;
+    packet << mServers.size();
+    for (std::size_t i = 0; i < mServers.size(); i++)
+    {
+        packet << mServers[i].getAddress().toString() << mServers[i].getPort();
     }
 }
 

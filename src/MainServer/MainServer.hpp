@@ -31,6 +31,11 @@ class MainServer
         void stop();
         bool isRunning() const;
 
+        void listClients();
+        void listServers();
+
+        void handleCommand(std::string const& command);
+
     protected:
         void sendToAllClients(sf::Packet& packet);
         void sendToAllServers(sf::Packet& packet);
@@ -42,6 +47,8 @@ class MainServer
 
         void runClient();
         void runServer();
+
+        void writeServerList(sf::Packet& packet);
 
     protected:
         bool mRunning;
