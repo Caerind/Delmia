@@ -6,40 +6,36 @@ namespace Packet
 
 enum Type
 {
-    None = 0, // Used for update
+    /// MainServer
+
+    MS_None = 0,            // Nothing
+    MS_Stopped,             // Tell both game servers and clients that the main server stopped
 
     // MainServer To Client
-    MS_ClientJoined,
-    MS_ClientLeft,
-    MS_ServerStopped,
-    MS_ServerMessage,
-    MS_Banned,
-    MS_Kicked,
-
-    // Client To MainServer
-    MS_Login,
-    MS_Disconnect,
-    MS_ClientMessage,
-
-    // GameServer To Client
-    GS_ClientJoined,
-    GS_ClientLeft,
-    GS_ServerStopped,
-    GS_ServerMessage,
-    GS_Banned,
-    GS_Kicked,
-
-    // Client To GameServer
-    GS_Login,
-    GS_Disconnect,
-    GS_ClientMessage,
-
-    // GameServer To MainServer
-    GS_Register_MS,
-
+    MS_LoginValid,          // Tell the client the login he entered is valid
+    MS_LoginFailed,         // Tell the client the login he entered isnt valid
+    MS_ServerList,          // Give the client a list of game servers
+    MS_ValidChoice,         // Tell the client he can go the the game server he requested
 
     // MainServer To GameServer
-    MS_TransferUser_GS,
+    MS_TransferClient,      // Give the game server an incoming client
+
+    /// Client
+
+    C_None,                 // Nothing
+    C_Disconnect,           // Tell the client disconnect
+    C_Login,                // Tell the client login
+
+    // Client To MainServer
+    C_RequestServerList,    // Tell the main server that the client want the new server list
+    C_RequestGameServer,    // Tell the main server that the client want to join a game server
+
+    /// GameServer
+    GS_None,                // Nothing
+    GS_Stopped,             // Tell others the server has stopped
+
+    // GameServer To MainServer
+    GS_Register,            // Register this game server on the main server
 };
 
 } // namespace Packet

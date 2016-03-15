@@ -1,129 +1,338 @@
 #include "MainServer.hpp"
 
-MainServer::MainServer() : on::Server<MainPeer>()
+namespace MainServer
 {
-    mMaxPlayers = 50;
-    mUpdateInterval = sf::seconds(1.f);
 
-    initPacketResponses();
-    initCommands();
+MainServer::MainServer()
+: mRunning(false)
+, mClientThread(&MainServer::runClient,this)
+, mServerThread(&MainServer::runServer,this)
+, mClients()
+, mServers()
+, mLog("")
+, mClientPort(4567)
+, mServerPort(4568)
+, mClientTimeout(sf::seconds(60.f))
+, mServerTimeout(sf::seconds(60.f))
+{
 }
 
-void MainServer::initPacketResponses()
+MainServer::~MainServer()
 {
-    mPacketResponses[Packet::Type::None] = [&](sf::Packet& packet, MainPeer& peer)
-    {
-    };
-
-    mPacketResponses[Packet::Type::MS_Login] = [&](sf::Packet& packet, MainPeer& peer)
-    {
-    };
-
-    mPacketResponses[Packet::Type::MS_Disconnect] = [&](sf::Packet& packet, MainPeer& peer)
-    {
-        peer.remove();
-    };
-
-    mPacketResponses[Packet::Type::MS_ClientMessage] = [&](sf::Packet& packet, MainPeer& peer)
-    {
-        on::Message msg;
-        packet >> msg;
-        packet.clear();
-
-        if (msg.isCommand())
-        {
-            std::string res = handleCommand(msg.getContent().substr(1), false, peer.getUsername());
-            if (res != "")
-            {
-                packet << Packet::Type::MS_ServerMessage << on::Message("",res);
-                peer.send(packet);
-            }
-        }
-        else
-        {
-            packet << Packet::Type::MS_ServerMessage << msg;
-            sendToAll(packet);
-
-            write(msg.getEmitter() + " : " + msg.getContent());
-        }
-    };
-}
-
-void MainServer::initCommands()
-{
-    mCommands["stop"] = on::Command("stop",[&](std::string const& args, std::string const& executant, bool isServer)
-    {
-        stop();
-    });
-
-    mCommands["help"] = on::Command("help",[&](std::string const& args, std::string const& executant, bool isServer)
-    {
-        if (isServer)
-        {
-            write("[Server] help : Display the list of commands");
-            write("[Server] stop : Stop the server");
-            write("[Server] say : Say something");
-        }
-        else
-        {
-            std::string str = "/help : Display the list of commands\n/say : Say something";
-            sf::Packet packet;
-            packet << Packet::Type::MS_ServerMessage << on::Message("[Server]",str);
-            sendToPeer(packet,executant);
-        }
-    },false);
-
-    mCommands["say"] = on::Command("say",[&](std::string const& args, std::string const& executant, bool isServer)
-    {
-        write("[Server] : " + args);
-
-        sf::Packet packet;
-        packet << Packet::Type::MS_ServerMessage << on::Message("[Server]",args);
-        sendToAll(packet);
-    });
-
-    mCommands["list"] = on::Command("list",[&](std::string const& args, std::string const& executant, bool isServer)
-    {
-        if (isServer)
-        {
-            write("[Server] Listing users : ");
-            for (std::size_t i = 0; i < mPeers.size(); i++)
-            {
-                if (mPeers[i]->isConnected() && mPeers[i]->getUsername() != "")
-                {
-                    write(" " + mPeers[i]->getUsername());
-                }
-            }
-        }
-    },false);
-}
-
-void MainServer::load()
-{
-    on::Server<MainPeer>::load();
+    stop();
 }
 
 void MainServer::start()
 {
-    on::Server<MainPeer>::start();
+    if (!mRunning)
+    {
+        sf::Clock clock;
+        write("Loading server...");
+
+        // Ip
+        write("Ip : " + sf::IpAddress::getPublicAddress().toString());
+
+        // Client socket
+        if (mClientSocket.bind(mClientPort) == sf::Socket::Done)
+        {
+            write("Client Port : " + std::to_string(mClientPort));
+        }
+        else
+        {
+            write("ERROR : Unable to bind player socket");
+        }
+
+        // Server socket
+        if (mServerSocket.bind(mServerPort) == sf::Socket::Done)
+        {
+            write("Server Port : " + std::to_string(mServerPort));
+        }
+        else
+        {
+            write("ERROR : Unable to bind server socket");
+        }
+
+        // Non-blocking sockets
+        mClientSocket.setBlocking(false);
+        mServerSocket.setBlocking(false);
+
+        // Run
+        mRunning = true;
+        mClientThread.launch();
+        mServerThread.launch();
+
+        // Loaded
+        write("Server loaded in " + std::to_string(clock.restart().asSeconds()) + "s");
+    }
 }
 
 void MainServer::stop()
 {
-    on::Server<MainPeer>::stop();
+    if (mRunning)
+    {
+        write("Stopping server...");
+
+        sf::Packet packet;
+        packet << Packet::Type::MS_Stopped;
+        sendToAllClients(packet);
+        sendToAllServers(packet);
+
+        mClientSocket.unbind();
+        mServerSocket.unbind();
+
+        mRunning = false;
+
+        mClientThread.wait();
+        mServerThread.wait();
+
+        write("Server stopped");
+
+        mLog.close();
+    }
 }
 
-void MainServer::update(sf::Time dt)
+bool MainServer::isRunning() const
 {
-    on::Server<MainPeer>::update(dt);
+    return mRunning;
 }
 
-void MainServer::onConnection(MainPeer& peer)
+void MainServer::sendToAllClients(sf::Packet& packet)
 {
-    write("[Server] " + peer.getUsername() + " joined the server");
+    for (std::size_t i = 0; i < mClients.size(); i++)
+    {
+        if (mClientSocket.send(packet,mClients[i].getAddress(),mClients[i].getPort()) == sf::Socket::Done)
+        {
+            mClients[i].resetLastPacketTime();
+        }
+    }
 }
 
-void MainServer::onDisconnection(MainPeer& peer)
+void MainServer::sendToAllServers(sf::Packet& packet)
 {
-    write("[Server] " + peer.getUsername() + " left the server");
+    for (std::size_t i = 0; i < mServers.size(); i++)
+    {
+        if (mServerSocket.send(packet,mServers[i].getAddress(),mServers[i].getPort()) == sf::Socket::Done)
+        {
+            mServers[i].resetLastPacketTime();
+        }
+    }
 }
+
+void MainServer::write(std::string const& message)
+{
+    // Get Time To Format
+    time_t rawtime;
+    struct tm* timeinfo;
+    char buffer[80];
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer,80,"[%x][%X] ",timeinfo);
+
+    // Write Message
+    std::string str = std::string(buffer) + message;
+    std::cout << str << std::endl;
+    if (mLog.is_open())
+    {
+        mLog << str << std::endl;
+    }
+}
+
+int MainServer::getClientId(sf::IpAddress address, sf::Uint16 port)
+{
+    for (std::size_t i = 0; i < mClients.size(); i++)
+    {
+        if (mClients[i].getAddress() == address && mClients[i].getPort() == port)
+        {
+            return (int)i;
+        }
+    }
+    return -1;
+}
+
+int MainServer::getServerId(sf::IpAddress address, sf::Uint16 port)
+{
+    for (std::size_t i = 0; i < mServers.size(); i++)
+    {
+        if (mServers[i].getAddress() == address && mServers[i].getPort() == port)
+        {
+            return (int)i;
+        }
+    }
+    return -1;
+}
+
+void MainServer::runClient()
+{
+    sf::Clock connectionClock;
+    while (isRunning())
+    {
+        // Handle Packets
+        sf::IpAddress address;
+        sf::Uint16 port;
+        sf::Packet packet;
+        while (mClientSocket.receive(packet,address,port) == sf::Socket::Done)
+        {
+            sf::Int32 packetType;
+            packet >> packetType;
+
+            int id = getClientId(address,port);
+            if (id >= 0) // Existing client
+            {
+                mClients[id].resetLastPacketTime();
+
+                switch (packetType)
+                {
+                    case Packet::Type::C_Disconnect:
+                    {
+                        mClients[id].setConnected(false);
+                    } break;
+
+                    case Packet::Type::C_RequestServerList:
+                    {
+                        packet.clear();
+                        packet << Packet::Type::MS_ServerList;
+                        // TODO : Server List
+                        mClientSocket.send(packet,address,port);
+                    } break;
+
+                    case Packet::Type::C_RequestGameServer:
+                    {
+                        // TODO : Transfer User
+                    } break;
+                }
+            }
+            else // New client
+            {
+                if (packetType == Packet::Type::C_Login)
+                {
+                    std::string username, password;
+                    packet >> username >> password;
+
+                    // TODO : DB checking
+                    bool valid = true;
+                    if (valid)
+                    {
+                        // Add the client
+                        Client newClient;
+                        newClient.setAddress(address);
+                        newClient.setPort(port);
+                        newClient.setConnected(true);
+                        newClient.setUsername(username);
+                        mClients.push_back(newClient);
+
+                        // Send Login Valid
+                        packet.clear();
+                        packet << Packet::Type::MS_LoginValid;
+                        mClientSocket.send(packet,address,port);
+
+                        // Send Server List
+                        packet.clear();
+                        packet << Packet::Type::MS_ServerList;
+                        // TODO : Server List
+                        mClientSocket.send(packet,address,port);
+                    }
+                    else
+                    {
+                        // Send Login Failed
+                        packet.clear();
+                        packet << Packet::Type::MS_LoginFailed;
+                        mClientSocket.send(packet,address,port);
+                    }
+                }
+            }
+
+            packet.clear();
+        }
+
+        // Handle Connection Checking
+        if (connectionClock.getElapsedTime() >= 0.7f * mClientTimeout)
+        {
+            packet.clear();
+            packet << Packet::Type::MS_None;
+            sendToAllClients(packet);
+            connectionClock.restart();
+        }
+
+        // Handle Disconnections
+        for (auto itr = mClients.begin(); itr != mClients.end();)
+        {
+            if (!(*itr).isConnected() || (*itr).getLastPacketTime() >= mClientTimeout)
+            {
+                itr = mClients.erase(itr);
+            }
+            else
+            {
+                itr++;
+            }
+        }
+
+        // Sleep
+        sf::sleep(sf::milliseconds(100));
+    }
+}
+
+void MainServer::runServer()
+{
+    sf::Clock connectionClock;
+    while (isRunning())
+    {
+        // Handle Packets
+        sf::IpAddress address;
+        sf::Uint16 port;
+        sf::Packet packet;
+        while (mServerSocket.receive(packet,address,port) == sf::Socket::Done)
+        {
+            sf::Int32 packetType;
+            packet >> packetType;
+
+            int id = getServerId(address,port);
+            if (id >= 0) // Existing server
+            {
+                mServers[id].resetLastPacketTime();
+
+                switch (packetType)
+                {
+                }
+            }
+            else // New server
+            {
+                if (packetType == Packet::Type::GS_Register)
+                {
+                    // Add the server
+                    GameServer newServer;
+                    newServer.setAddress(address);
+                    newServer.setPort(port);
+                    newServer.setConnected(true);
+                    mServers.push_back(newServer);
+                }
+            }
+        }
+
+        // Handle Connection Checking
+        if (connectionClock.getElapsedTime() >= 0.7f * mServerTimeout)
+        {
+            packet.clear();
+            packet << Packet::Type::MS_None;
+            sendToAllServers(packet);
+            connectionClock.restart();
+        }
+
+        // Handle Disconnections
+        for (auto itr = mServers.begin(); itr != mServers.end();)
+        {
+            if (!(*itr).isConnected() || (*itr).getLastPacketTime() >= mServerTimeout)
+            {
+                itr = mServers.erase(itr);
+            }
+            else
+            {
+                itr++;
+            }
+        }
+
+        // Sleep
+        sf::sleep(sf::milliseconds(100));
+    }
+}
+
+} // namespace MainServer

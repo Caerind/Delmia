@@ -1,26 +1,69 @@
-#ifndef MAINSERVER_HPP
-#define MAINSERVER_HPP
+#ifndef MAINSERVER_MAINSERVER_HPP
+#define MAINSERVER_MAINSERVER_HPP
 
-#include "../Server/Server.hpp"
+#include <ctime>
+#include <fstream>
+#include <iostream>
+
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Sleep.hpp>
+#include <SFML/System/Thread.hpp>
+#include <SFML/System/Time.hpp>
+
+#include <SFML/Network/IpAddress.hpp>
+#include <SFML/Network/Packet.hpp>
+#include <SFML/Network/UdpSocket.hpp>
+
 #include "../PacketType.hpp"
-#include "MainPeer.hpp"
+#include "Client.hpp"
+#include "GameServer.hpp"
 
-class MainServer : public on::Server<MainPeer>
+namespace MainServer
+{
+
+class MainServer
 {
     public:
         MainServer();
+        ~MainServer();
 
-        void initPacketResponses();
-        void initCommands();
-
-        void load();
         void start();
         void stop();
+        bool isRunning() const;
 
-        void update(sf::Time dt);
+    protected:
+        void sendToAllClients(sf::Packet& packet);
+        void sendToAllServers(sf::Packet& packet);
 
-        void onConnection(MainPeer& peer);
-        void onDisconnection(MainPeer& peer);
+        void write(std::string const& message);
+
+        int getClientId(sf::IpAddress address, sf::Uint16 port);
+        int getServerId(sf::IpAddress address, sf::Uint16 port);
+
+        void runClient();
+        void runServer();
+
+    protected:
+        bool mRunning;
+
+        sf::Thread mClientThread;
+        sf::Thread mServerThread;
+
+        sf::UdpSocket mClientSocket;
+        sf::UdpSocket mServerSocket;
+
+        std::vector<Client> mClients;
+        std::vector<GameServer> mServers;
+
+        std::ofstream mLog;
+
+        sf::Uint16 mClientPort;
+        sf::Uint16 mServerPort;
+
+        sf::Time mClientTimeout;
+        sf::Time mServerTimeout;
 };
 
-#endif // MAINSERVER_HPP
+} // namespace MainServer
+
+#endif // MAINSERVER_MAINSERVER_HPP
