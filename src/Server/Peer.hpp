@@ -1,31 +1,27 @@
-#ifndef ON_PEER_HPP
-#define ON_PEER_HPP
+#ifndef PEER_HPP
+#define PEER_HPP
 
 #include "Connection.hpp"
+#include "PacketType.hpp"
 
-namespace on
-{
-
-class Peer : public Connection
+class Peer : public on::Connection
 {
     public:
         Peer();
-        virtual ~Peer();
+        ~Peer();
 
-        virtual bool connect();
+        bool connect();
 
         void remove();
         bool needRemove() const;
 
-        sf::IpAddress getRemoteAddress();
-
         std::string getUsername() const;
+        std::string getPassword() const;
 
     protected:
         bool mRemove;
         std::string mUsername;
+        std::string mPassword;
 };
 
-} // namespace on
-
-#endif // ON_PEER_HPP
+#endif // PEER_HPP

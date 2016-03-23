@@ -1,38 +1,44 @@
-#ifndef ON_CLIENT_HPP
-#define ON_CLIENT_HPP
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
+#include <iostream>
 #include <functional>
 #include <map>
-#include <queue>
+
+#include <SFML/Network.hpp>
+#include <SFML/System.hpp>
 
 #include "Connection.hpp"
+#include "PacketType.hpp"
+#include "Output.hpp"
 
-namespace on
-{
-
-class Client : public Connection
+class Client : public on::Connection, public on::Output
 {
     public:
         Client();
-        virtual ~Client();
+        ~Client();
 
-        void handlePackets();
-        bool pollPacket(sf::Int32& packetType, sf::Packet& packet);
+        typedef std::function<void(sf::Packet&)> Response;
 
-        sf::IpAddress getRemoteAddress();
+        bool connect(sf::IpAddress const& address, sf::Uint16 port, std::string const& username, std::string const& password);
+        void disconnect();
 
-        std::string getUsername() const;
+        void handleCommand(std::string const& command);
+
+        void initPacketResponses();
 
     protected:
-        std::string mUsername;
+        void run();
 
+    protected:
         sf::Thread mThread;
+        sf::Mutex mMutex;
+        bool mRunning;
 
-        std::map<sf::Int32,std::function<void(sf::Packet&)>> mPacketResponses;
+        std::string mUsername;
+        std::string mPassword;
 
-        std::queue<std::pair<sf::Int32,sf::Packet>> mUnhandledPackets;
+        std::map<sf::Int32,Response> mPacketResponses;
 };
 
-} // namespace on
-
-#endif // ON_CLIENT_HPP
+#endif // CLIENT_HPP

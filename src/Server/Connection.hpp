@@ -23,16 +23,14 @@ class Connection
         Connection();
         virtual ~Connection();
 
-        bool poll(sf::Packet& packet);
-        void send(sf::Packet& packet);
-
         bool isConnected() const;
         bool connect();
         virtual void disconnect();
 
-        sf::Uint32 getId() const;
+        bool poll(sf::Packet& packet);
+        void send(sf::Packet& packet);
 
-        virtual sf::IpAddress getRemoteAddress() = 0;
+        sf::Uint32 getId() const;
 
         sf::TcpSocket& getSocketIn();
         sf::TcpSocket& getSocketOut();
@@ -47,14 +45,12 @@ class Connection
         sf::TcpSocket mSocketIn;
         sf::Thread mReceiveThread;
         sf::Mutex mReceiveMutex;
-        sf::Clock mReceiveClock;
         std::queue<sf::Packet> mIncoming;
 
         void send();
         sf::TcpSocket mSocketOut;
         sf::Thread mSendThread;
         sf::Mutex mSendMutex;
-        sf::Clock mSendClock;
         std::queue<sf::Packet> mOutgoing;
 
         static sf::Uint32 mNumberOfCreations;

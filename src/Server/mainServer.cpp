@@ -1,8 +1,8 @@
-#include "MainServer.hpp"
+#include "Server.hpp"
 
-int main(int argc, char *argv[])
+int exampleMainServer()
 {
-    MainServer::MainServer server;
+    Server server;
     server.start();
 
     while (server.isRunning())
@@ -12,5 +12,5 @@ int main(int argc, char *argv[])
         server.handleCommand(line);
     }
 
-    return EXIT_SUCCESS;
+    return 0;
 }
