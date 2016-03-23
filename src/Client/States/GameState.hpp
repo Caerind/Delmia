@@ -16,11 +16,30 @@ class GameState : public ah::State
         void render(sf::RenderTarget& target, sf::RenderStates states);
 
         template <typename T, typename ... Args>
-        std::shared_ptr<T> createActor(std::string str,Args&& ... args);
+        std::shared_ptr<T> createActor(Args&& ... args);
 
     protected:
-        std::map<std::string, std::shared_ptr<Building>> mBuilding;
-        std::map<std::string, std::shared_ptr<Unit>> mUnit;
+        std::vector<std::shared_ptr<Building>> mBuildings;
+        std::vector<std::shared_ptr<Unit>> mUnits;
 };
+
+template <typename T, typename ... Args>
+std::shared_ptr<T> GameState::createActor(Args&& ... args)
+{
+    std::shared_ptr<T> actor = NWorld::createActor<T>(std::forward<Args>(args)...);
+    std::shared_ptr<Building> building;
+    if(building = std::dynamic_pointer_cast<Building>(actor))
+    {
+        mBuildings.push_back(building);
+        NLog::log("Building added");
+    }
+    std::shared_ptr<Unit> unit;
+    if(unit = std::dynamic_pointer_cast<Unit>(actor))
+    {
+        mUnits.push_back(unit);
+        NLog::log("Unit added");
+    }
+    return actor;
+}
 
 #endif // GAMESTATE_HPP

@@ -11,7 +11,7 @@ GameState::GameState(ah::StateManager& manager)
 
     NWorld::createActor<Map>();
 
-    auto house = createActor<Building>("house");
+    auto house = createActor<Building>();
     house->setCoords(2,3);
     house->addSprite(0,0,sf::IntRect(0,0,256,256));
     house->addSprite(0,-1,sf::IntRect(0,0,256,256));
@@ -27,11 +27,11 @@ bool GameState::handleEvent(sf::Event const& event)
     sf::Vector2i c = NMapUtility::Isometric::worldToCoords(NWorld::getPointerPositionView());
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
     {
-        createActor<Unit>("soldier")->setPosition(NWorld::getPointerPositionView());
+        createActor<Unit>()->setPosition(NWorld::getPointerPositionView());
     }
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
-        createActor<Forest>("woods",c.x,c.y);
+        createActor<Forest>(c.x,c.y);
     }
 
     // Zoom
@@ -94,23 +94,4 @@ bool GameState::update(sf::Time dt)
 void GameState::render(sf::RenderTarget& target, sf::RenderStates states)
 {
     NWorld::render(target);
-}
-
-template <typename T, typename ... Args>
-std::shared_ptr<T> GameState::createActor(std::string str,Args&& ... args)
-{
-    std::shared_ptr<T> actor = NWorld::createActor<T>(std::forward<Args>(args)...);
-    std::shared_ptr<Building> building;
-    if(building = std::dynamic_pointer_cast<Building>(actor))
-    {
-        mBuilding[str] = building;
-        std::cout<<"GameState::createActor: Building \""<<str<<"\" added"<<std::endl;
-    }
-    std::shared_ptr<Unit> unit;
-    if(unit = std::dynamic_pointer_cast<Unit>(actor))
-    {
-        mUnit[str] = unit;
-        std::cout<<"GameState::createActor: Unit \""<<str<<"\" added"<<std::endl;
-    }
-    return actor;
 }
