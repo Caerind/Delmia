@@ -48,10 +48,12 @@ void Map::setRoadId(int x, int y, int id)
 
 int Map::getTileId(int x, int y)
 {
+    return 0;
 }
 
 int Map::getRoadId(int x, int y)
 {
+    return 0;
 }
 
 void Map::load(pugi::xml_node& node)
