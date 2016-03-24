@@ -95,3 +95,18 @@ void GameState::render(sf::RenderTarget& target, sf::RenderStates states)
 {
     NWorld::render(target);
 }
+
+void GameState::removeActor(std::string const& id)
+{
+    for(auto it=mBuildings.begin();it!=mBuildings.end();it++)
+    {
+        if((*it)->getId() == id)
+            mBuildings.erase(it);
+    }
+    for(auto it=mUnits.begin();it!=mUnits.end();it++)
+    {
+        if((*it)->getId() == id)
+            mUnits.erase(it);
+    }
+    NWorld::removeActor(id);
+}
