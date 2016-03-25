@@ -7,5 +7,6 @@
 #include "Game/Map.hpp"
 
 #include "Game/Forest.hpp"
+#include "Game/Hall.hpp"
 
 #endif // GAME_HPP

@@ -15,19 +15,24 @@ class Building : public Entity
         Building();
         ~Building();
 
-        void setCoords(int x, int y);
-        sf::Vector2i getCoords();
+        virtual std::vector<sf::Vector2i> getTiles(int x, int y);
+        virtual void generateBuilding(int x, int y, sf::IntRect rect);
+        void addTile(int x, int y, sf::IntRect rect);
 
-        void addSprite(int x, int y, sf::IntRect rect);
-
-        // TODO : Collisions functions
+        sf::FloatRect getBounds();
+        bool collide(int x, int y);
 
         void load(pugi::xml_node& node);
         void save(pugi::xml_node& node);
 
+        struct TileBuilding
+        {
+            sf::Vector2i coords;
+            NSpriteComponent* sprite;
+        };
+
     protected:
-        sf::Vector2i mCoords;
-        std::vector<std::pair<sf::Vector2i,NSpriteComponent*>> mSprites;
+        std::vector<TileBuilding> mTiles;
 };
 
 #endif // BUILDING_HPP

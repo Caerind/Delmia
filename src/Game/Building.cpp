@@ -2,68 +2,75 @@
 
 Building::Building()
 {
-    setCoords(0,0);
 }
 
 Building::~Building()
 {
-    for (std::size_t i = 0; i < mSprites.size(); i++)
+    for (std::size_t i = 0; i < mTiles.size(); i++)
     {
-        delete mSprites[i].second;
+        delete mTiles[i].sprite;
     }
-    mSprites.clear();
+    mTiles.clear();
 }
 
-void Building::setCoords(int x, int y)
+std::vector<sf::Vector2i> Building::getTiles(int x, int y)
 {
-    mCoords = sf::Vector2i(x,y);
-    setPosition(NMapUtility::Isometric::coordsToWorld(mCoords) - NMapUtility::Isometric::coordsToWorld(sf::Vector2i(0,0)));
+    std::vector<sf::Vector2i> tiles;
+    tiles.push_back(sf::Vector2i(x,y));
+    return tiles;
 }
 
-sf::Vector2i Building::getCoords()
+void Building::generateBuilding(int x, int y, sf::IntRect rect)
 {
-    return mCoords;
+    std::vector<sf::Vector2i> tiles = getTiles(x,y);
+    for (std::size_t i = 0; i < tiles.size(); i++)
+    {
+        addTile(tiles[i].x,tiles[i].y,rect);
+    }
 }
 
-void Building::addSprite(int x, int y, sf::IntRect rect)
+void Building::addTile(int x, int y, sf::IntRect rect)
 {
     sf::Vector2i coords = sf::Vector2i(x,y);
 
-    std::pair<sf::Vector2i,NSpriteComponent*> pair;
-    pair.first = coords;
-    pair.second = new NSpriteComponent();
-    pair.second->setTexture("building",rect);
-    pair.second->setOrigin(128,192);
+    mTiles.emplace_back();
+    mTiles.back().coords = coords;
+    mTiles.back().sprite = new NSpriteComponent();
+    mTiles.back().sprite->setTexture("building",rect);
+    mTiles.back().sprite->setOrigin(rect.width/2,rect.height-64);
+    mTiles.back().sprite->setPosition(NMapUtility::Isometric::coordsToWorld(coords));
+    mTiles.back().sprite->setPositionZ(1.f);
 
-    pair.second->setPosition(NMapUtility::Isometric::coordsToWorld(coords));
+    attachComponent(mTiles.back().sprite);
+}
 
-    attachComponent(pair.second);
+sf::FloatRect Building::getBounds()
+{
+    // TODO : Bounds
+    for (std::size_t i = 0; i < mTiles.size(); i++)
+    {
+        return mTiles[i].sprite->getBounds();
+    }
+    return sf::FloatRect();
+}
 
-    mSprites.push_back(pair);
+bool Building::collide(int x, int y)
+{
+    sf::Vector2i coords = sf::Vector2i(x,y);
+    for (std::size_t i = 0; i < mTiles.size(); i++)
+    {
+        if (mTiles[i].coords == coords)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void Building::load(pugi::xml_node& node)
 {
-    std::size_t size = node.attribute("size").as_uint();
-    for (std::size_t i = 0; i < size; i++)
-    {
-        std::string name = "Sprite" + std::to_string(i);
-        pugi::xml_node n = node.child(name.c_str());
-        sf::Vector2i coords = NVector::NToSFML2I(NString::toVector(n.attribute("coords").value()));
-        sf::IntRect rect = NString::toIntRect(n.attribute("rect").value());
-        addSprite(coords.x,coords.y,rect);
-    }
 }
 
 void Building::save(pugi::xml_node& node)
 {
-    node.append_attribute("type") = "Building";
-    node.append_attribute("size") = mSprites.size();
-    for (std::size_t i = 0; i < mSprites.size(); i++)
-    {
-        std::string name = "Sprite" + std::to_string(i);
-        pugi::xml_node n = node.append_child(name.c_str());
-        n.append_attribute("coords") = NString::toString(NVector::SFML2IToN(mSprites[i].first)).c_str();
-        n.append_attribute("rect") = NString::toString(mSprites[i].second->getTextureRect()).c_str();
-    }
 }
