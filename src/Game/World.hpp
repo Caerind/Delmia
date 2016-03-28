@@ -5,6 +5,8 @@
 #include "../NodeEngine/Core/MapUtility.hpp"
 
 #include "../Game.hpp"
+#include "Buildings/Building.hpp"
+#include "Units/Unit.hpp"
 
 class World
 {
@@ -14,6 +16,9 @@ class World
         void handleEvent(sf::Event const& event);
         void update(sf::Time dt);
         void render(sf::RenderTarget& target);
+
+        sf::Vector2i getMouseCoords();
+        bool collide(int x, int y);
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createActor(Args&& ... args);

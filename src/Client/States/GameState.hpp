@@ -1,7 +1,9 @@
 #ifndef GAMESTATE_HPP
 #define GAMESTATE_HPP
 
-#include "../../Game/World.hpp"
+#include "../../Game.hpp"
+
+#include "../../Game/Buildings/Buildings.hpp"
 
 class GameState : public ah::State
 {
@@ -14,6 +16,7 @@ class GameState : public ah::State
 
     protected:
         World mWorld;
+        int mType;
 };
 
 

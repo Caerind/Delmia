@@ -14,42 +14,8 @@ World::World()
 
 void World::handleEvent(sf::Event const& event)
 {
+    // Add event to the world system
     NWorld::addEvent(event);
-
-    sf::Vector2i c = NMapUtility::Isometric::worldToCoords(NWorld::getPointerPositionView());
-
-    // Right
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Middle)
-    {
-        createActor<Hall>(c.x,c.y);
-    }
-    // Left
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-    {
-        createActor<Forest>(c.x,c.y);
-    }
-    // Middle
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
-    {
-        bool collision = false;
-
-        // Buildings
-        for (auto itr = mBuildings.begin(); itr != mBuildings.end(); itr++)
-        {
-            if (itr->second->collide(c.x,c.y))
-            {
-                collision = true;
-            }
-        }
-
-        // Map
-        if (mMap->getTileId(c.x,c.y) == 3)
-        {
-            collision = true;
-        }
-
-        NLog::log("Collide : " + std::to_string(collision));
-    }
 
     // Zoom
     if (event.type == sf::Event::MouseWheelScrolled && event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
@@ -98,6 +64,7 @@ void World::update(sf::Time dt)
 
     NWorld::getWindow().setDebugInfo("mouse",NString::toString(m));
     NWorld::getWindow().setDebugInfo("tile",NString::toString(t));
+    NWorld::getWindow().setDebugInfo("collide",std::to_string(collide(t.x,t.y)));
 
     NWorld::getWindow().setDebugInfo("actors",std::to_string(NWorld::getActorCount()));
     NWorld::getWindow().setDebugInfo("tickables",std::to_string(NWorld::getTickableCount()));
@@ -121,4 +88,29 @@ void World::render(sf::RenderTarget& target)
         shape.setPosition(sf::Vector2f(r.left,r.top));
         target.draw(shape);
     }
+}
+
+sf::Vector2i World::getMouseCoords()
+{
+    return NMapUtility::Isometric::worldToCoords(NWorld::getPointerPositionView());
+}
+
+bool World::collide(int x, int y)
+{
+    // Buildings
+    for (auto itr = mBuildings.begin(); itr != mBuildings.end(); itr++)
+    {
+        if (itr->second->collide(x,y))
+        {
+            return true;
+        }
+    }
+
+    // Map
+    if (mMap->getTileId(x,y) == 3) // Water
+    {
+        return true;
+    }
+
+    return false;
 }

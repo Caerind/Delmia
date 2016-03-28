@@ -2,11 +2,11 @@
 #define GAME_HPP
 
 #include "Game/Entity.hpp"
-#include "Game/Building.hpp"
-#include "Game/Unit.hpp"
 #include "Game/Map.hpp"
+#include "Game/World.hpp"
 
-#include "Game/Forest.hpp"
-#include "Game/Hall.hpp"
+#include "Game/Buildings/Buildings.hpp"
+#include "Game/Resources/Resources.hpp"
+#include "Game/Units/Units.hpp"
 
 #endif // GAME_HPP

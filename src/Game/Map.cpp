@@ -26,13 +26,13 @@ Map::Map()
         {
             if (coords.y > 10 && coords.x > 10)
             {
-                mChunks.back()->map.setTileId(coords,3);
+                mChunks.back()->map.setTileId(coords,Tile::Water);
             }
             else
             {
-                mChunks.back()->map.setTileId(coords,1);
+                mChunks.back()->map.setTileId(coords,Tile::Dirt);
             }
-            mChunks.back()->road.setTileId(coords,0);
+            mChunks.back()->road.setTileId(coords,Tile::None);
         }
     }
 }
