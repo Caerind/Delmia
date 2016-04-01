@@ -7,7 +7,7 @@ World::World()
     NWorld::registerActor<Unit>();
     NWorld::registerActor<Map>();
     NWorld::registerActor<Forest>();
-    NWorld::registerActor<Hall>();
+    //NWorld::registerActor<Hall>();
 
     mMap = NWorld::createActor<Map>();
 }
