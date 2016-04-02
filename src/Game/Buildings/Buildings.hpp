@@ -9,9 +9,9 @@
 
 enum Buildings
 {
-    Barrack,
-    Hall,
-    Market,
+    bBarrack,
+    bHall,
+    bMarket,
 };
 
 #endif // BUILDINGS_HPP_INCLUDED

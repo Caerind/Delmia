@@ -7,9 +7,9 @@
 
 enum Resources
 {
-    Wood,
-    Gold,
-    Rock,
+    rWood,
+    rGold,
+    rRock,
 };
 
 #endif // RESOURCES_HPP_INCLUDED

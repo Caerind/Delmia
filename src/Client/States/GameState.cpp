@@ -22,9 +22,9 @@ bool GameState::handleEvent(sf::Event const& event)
             case 0: mWorld.createActor<Forest>(c.x,c.y); break;
             case 1: mWorld.createActor<GoldMine>(c.x,c.y); break;
             case 2: mWorld.createActor<Quarry>(c.x,c.y); break;
-            //case 3: mWorld.createActor<Hall>(c.x,c.y); break;
-            //case 4: mWorld.createActor<Market>(c.x,c.y); break;
-            //case 5: mWorld.createActor<Barrack>(c.x,c.y); break;
+            case 3: mWorld.createActor<Hall>(c.x,c.y); break;
+            case 4: mWorld.createActor<Market>(c.x,c.y); break;
+            case 5: mWorld.createActor<Barrack>(c.x,c.y); break;
             default: break;
         }
     }

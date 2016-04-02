@@ -2,12 +2,12 @@
 
 World::World()
 {
-    NWorld::registerActor<Entity>();
-    NWorld::registerActor<Building>();
-    NWorld::registerActor<Unit>();
-    NWorld::registerActor<Map>();
-    NWorld::registerActor<Forest>();
-    //NWorld::registerActor<Hall>();
+    NWorld::registerActor<Entity>("Entity");
+    NWorld::registerActor<Building>("Building");
+    NWorld::registerActor<Unit>("Unit");
+    NWorld::registerActor<Map>("Map");
+    NWorld::registerActor<Forest>("Forest");
+    NWorld::registerActor<Hall>("Hall");
 
     mMap = NWorld::createActor<Map>();
 }
