@@ -300,3 +300,8 @@ NWorld::NWorld()
 NWorld::~NWorld()
 {
 }
+
+void NWorld::addActor(NActor::Ptr actor)
+{
+  instance().mActors.add(actor);
+}

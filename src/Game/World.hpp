@@ -32,17 +32,24 @@ class World
 template <typename T, typename ... Args>
 std::shared_ptr<T> World::createActor(Args&& ... args)
 {
-    std::shared_ptr<T> actor = NWorld::createActor<T>(std::forward<Args>(args)...);
-
-    std::shared_ptr<Building> building;
-    if(building = std::dynamic_pointer_cast<Building>(actor))
+    std::shared_ptr<T> actor = std::make_shared<T>(std::forward<Args>(args)...);
+    std::shared_ptr<NActor> nactor = std::dynamic_pointer_cast<NActor>(actor);
+    std::shared_ptr<Building> building = std::dynamic_pointer_cast<Building>(actor);
+    std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit>(actor);
+    
+    if(nactor)
+    {
+      NWorld::addActor(nactor);
+      NLog::log("NAcotr added");
+    }
+    
+    if(building)
     {
         mBuildings[actor->getId()] = building;
         NLog::log("Building added");
     }
-
-    std::shared_ptr<Unit> unit;
-    if(unit = std::dynamic_pointer_cast<Unit>(actor))
+    
+    if(unit)
     {
         mUnits[actor->getId()] = unit;
         NLog::log("Unit added");

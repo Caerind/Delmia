@@ -19,12 +19,30 @@ bool GameState::handleEvent(sf::Event const& event)
     {
         switch (mType)
         {
-            case 0: mWorld.createActor<Forest>(c.x,c.y); break;
-            case 1: mWorld.createActor<GoldMine>(c.x,c.y); break;
-            case 2: mWorld.createActor<Quarry>(c.x,c.y); break;
-            case 3: mWorld.createActor<Hall>(c.x,c.y); break;
-            case 4: mWorld.createActor<Market>(c.x,c.y); break;
-            case 5: mWorld.createActor<Barrack>(c.x,c.y); break;
+            case 0: 
+	      if(!mWorld.collide(c.x,c.y))
+		mWorld.createActor<Forest>(c.x,c.y); 
+	      break;
+            case 1:
+	      if(!mWorld.collide(c.x,c.y))
+	       mWorld.createActor<GoldMine>(c.x,c.y); 
+	      break;
+            case 2:
+	      if(!mWorld.collide(c.x,c.y))
+	       mWorld.createActor<Quarry>(c.x,c.y); 
+	      break;
+            case 3:
+	      if(!mWorld.collide(c.x,c.y))
+	        mWorld.createActor<Hall>(c.x,c.y); 
+	      break;
+	    case 4:
+	      if(!mWorld.collide(c.x,c.y))
+		mWorld.createActor<Market>(c.x,c.y); 
+	      break;
+            case 5:
+	      if(!mWorld.collide(c.x,c.y))
+	       mWorld.createActor<Barrack>(c.x,c.y);
+	      break;
             default: break;
         }
     }
@@ -32,7 +50,8 @@ bool GameState::handleEvent(sf::Event const& event)
     // Right click
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
     {
-        mType = (mType >= 6)? 0 : mType+1;
+        mType++;
+	mType%=6;
     }
 
 
