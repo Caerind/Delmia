@@ -5,6 +5,14 @@
 #include "../NodeEngine/Core/LayerComponent.hpp"
 #include "../NodeEngine/Core/MapUtility.hpp"
 
+enum Tile
+{
+    None = 0,
+    Dirt,
+    Path,
+    Water,
+};
+
 class Map : public NActor
 {
     public:

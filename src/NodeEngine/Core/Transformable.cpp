@@ -23,9 +23,19 @@ void NTransformable::setPosition(sf::Vector2f const& position, float z)
     mZ = z;
 }
 
+void NTransformable::setPosition(float x, float y)
+{
+    setPosition(NVector(x,y,getPosition().z));
+}
+
 void NTransformable::setPosition(float x, float y, float z)
 {
     setPosition(NVector(x,y,z));
+}
+
+void NTransformable::setPositionZ(float z)
+{
+    setPosition(NVector(getPosition().x,getPosition().y,z));
 }
 
 void NTransformable::move(NVector const& movement)

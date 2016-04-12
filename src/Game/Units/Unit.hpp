@@ -1,9 +1,9 @@
 #ifndef UNIT_HPP
 #define UNIT_HPP
 
-#include "../NodeEngine/Core/SpriteComponent.hpp"
+#include "../../NodeEngine/Core/SpriteComponent.hpp"
 
-#include "Entity.hpp"
+#include "../Entity.hpp"
 
 class Unit : public Entity
 {

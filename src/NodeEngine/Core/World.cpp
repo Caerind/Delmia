@@ -170,11 +170,6 @@ bool NWorld::load(std::string const& filename)
     return true;
 }
 
-void NWorld::addActor(NActor::Ptr actor)
-{
-    instance().mActors.add(actor);
-}
-
 bool NWorld::save(std::string const& filename)
 {
     pugi::xml_document doc;
