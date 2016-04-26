@@ -74,6 +74,70 @@ void NLayerComponent::create(std::string const& textureName, sf::Vector2i mapSiz
     }
 }
 
+bool NLayerComponent::loadFromCode(std::string const& code)
+{
+    sf::Vector2i coords;
+
+    std::string data;
+    std::stringstream ss;
+    ss << code;
+    ss >> data;
+
+    if (!NCompression::decompress(data))
+    {
+        return false;
+    }
+
+    std::vector<unsigned char> byteVector; // hold decompressed data as bytes
+    byteVector.reserve(mMapSize.x * mMapSize.y * 4); // number of tiles * 4 bytes = 32bits/tile
+
+    for (std::string::iterator i = data.begin(); i != data.end(); ++i)
+    {
+        byteVector.push_back(*i);
+    }
+    for (std::size_t i = 0; i < byteVector.size() - 3; i += 4)
+    {
+        int id = byteVector[i] | byteVector[i+1] << 8 | byteVector[i+2] << 16 | byteVector[i+3] << 24;
+        setTileId(coords,id);
+
+        coords.x = (coords.x + 1) % mMapSize.x;
+        if (coords.x == 0)
+        {
+            coords.y++;
+        }
+    }
+
+    // TODO : We need to return false if problem with size
+
+    return true;
+}
+
+std::string NLayerComponent::saveToCode()
+{
+    std::string data;
+    data.reserve(mMapSize.x * mMapSize.y * 4);
+    sf::Vector2i coords;
+    for (coords.y = 0; coords.y < mMapSize.y; coords.y++)
+    {
+        for (coords.x = 0; coords.x < mMapSize.x; coords.x++)
+        {
+            const int id = getTileId(coords);
+            data.push_back((char)(id));
+            data.push_back((char)(id >> 8));
+            data.push_back((char)(id >> 16));
+            data.push_back((char)(id >> 24));
+        }
+    }
+    if (NCompression::compress(data))
+    {
+        return data;
+    }
+    else
+    {
+        return "";
+    }
+}
+
 sf::Vector2i NLayerComponent::getMapSize() const
 {
     return mMapSize;
@@ -188,36 +252,7 @@ void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
 
     create(mTexture,mMapSize,mTileSize,mType,mHexSide);
 
-    // Load Tile Data
-    std::string data = n.attribute("data").value();
-    sf::Vector2i coords;
-
-    std::stringstream ss;
-    ss << data;
-    ss >> data;
-
-    if (!NCompression::decompress(data))
-    {
-        return;
-    }
-    std::vector<unsigned char> byteVector; // hold decompressed data as bytes
-    byteVector.reserve(mMapSize.x * mMapSize.y * 4); // number of tiles * 4 bytes = 32bits/tile
-
-    for (std::string::iterator i = data.begin(); i != data.end(); ++i)
-    {
-        byteVector.push_back(*i);
-    }
-    for (std::size_t i = 0; i < byteVector.size() - 3; i += 4)
-    {
-        int id = byteVector[i] | byteVector[i+1] << 8 | byteVector[i+2] << 16 | byteVector[i+3] << 24;
-        setTileId(coords,id);
-
-        coords.x = (coords.x + 1) % mMapSize.x;
-        if (coords.x == 0)
-        {
-            coords.y++;
-        }
-    }
+    loadFromCode(n.attribute("data").value());
 }
 
 void NLayerComponent::save(pugi::xml_node& node, std::string const& name)
@@ -235,22 +270,8 @@ void NLayerComponent::save(pugi::xml_node& node, std::string const& name)
     n.append_attribute("sca") = NString::toString(getScale()).c_str();
     n.append_attribute("rot") = getRotation();
 
-    // Save Tile Data
-    std::string data;
-    data.reserve(mMapSize.x * mMapSize.y * 4);
-    sf::Vector2i coords;
-    for (coords.y = 0; coords.y < mMapSize.y; coords.y++)
-    {
-        for (coords.x = 0; coords.x < mMapSize.x; coords.x++)
-        {
-            const int id = getTileId(coords);
-            data.push_back((char)(id));
-            data.push_back((char)(id >> 8));
-            data.push_back((char)(id >> 16));
-            data.push_back((char)(id >> 24));
-        }
-    }
-    if (NCompression::compress(data))
+    std::string data = saveToCode();
+    if (data != "")
     {
         n.append_attribute("data") = data.c_str();
     }

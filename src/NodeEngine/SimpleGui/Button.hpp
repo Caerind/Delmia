@@ -33,7 +33,7 @@ class Button : public Widget, public Sprite, public Callback
 
 	private:
 		bool mPressed;
-		#ifndef WINDOWS
+		#ifdef N_MOBILE_PLATFORM
 		unsigned int mFingerId;
 		#endif
 };

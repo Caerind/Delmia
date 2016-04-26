@@ -6,6 +6,7 @@
 #include "AudioManager.hpp"
 #include "ResourceManager.hpp"
 #include "LangManager.hpp"
+#include "ValueContainer.hpp"
 
 namespace ah
 {
@@ -23,6 +24,7 @@ class Application
         static AudioManager& getAudio();
         static ResourceManager& getResources();
         static LangManager& getLang();
+        static ValueContainer& getValues();
 
     private:
         Application();
@@ -37,6 +39,7 @@ class Application
         AudioManager mAudio;
         ResourceManager mResources;
         LangManager mLang;
+        ValueContainer mValues;
 };
 
 } // namespace ah

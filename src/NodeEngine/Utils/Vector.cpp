@@ -86,6 +86,16 @@ void NVector::normalize()
     }
 }
 
+NVector NVector::unitVector() const
+{
+    NVector t;
+    t.x = x;
+    t.y = y;
+    t.z = z;
+    t.normalize();
+    return t;
+}
+
 float NVector::size() const
 {
     return std::sqrt(sizeSquared());
@@ -104,6 +114,45 @@ float NVector::size2D() const
 float NVector::sizeSquared2D() const
 {
     return (x*x + y*y);
+}
+
+float NVector::getLength() const
+{
+    return size2D();
+}
+
+float NVector::getAngle() const
+{
+    if (y != 0.f || x != 0.f)
+    {
+        return std::atan2(y,x);
+    }
+    return 0.f;
+}
+
+void NVector::setLength(float length)
+{
+    float l = getLength();
+    if (getLength() != 0.f)
+    {
+        float r = length / l;
+        x *= r;
+        y *= r;
+    }
+}
+
+void NVector::setAngle(float angle)
+{
+    float length = getLength();
+	x = length * std::cos(angle);
+	y = length * std::sin(angle);
+}
+
+void NVector::rotate(float angle)
+{
+    float cos = std::cos(angle);
+	float sin = std::sin(angle);
+	*this = NVector(cos * x - sin * y, sin * x + cos * y, z); // Don't manipulate x and y separately, otherwise they're overwritten too early
 }
 
 sf::Vector2f NVector::NToSFML2F(NVector const& v)

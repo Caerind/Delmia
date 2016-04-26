@@ -76,6 +76,7 @@ void Application::run()
 void Application::close()
 {
     instance().mRunning = false;
+    instance().mAudio.stop();
 }
 
 StateManager& Application::getStates()
@@ -101,6 +102,11 @@ ResourceManager& Application::getResources()
 LangManager& Application::getLang()
 {
     return instance().mLang;
+}
+
+ValueContainer& Application::getValues()
+{
+    return instance().mValues;
 }
 
 Application::Application()

@@ -26,6 +26,8 @@ class NArray : public std::vector<T>
 
         bool contains(T const& element);
 
+        bool validIndex(std::size_t index);
+
         T randomElement();
 };
 
@@ -97,6 +99,12 @@ template <typename T>
 bool NArray<T>::contains(T const& element)
 {
     return std::find(std::vector<T>::begin(),std::vector<T>::end(),element) != std::vector<T>::end();
+}
+
+template <typename T>
+bool NArray<T>::validIndex(std::size_t index)
+{
+    return (index >= 0 && index < std::vector<T>::size());
 }
 
 template <typename T>

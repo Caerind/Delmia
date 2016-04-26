@@ -34,7 +34,6 @@ void World::handleEvent(sf::Event const& event)
 void World::update(sf::Time dt)
 {
     NWorld::tick(dt);
-    NWorld::update();
 
     sf::Vector2f mvt;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
@@ -73,7 +72,7 @@ void World::update(sf::Time dt)
 
 void World::render(sf::RenderTarget& target)
 {
-    NWorld::render(target);
+    NWorld::render();
 
     NWorld::getWindow().setView(NWorld::getCameraManager().getActiveView());
 
