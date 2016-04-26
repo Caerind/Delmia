@@ -7,11 +7,16 @@
 #include "Hall.hpp"
 #include "Market.hpp"
 
-enum Buildings
+namespace Buildings
+{
+
+enum Type
 {
     Barrack,
     Hall,
     Market,
 };
+
+} // namespace Buildings
 
 #endif // BUILDINGS_HPP_INCLUDED

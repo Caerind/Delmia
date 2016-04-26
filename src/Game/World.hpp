@@ -32,6 +32,8 @@ class World
 template <typename T, typename ... Args>
 std::shared_ptr<T> World::createActor(Args&& ... args)
 {
+    // TODO : Test collision (or do it before calling this function)
+
     std::shared_ptr<T> actor = NWorld::createActor<T>(std::forward<Args>(args)...);
 
     std::shared_ptr<Building> building;
