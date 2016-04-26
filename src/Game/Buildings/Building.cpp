@@ -13,11 +13,16 @@ Building::~Building()
     mTiles.clear();
 }
 
-std::vector<sf::Vector2i> Building::getTiles(int x, int y)
+std::vector<sf::Vector2i> Building::getTilesBlueprint(int x, int y)
 {
     std::vector<sf::Vector2i> tiles;
     tiles.push_back(sf::Vector2i(x,y));
     return tiles;
+}
+
+std::vector<sf::Vector2i> Building::getTiles(int x, int y)
+{
+    return Building::getTilesBlueprint(x,y);
 }
 
 void Building::generateBuilding(int x, int y, sf::IntRect rect)

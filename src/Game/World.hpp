@@ -21,6 +21,9 @@ class World
         bool collide(int x, int y);
 
         template <typename T, typename ... Args>
+        std::shared_ptr<T> createBuilding(int x, int y, Args&& ... args);
+
+        template <typename T, typename ... Args>
         std::shared_ptr<T> createActor(Args&& ... args);
 
     protected:
@@ -30,24 +33,32 @@ class World
 };
 
 template <typename T, typename ... Args>
+std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
+{
+    std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(x,y);
+    for (auto v : tiles)
+    {
+        if (collide(v.x,v.y))
+        {
+            return nullptr;
+        }
+    }
+
+    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    mBuildings[actor->getId()] = actor;
+
+    return actor;
+}
+
+template <typename T, typename ... Args>
 std::shared_ptr<T> World::createActor(Args&& ... args)
 {
-    // TODO : Test collision (or do it before calling this function)
-
     std::shared_ptr<T> actor = NWorld::createActor<T>(std::forward<Args>(args)...);
-
-    std::shared_ptr<Building> building;
-    if(building = std::dynamic_pointer_cast<Building>(actor))
-    {
-        mBuildings[actor->getId()] = building;
-        NLog::log("Building added");
-    }
 
     std::shared_ptr<Unit> unit;
     if(unit = std::dynamic_pointer_cast<Unit>(actor))
     {
         mUnits[actor->getId()] = unit;
-        NLog::log("Unit added");
     }
     return actor;
 }

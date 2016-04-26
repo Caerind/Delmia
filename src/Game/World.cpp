@@ -66,20 +66,6 @@ void World::update(sf::Time dt)
 void World::render(sf::RenderTarget& target)
 {
     NWorld::render();
-
-    NWorld::getWindow().setView(NWorld::getCameraManager().getActiveView());
-
-    for (auto itr = mBuildings.begin(); itr != mBuildings.end(); itr++)
-    {
-        sf::RectangleShape shape;
-        shape.setFillColor(sf::Color::Transparent);
-        shape.setOutlineColor(sf::Color::Red);
-        shape.setOutlineThickness(1.f);
-        sf::FloatRect r = itr->second->getBounds();
-        shape.setSize(sf::Vector2f(r.width,r.height));
-        shape.setPosition(sf::Vector2f(r.left,r.top));
-        target.draw(shape);
-    }
 }
 
 sf::Vector2i World::getMouseCoords()
