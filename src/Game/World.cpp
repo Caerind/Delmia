@@ -84,6 +84,15 @@ bool World::collide(int x, int y)
         }
     }
 
+    // Resources
+    for (auto itr = mResources.begin(); itr != mResources.end(); itr++)
+    {
+        if (itr->second->collide(x,y))
+        {
+            return true;
+        }
+    }
+
     // Map
     if (mMap->getTileId(x,y) == 3) // Water
     {

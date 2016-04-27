@@ -20,17 +20,33 @@ std::vector<sf::Vector2i> Building::getTilesBlueprint(int x, int y)
     return tiles;
 }
 
-std::vector<sf::Vector2i> Building::getTiles(int x, int y)
+/*
+std::vector<std::pair<sf::Vector2i,sf::IntRect>> Building::getTiles(int x, int y)
 {
-    return Building::getTilesBlueprint(x,y);
+    std::vector<sf::Vector2i> tilesBP = Building::getTilesBlueprint(x,y);
+    std::vector<std::pair<sf::Vector2i,sf::IntRect>> tiles;
+    for (std::size_t i = 0; i < tilesBP.size(); i++)
+    {
+        tiles.emplace_back();
+        tiles.back().first = tilesBP[i];
+    }
+    // ADD YOUR TILES TEXTURE RECT
+    return tiles;
 }
+*/
 
-void Building::generateBuilding(int x, int y, sf::IntRect rect)
+void Building::generate(int x, int y)
 {
-    std::vector<sf::Vector2i> tiles = getTiles(x,y);
+    for (std::size_t i = 0; i < mTiles.size(); i++)
+    {
+        detachComponent(mTiles[i].sprite);
+    }
+    mTiles.clear();
+
+    std::vector<std::pair<sf::Vector2i,sf::IntRect>> tiles = getTiles(x,y);
     for (std::size_t i = 0; i < tiles.size(); i++)
     {
-        addTile(tiles[i].x,tiles[i].y,rect);
+        addTile(tiles[i].first.x,tiles[i].first.y,tiles[i].second);
     }
 }
 
@@ -47,16 +63,6 @@ void Building::addTile(int x, int y, sf::IntRect rect)
     mTiles.back().sprite->setPositionZ(1.f);
 
     attachComponent(mTiles.back().sprite);
-}
-
-sf::FloatRect Building::getBounds()
-{
-    // TODO : Bounds
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        return mTiles[i].sprite->getBounds();
-    }
-    return sf::FloatRect();
 }
 
 bool Building::collide(int x, int y)

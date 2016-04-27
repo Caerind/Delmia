@@ -18,9 +18,9 @@ bool GameState::handleEvent(sf::Event const& event)
     {
         switch (mType)
         {
-            case 0: mWorld.createBuilding<Forest>(c.x,c.y); break;
-            case 1: mWorld.createBuilding<GoldMine>(c.x,c.y); break;
-            case 2: mWorld.createBuilding<Quarry>(c.x,c.y); break;
+            case 0: mWorld.createResource<Forest>(c.x,c.y); break;
+            case 1: mWorld.createResource<GoldMine>(c.x,c.y); break;
+            case 2: mWorld.createResource<Quarry>(c.x,c.y); break;
             case 3: mWorld.createBuilding<Hall>(c.x,c.y); break;
             case 4: mWorld.createBuilding<Market>(c.x,c.y); break;
             case 5: mWorld.createBuilding<Barrack>(c.x,c.y); break;
