@@ -1,9 +1,10 @@
 bin/*
 obj/*
-bin*
-obj*
 *.layout
 *.cbp
 *.depend
 *~
 *.workspace
+CMakeLists.txt
+Delmia.kdev4
+build

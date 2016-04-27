@@ -5,7 +5,7 @@
 #include <cassert>
 #include <string>
 #include <fstream>
-#include "pugixml.hpp"
+#include "Pugixml.hpp"
 
 #include <SFML/Window/Keyboard.hpp>
 
