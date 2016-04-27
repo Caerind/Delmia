@@ -31,12 +31,23 @@ class NVector
 
         bool isNormalized() const;
         void normalize();
+        NVector unitVector() const;
 
         float size() const;
         float sizeSquared() const;
 
         float size2D() const;
         float sizeSquared2D() const;
+
+
+        // Polar2D
+        float getLength() const;
+        float getAngle() const;
+
+        void setLength(float length);
+        void setAngle(float angle);
+
+        void rotate(float angle);
 
 
         // Conversions

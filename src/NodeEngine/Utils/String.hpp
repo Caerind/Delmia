@@ -48,7 +48,7 @@ std::string readable_name( const char* mangled_name ) { return mangled_name ; }
 template < typename T > std::string type()
 { return readable_name( typeid(T).name() ) ; }
 
-template < typename T > std::string Type( const T& obj )
+template < typename T > std::string type( const T& obj )
 { return readable_name( typeid(obj).name() ) ; }
 
 #endif // N_DESKTOP_PLATFORM

@@ -30,7 +30,7 @@ sf::View& NCameraManager::getView()
     return mView;
 }
 
-sf::View NCameraManager::getActiveView() const
+sf::View& NCameraManager::getActiveView()
 {
     if (mActive >= 0 && mActive < (int)mCameras.size())
     {
@@ -40,4 +40,11 @@ sf::View NCameraManager::getActiveView() const
         }
     }
     return mView;
+}
+
+void NCameraManager::clear()
+{
+    mCameras.clear();
+    mActive = -1;
+    mView = NWorld::getWindow().getView();
 }

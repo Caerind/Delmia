@@ -1,6 +1,9 @@
 #include "Transformable.hpp"
+#include "World.hpp"
 
 NTransformable::NTransformable()
+: mTransformable()
+, mZ(0.f)
 {
 }
 
@@ -13,19 +16,15 @@ NVector NTransformable::getPosition() const
 
 void NTransformable::setPosition(NVector const& position)
 {
-    mTransformable.setPosition(NVector::NToSFML2F(position));
-    mZ = position.z;
+    setPosition(NVector::NToSFML2F(position),position.z);
 }
 
 void NTransformable::setPosition(sf::Vector2f const& position, float z)
 {
     mTransformable.setPosition(position);
     mZ = z;
-}
-
-void NTransformable::setPosition(float x, float y)
-{
-    setPosition(NVector(x,y,getPosition().z));
+    onMoved();
+    NWorld::needUpdateOrder();
 }
 
 void NTransformable::setPosition(float x, float y, float z)
@@ -35,7 +34,7 @@ void NTransformable::setPosition(float x, float y, float z)
 
 void NTransformable::setPositionZ(float z)
 {
-    setPosition(NVector(getPosition().x,getPosition().y,z));
+    setPosition(mTransformable.getPosition(),z);
 }
 
 void NTransformable::move(NVector const& movement)
@@ -55,12 +54,14 @@ NVector NTransformable::getScale() const
 
 void NTransformable::setScale(NVector const& scale)
 {
-    mTransformable.setScale(NVector::NToSFML2F(scale));
+    setScale(NVector::NToSFML2F(scale));
 }
 
 void NTransformable::setScale(sf::Vector2f const& scale)
 {
     mTransformable.setScale(scale);
+    onScaled();
+    NWorld::needUpdateOrder();
 }
 
 void NTransformable::setScale(float x, float y)
@@ -76,9 +77,23 @@ float NTransformable::getRotation() const
 void NTransformable::setRotation(float rotation)
 {
     mTransformable.setRotation(rotation);
+    onRotated();
+    NWorld::needUpdateOrder();
 }
 
 sf::Transform NTransformable::getTransform() const
 {
     return mTransformable.getTransform();
+}
+
+void NTransformable::onMoved()
+{
+}
+
+void NTransformable::onScaled()
+{
+}
+
+void NTransformable::onRotated()
+{
 }

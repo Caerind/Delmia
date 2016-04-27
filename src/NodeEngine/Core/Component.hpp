@@ -32,6 +32,16 @@ class NComponent : public NTickable, public NTransformable
         void setActorScale(NVector const& scale);
         void setActorRotation(float rotation);
 
+        virtual void onMoved();
+        virtual void onMovedThis();
+        virtual void onMovedChildren();
+        virtual void onScaled();
+        virtual void onScaledThis();
+        virtual void onScaledChildren();
+        virtual void onRotated();
+        virtual void onRotatedThis();
+        virtual void onRotatedChildren();
+
         virtual void load(pugi::xml_node& node, std::string const& name = "Component");
         virtual void save(pugi::xml_node& node, std::string const& name = "Component");
 

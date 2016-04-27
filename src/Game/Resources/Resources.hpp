@@ -5,11 +5,16 @@
 #include "GoldMine.hpp"
 #include "Quarry.hpp"
 
-enum Resources
+namespace Resources
+{
+
+enum Type
 {
     Wood,
     Gold,
     Rock,
 };
+
+} // namespace Resources
 
 #endif // RESOURCES_HPP_INCLUDED

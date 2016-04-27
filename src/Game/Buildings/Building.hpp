@@ -15,6 +15,7 @@ class Building : public Entity
         Building();
         ~Building();
 
+        static std::vector<sf::Vector2i> getTilesBlueprint(int x, int y);
         virtual std::vector<sf::Vector2i> getTiles(int x, int y);
         virtual void generateBuilding(int x, int y, sf::IntRect rect);
         void addTile(int x, int y, sf::IntRect rect);

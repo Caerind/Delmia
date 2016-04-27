@@ -12,7 +12,8 @@ class Hall : public Building
         Hall();
         Hall(int x, int y);
 
-        std::vector<sf::Vector2i> getTiles(int x, int y);
+        static std::vector<sf::Vector2i> getTilesBlueprint(int x, int y);
+        virtual std::vector<sf::Vector2i> getTiles(int x, int y);
 };
 
 #endif // HALL_HPP

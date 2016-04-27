@@ -162,6 +162,60 @@ void NComponent::setActorRotation(float rotation)
     }
 }
 
+void NComponent::onMoved()
+{
+    onMovedThis();
+    onMovedChildren();
+}
+
+void NComponent::onMovedThis()
+{
+}
+
+void NComponent::onMovedChildren()
+{
+    for (std::size_t i = 0; i < mComponents.size(); i++)
+    {
+        mComponents[i]->onMoved();
+    }
+}
+
+void NComponent::onScaled()
+{
+    onScaledThis();
+    onScaledChildren();
+}
+
+void NComponent::onScaledThis()
+{
+}
+
+void NComponent::onScaledChildren()
+{
+    for (std::size_t i = 0; i < mComponents.size(); i++)
+    {
+        mComponents[i]->onScaled();
+    }
+}
+
+void NComponent::onRotated()
+{
+    onRotatedThis();
+    onRotatedChildren();
+}
+
+void NComponent::onRotatedThis()
+{
+}
+
+void NComponent::onRotatedChildren()
+{
+    for (std::size_t i = 0; i < mComponents.size(); i++)
+    {
+        mComponents[i]->onRotated();
+    }
+}
+
 void NComponent::load(pugi::xml_node& node, std::string const& name)
 {
     pugi::xml_node n = node.child(name.c_str());

@@ -2,13 +2,12 @@
 #define NWORLD_HPP
 
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Window/Event.hpp>
 
-#include "CameraManager.hpp"
 #include "Tickable.hpp"
 #include "Actor.hpp"
-#include "Action.hpp"
-#include "SceneComponent.hpp"
+#include "GraphicManager.hpp"
 
 #include "../Utils/Array.hpp"
 #include "../Utils/Map.hpp"
@@ -26,18 +25,14 @@ class NWorld
         // Add an event to the list
         static void addEvent(sf::Event const& event);
 
-        // Test if an event exist
-        //static bool testEvent(sf::Event const& event);
-        static bool testAction(NAction const& action);
-
         // Tick the world
         static void tick(sf::Time dt);
 
         // Render the world
-        static void render(sf::RenderTarget& target);
+        static void render();
 
-        // Update the world : use temp array and then clear them
-        static void update();
+        // Remove All
+        static void clear();
 
         #ifdef N_DESKTOP_PLATFORM
         template <typename T>
@@ -50,14 +45,12 @@ class NWorld
         template <typename T, typename ... Args>
         static std::shared_ptr<T> createActor(Args&& ... args);
 
-        // Add an actor
-        static void addActor(NActor::Ptr actor);
-
         // Get an actor
         static NActor::Ptr getActor(std::size_t index);
         static NActor::Ptr getActor(std::string const& id);
 
         // Remove an actor
+        static void removeActor(std::size_t index);
         static void removeActor(std::string const& id);
 
         static bool load(std::string const& filename);
@@ -65,6 +58,7 @@ class NWorld
 
         // CameraManager
         static NCameraManager& getCameraManager();
+        static sf::View& getActiveView();
 
         static std::size_t getActorCount();
         static std::size_t getRenderableCount();
@@ -75,10 +69,16 @@ class NWorld
 
         static ah::ResourceManager& getResources();
         static ah::Window& getWindow();
+        static ah::ValueContainer& getValues();
 
         static std::string setTimer(sf::Time duration, NTimer::Callback function = [](){});
+        static std::string startTimer();
+        static sf::Time getTimerElapsed(std::string const& handle);
         static sf::Time getTimerRemaining(std::string const& handle);
         static sf::Time getTimerDuration(std::string const& handle);
+        static void repeatTimer(std::string const& handle, bool repeat);
+        static void playTimer(std::string const& handle);
+        static void pauseTimer(std::string const& handle);
         static void resetTimer(std::string const& handle, sf::Time newDuration);
         static void stopTimer(std::string const& handle);
 
@@ -88,6 +88,18 @@ class NWorld
         void addTickable(NTickable* tickable);
         void removeTickable(NTickable* tickable);
 
+        static NParticleSystem::Ptr getParticleSystem(std::string const& systemId);
+        static void removeParticleSystem(std::string const& systemId);
+        static std::size_t getParticleSystemCount();
+
+        template <typename T>
+        static void setEffect();
+
+        template <typename T>
+        static T* getEffect();
+
+        static void needUpdateOrder();
+
     private:
         NWorld();
         ~NWorld();
@@ -95,21 +107,17 @@ class NWorld
         static NWorld* mInstance;
 
     private:
+        NGraphicManager mGraphics;
+
         NArray<sf::Event> mEvents;
 
         NArray<NActor::Ptr> mActors;
         NArray<std::string> mActorsDeletions;
 
-        NArray<NSceneComponent*> mRenderables;
-        NArray<NSceneComponent*> mRenderablesDeletions;
-
         NArray<NTickable*> mTickables;
-        NArray<NTickable*> mTickablesAdditions;
-        NArray<NTickable*> mTickablesDeletions;
 
         NMap<std::string,NTimer> mTimers;
-
-        NCameraManager mCameraManager;
+        int mTimerHandleCounter;
 
         NMap<std::string,std::function<NActor::Ptr()>> mActorFactory;
 };
@@ -138,6 +146,18 @@ bool NWorld::registerActor(std::string const& type)
 		return NActor::Ptr(new T());
 	};
 	return true;
+}
+
+template <typename T>
+void NWorld::setEffect()
+{
+    instance().mGraphics.setEffect<T>();
+}
+
+template <typename T>
+T* NWorld::getEffect()
+{
+    return instance().mGraphics.getEffect<T>();
 }
 
 #endif // NWORLD_HPP

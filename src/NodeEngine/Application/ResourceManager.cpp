@@ -11,24 +11,24 @@ ResourceManager::~ResourceManager()
 {
 }
 
-void ResourceManager::loadTexture(std::string const& id, std::string const& filename)
+bool ResourceManager::loadTexture(std::string const& id, std::string const& filename)
 {
-    mTextures[id].loadFromFile(filename);
+    return mTextures[id].loadFromFile(filename);
 }
 
-void ResourceManager::loadImage(std::string const& id, std::string const& filename)
+bool ResourceManager::loadImage(std::string const& id, std::string const& filename)
 {
-    mImages[id].loadFromFile(filename);
+    return mImages[id].loadFromFile(filename);
 }
 
-void ResourceManager::loadFont(std::string const& id, std::string const& filename)
+bool ResourceManager::loadFont(std::string const& id, std::string const& filename)
 {
-    mFonts[id].loadFromFile(filename);
+    return mFonts[id].loadFromFile(filename);
 }
 
-void ResourceManager::loadSoundBuffer(std::string const& id, std::string const& filename)
+bool ResourceManager::loadSoundBuffer(std::string const& id, std::string const& filename)
 {
-    mSoundBuffers[id].loadFromFile(filename);
+    return mSoundBuffers[id].loadFromFile(filename);
 }
 
 sf::Texture& ResourceManager::getTexture(std::string const& id)
@@ -71,6 +71,16 @@ sf::SoundBuffer& ResourceManager::getSoundBuffer(std::string const& id)
     return mSoundBuffers[id];
 }
 
+lp::Shader& ResourceManager::getShader(std::string const& id)
+{
+    if (mShaders.find(id) == mShaders.end())
+    {
+        std::cerr << "Resource : " << id << " : not loaded properly" << std::endl;
+        assert(false);
+    }
+    return mShaders[id];
+}
+
 void ResourceManager::releaseTexture(std::string const& id)
 {
     mTextures.erase(mTextures.find(id));
@@ -89,6 +99,11 @@ void ResourceManager::releaseFont(std::string const& id)
 void ResourceManager::releaseSoundBuffer(std::string const& id)
 {
     mSoundBuffers.erase(mSoundBuffers.find(id));
+}
+
+void ResourceManager::releaseShader(std::string const& id)
+{
+    mShaders.erase(mShaders.find(id));
 }
 
 } // namespace ah
