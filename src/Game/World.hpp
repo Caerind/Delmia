@@ -19,7 +19,7 @@ class World
         void render(sf::RenderTarget& target);
 
         sf::Vector2i getMouseCoords();
-        bool collide(int x, int y);
+        bool collide(int x, int y, bool isSolid = true);
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createBuilding(int x, int y, Args&& ... args);
@@ -46,6 +46,14 @@ std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
         if (collide(v.x,v.y))
         {
             return nullptr;
+        }
+        std::vector<sf::Vector2i> ns = NMapUtility::Isometric::getNeighboors(v,true);
+        for (auto n : ns)
+        {
+            if (collide(n.x,n.y,false))
+            {
+                return nullptr;
+            }
         }
     }
 
