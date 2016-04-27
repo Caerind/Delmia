@@ -143,7 +143,7 @@ bool NWorld::registerActor(std::string const& type)
 {
 	instance().mActorFactory[type] = [] ()
 	{
-		return NActor::Ptr(new T());
+		return std::make_shared<T>();
 	};
 	return true;
 }

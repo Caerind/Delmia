@@ -12,9 +12,9 @@ namespace Buildings
 
 enum Type
 {
-    Barrack,
-    Hall,
-    Market,
+    bBarrack,
+    bHall,
+    bMarket,
 };
 
 } // namespace Buildings

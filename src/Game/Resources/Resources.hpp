@@ -10,9 +10,9 @@ namespace Resources
 
 enum Type
 {
-    Wood,
-    Gold,
-    Rock,
+    rWood,
+    rGold,
+    rRock,
 };
 
 } // namespace Resources
