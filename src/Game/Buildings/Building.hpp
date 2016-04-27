@@ -16,11 +16,10 @@ class Building : public Entity
         ~Building();
 
         static std::vector<sf::Vector2i> getTilesBlueprint(int x, int y);
-        virtual std::vector<sf::Vector2i> getTiles(int x, int y);
-        virtual void generateBuilding(int x, int y, sf::IntRect rect);
+        virtual std::vector<std::pair<sf::Vector2i,sf::IntRect>> getTiles(int x, int y) = 0;
+        virtual void generate(int x, int y);
         void addTile(int x, int y, sf::IntRect rect);
 
-        sf::FloatRect getBounds();
         bool collide(int x, int y);
 
         void load(pugi::xml_node& node);

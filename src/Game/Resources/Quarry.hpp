@@ -1,10 +1,9 @@
 #ifndef QUARRY_HPP
 #define QUARRY_HPP
 
-#include "../Buildings/Building.hpp"
 #include "Resources.hpp"
 
-class Quarry : public Building
+class Quarry : public Resource
 {
     public:
         typedef std::shared_ptr<Quarry> Ptr;
@@ -12,6 +11,8 @@ class Quarry : public Building
     public:
         Quarry();
         Quarry(int x, int y);
+
+        std::vector<std::pair<sf::Vector2i,sf::IntRect>> getTiles(int x, int y);
 };
 
 #endif // QUARRY_HPP

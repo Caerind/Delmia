@@ -6,6 +6,7 @@
 
 #include "../Game.hpp"
 #include "Buildings/Building.hpp"
+#include "Resources/Resource.hpp"
 #include "Units/Unit.hpp"
 
 class World
@@ -18,10 +19,13 @@ class World
         void render(sf::RenderTarget& target);
 
         sf::Vector2i getMouseCoords();
-        bool collide(int x, int y);
+        bool collide(int x, int y, bool isSolid = true);
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createBuilding(int x, int y, Args&& ... args);
+
+        template <typename T, typename ... Args>
+        std::shared_ptr<T> createResource(int x, int y, Args&& ... args);
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createActor(Args&& ... args);
@@ -29,6 +33,7 @@ class World
     protected:
         std::shared_ptr<Map> mMap;
         std::map<std::string,std::shared_ptr<Building>> mBuildings;
+        std::map<std::string,std::shared_ptr<Resource>> mResources;
         std::map<std::string,std::shared_ptr<Unit>> mUnits;
 };
 
@@ -42,10 +47,32 @@ std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
         {
             return nullptr;
         }
+        std::vector<sf::Vector2i> ns = NMapUtility::Isometric::getNeighboors(v,true);
+        for (auto n : ns)
+        {
+            if (collide(n.x,n.y,false))
+            {
+                return nullptr;
+            }
+        }
     }
 
     std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
     mBuildings[actor->getId()] = actor;
+
+    return actor;
+}
+
+template <typename T, typename ... Args>
+std::shared_ptr<T> World::createResource(int x, int y, Args&& ... args)
+{
+    if (collide(x,y))
+    {
+        return nullptr;
+    }
+
+    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    mResources[actor->getId()] = actor;
 
     return actor;
 }

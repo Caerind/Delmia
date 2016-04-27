@@ -2,12 +2,12 @@
 
 Hall::Hall()
 {
-    generateBuilding(0,0,sf::IntRect(0,0,256,256));
+    generate(0,0);
 }
 
 Hall::Hall(int x, int y)
 {
-    generateBuilding(x,y,sf::IntRect(0,0,256,256));
+    generate(x,y);
 }
 
 std::vector<sf::Vector2i> Hall::getTilesBlueprint(int x, int y)
@@ -28,7 +28,18 @@ std::vector<sf::Vector2i> Hall::getTilesBlueprint(int x, int y)
     return tiles;
 }
 
-std::vector<sf::Vector2i> Hall::getTiles(int x, int y)
+std::vector<std::pair<sf::Vector2i,sf::IntRect>> Hall::getTiles(int x, int y)
 {
-    return Hall::getTilesBlueprint(x,y);
+    std::vector<sf::Vector2i> tilesBP = Hall::getTilesBlueprint(x,y);
+    std::vector<std::pair<sf::Vector2i,sf::IntRect>> tiles;
+    for (std::size_t i = 0; i < tilesBP.size(); i++)
+    {
+        tiles.emplace_back();
+        tiles.back().first = tilesBP[i];
+    }
+    for (std::size_t i = 0; i < tiles.size(); i++)
+    {
+        tiles[i].second = sf::IntRect(0,0,256,256);
+    }
+    return tiles;
 }

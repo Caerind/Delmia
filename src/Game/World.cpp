@@ -73,7 +73,7 @@ sf::Vector2i World::getMouseCoords()
     return NMapUtility::Isometric::worldToCoords(NWorld::getPointerPositionView());
 }
 
-bool World::collide(int x, int y)
+bool World::collide(int x, int y, bool isSolid)
 {
     // Buildings
     for (auto itr = mBuildings.begin(); itr != mBuildings.end(); itr++)
@@ -84,10 +84,22 @@ bool World::collide(int x, int y)
         }
     }
 
-    // Map
-    if (mMap->getTileId(x,y) == 3) // Water
+    if (isSolid)
     {
-        return true;
+        // Resources
+        for (auto itr = mResources.begin(); itr != mResources.end(); itr++)
+        {
+            if (itr->second->collide(x,y))
+            {
+                return true;
+            }
+        }
+
+        // Map
+        if (mMap->getTileId(x,y) == 3) // Water
+        {
+            return true;
+        }
     }
 
     return false;

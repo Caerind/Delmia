@@ -35,7 +35,7 @@ NVector coordsToWorld(sf::Vector2i const& coords) // center of the tile
 namespace Isometric
 {
 
-std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords)
+std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
 {
     std::vector<sf::Vector2i> n;
     if (coords.y % 2 == 0)
@@ -51,6 +51,13 @@ std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords)
         n.push_back(sf::Vector2i(coords.x+1,coords.y-1));
         n.push_back(sf::Vector2i(coords.x,coords.y+1));
         n.push_back(sf::Vector2i(coords.x+1,coords.y+1));
+    }
+    if (diag)
+    {
+        n.push_back(sf::Vector2i(coords.x,coords.y-1));
+        n.push_back(sf::Vector2i(coords.x+1,coords.y));
+        n.push_back(sf::Vector2i(coords.x,coords.y+1));
+        n.push_back(sf::Vector2i(coords.x-1,coords.y));
     }
     return n;
 }

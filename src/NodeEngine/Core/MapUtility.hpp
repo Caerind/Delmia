@@ -19,7 +19,7 @@ namespace NMapUtility
 
 	namespace Isometric
 	{
-		std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords);
+		std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag);
 		sf::Vector2i worldToCoords(NVector const& pos);
 		NVector coordsToWorld(sf::Vector2i const& coords); // center of the tile
 	}
