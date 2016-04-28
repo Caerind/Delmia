@@ -15,11 +15,13 @@ class GameState : public ah::State
         void render(sf::RenderTarget& target, sf::RenderStates states);
 
         void handlePlacement(sf::Event const& event);
+        void movePlacement(sf::Vector2i const& coords);
 
     protected:
         World mWorld;
 
         bool mPlacing;
+        bool mPlacingCollide;
         int mPlacingType;
         Building::Ptr mPlacement;
 };

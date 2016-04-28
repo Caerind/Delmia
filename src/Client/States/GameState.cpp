@@ -4,6 +4,7 @@ GameState::GameState(ah::StateManager& manager)
 : ah::State(manager)
 {
     mPlacing = false;
+    mPlacingCollide = false;
     mPlacingType = 0;
     mPlacement = nullptr;
 }
@@ -11,8 +12,6 @@ GameState::GameState(ah::StateManager& manager)
 bool GameState::handleEvent(sf::Event const& event)
 {
     mWorld.handleEvent(event);
-
-
 
     handlePlacement(event);
 
@@ -32,41 +31,48 @@ void GameState::render(sf::RenderTarget& target, sf::RenderStates states)
 
 void GameState::handlePlacement(sf::Event const& event)
 {
-    // Coordonnées
+    // Actual Mouse Coords
     sf::Vector2i c = mWorld.getMouseCoords();
 
-    // Left Click
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    // Left Click Pressed
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left && !mPlacing)
     {
         mPlacing = true;
         switch (mPlacingType)
         {
-            case 0: mPlacement = mWorld.createActor<Forest>(c.x,c.y); break;
-            case 1: mPlacement = mWorld.createActor<GoldMine>(c.x,c.y); break;
-            case 2: mPlacement = mWorld.createActor<Quarry>(c.x,c.y); break;
-            case 3: mPlacement = mWorld.createActor<Hall>(c.x,c.y); break;
-            case 4: mPlacement = mWorld.createActor<Market>(c.x,c.y); break;
-            case 5: mPlacement = mWorld.createActor<Barrack>(c.x,c.y); break;
+            case 0: mPlacement = mWorld.createActor<Forest>(); break;
+            case 1: mPlacement = mWorld.createActor<GoldMine>(); break;
+            case 2: mPlacement = mWorld.createActor<Quarry>(); break;
+            case 3: mPlacement = mWorld.createActor<Hall>(); break;
+            case 4: mPlacement = mWorld.createActor<Market>(); break;
+            case 5: mPlacement = mWorld.createActor<Barrack>(); break;
             default: break;
         }
-        mPlacement->setPositionZ(100.f);
+        mPlacement->setPositionZ(100000.f);
+        movePlacement(c);
     }
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+
+    // Left Click Released
+    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left && mPlacing)
     {
         mPlacing = false;
         NWorld::removeActor(mPlacement->getId());
         mPlacement = nullptr;
 
-        switch (mPlacingType)
+        if (!mPlacingCollide)
         {
-            case 0: mWorld.createResource<Forest>(c.x,c.y); break;
-            case 1: mWorld.createResource<GoldMine>(c.x,c.y); break;
-            case 2: mWorld.createResource<Quarry>(c.x,c.y); break;
-            case 3: mWorld.createBuilding<Hall>(c.x,c.y); break;
-            case 4: mWorld.createBuilding<Market>(c.x,c.y); break;
-            case 5: mWorld.createBuilding<Barrack>(c.x,c.y); break;
-            default: break;
+            switch (mPlacingType)
+            {
+                case 0: mWorld.createResource<Forest>(c.x,c.y); break;
+                case 1: mWorld.createResource<GoldMine>(c.x,c.y); break;
+                case 2: mWorld.createResource<Quarry>(c.x,c.y); break;
+                case 3: mWorld.createBuilding<Hall>(c.x,c.y); break;
+                case 4: mWorld.createBuilding<Market>(c.x,c.y); break;
+                case 5: mWorld.createBuilding<Barrack>(c.x,c.y); break;
+                default: break;
+            }
         }
+        mPlacingCollide = false;
     }
 
     // Mouse Moved
@@ -74,58 +80,30 @@ void GameState::handlePlacement(sf::Event const& event)
     {
         if (mPlacement->getCoords() != c)
         {
-            mPlacement->clearTiles();
-            mPlacement->generate(c.x,c.y);
-            if (0 <= mPlacingType && mPlacingType < 3)
-            {
-                if (mWorld.collide(c.x,c.y))
-                {
-                    mPlacement->setColor(sf::Color::Red);
-                }
-                else
-                {
-                    mPlacement->setColor(sf::Color::Green);
-                }
-            }
-            else
-            {
-                bool collide = false;
-                std::vector<sf::Vector2i> tiles;
-                switch (mPlacingType)
-                {
-                    case 3: tiles = Hall::getTilesBlueprint(c.x,c.y); break;
-                    case 4: tiles = Market::getTilesBlueprint(c.x,c.y); break;
-                    case 5: tiles = Barrack::getTilesBlueprint(c.x,c.y); break;
-                    default: break;
-                }
-                for (auto v : tiles)
-                {
-                    if (mWorld.collide(v.x,v.y))
-                    {
-                        collide = true;
-                        mPlacement->setColor(sf::Color::Red);
-                    }
-                    std::vector<sf::Vector2i> ns = NMapUtility::Isometric::getNeighboors(v,true);
-                    for (auto n : ns)
-                    {
-                        if (mWorld.collide(n.x,n.y,false))
-                        {
-                            collide = true;
-                            mPlacement->setColor(sf::Color::Red);
-                        }
-                    }
-                }
-                if (!collide)
-                {
-                    mPlacement->setColor(sf::Color::Green);
-                }
-            }
+            movePlacement(c);
         }
     }
 
     // Right click
     if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right && !mPlacing)
     {
-        mPlacingType = (mPlacingType >= 6)? 0 : mPlacingType+1;
+        mPlacingType = (mPlacingType >= 6) ? 0 : mPlacingType + 1;
     }
+}
+
+void GameState::movePlacement(sf::Vector2i const& coords)
+{
+    mPlacement->clearTiles();
+    mPlacement->generate(coords.x,coords.y);
+    switch (mPlacingType)
+    {
+        case 0: mPlacingCollide = mWorld.collide(coords.x,coords.y); break;
+        case 1: mPlacingCollide = mWorld.collide(coords.x,coords.y); break;
+        case 2: mPlacingCollide = mWorld.collide(coords.x,coords.y); break;
+        case 3: mPlacingCollide = !mWorld.buildingPlacing<Hall>(coords.x,coords.y); break;
+        case 4: mPlacingCollide = !mWorld.buildingPlacing<Market>(coords.x,coords.y); break;
+        case 5: mPlacingCollide = !mWorld.buildingPlacing<Barrack>(coords.x,coords.y); break;
+        default: mPlacingCollide = false; break;
+    }
+    mPlacement->setColor((mPlacingCollide) ? sf::Color::Red : sf::Color::Green);
 }

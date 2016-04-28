@@ -36,7 +36,7 @@ std::vector<std::pair<sf::Vector2i,sf::IntRect>> Market::getTiles(int x, int y)
     }
     for (std::size_t i = 0; i < tiles.size(); i++)
     {
-        tiles[i].second = sf::IntRect(0,0,256,256);
+        tiles[i].second = sf::IntRect(1792,0,256,256);
     }
     return tiles;
 }

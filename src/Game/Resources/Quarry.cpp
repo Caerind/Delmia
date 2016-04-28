@@ -21,6 +21,6 @@ std::vector<std::pair<sf::Vector2i,sf::IntRect>> Quarry::getTiles(int x, int y)
         tiles.emplace_back();
         tiles.back().first = tilesBP[i];
     }
-    tiles[0].second = sf::IntRect(256,0,256,256);
+    tiles[0].second = sf::IntRect(1024,0,256,256);
     return tiles;
 }

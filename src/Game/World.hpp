@@ -19,7 +19,11 @@ class World
         void render(sf::RenderTarget& target);
 
         sf::Vector2i getMouseCoords();
+
         bool collide(int x, int y, bool isSolid = true);
+
+        template <typename T>
+        bool buildingPlacing(int x, int y);
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createBuilding(int x, int y, Args&& ... args);
@@ -37,30 +41,39 @@ class World
         std::map<std::string,std::shared_ptr<Unit>> mUnits;
 };
 
-template <typename T, typename ... Args>
-std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
+template <typename T>
+bool World::buildingPlacing(int x, int y)
 {
     std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(x,y);
-    for (auto v : tiles)
+    for (sf::Vector2i const& t : tiles)
     {
-        if (collide(v.x,v.y))
+        if (collide(t.x,t.y))
         {
-            return nullptr;
+            return false;
         }
-        std::vector<sf::Vector2i> ns = NMapUtility::Isometric::getNeighboors(v,true);
-        for (auto n : ns)
+        std::vector<sf::Vector2i> neighboors = NMapUtility::Isometric::getNeighboors(t,true);
+        for (sf::Vector2i const& n : neighboors)
         {
             if (collide(n.x,n.y,false))
             {
-                return nullptr;
+                return false;
             }
         }
     }
+    return true;
+}
 
-    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
-    mBuildings[actor->getId()] = actor;
+template <typename T, typename ... Args>
+std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
+{
+    if (buildingPlacing<T>(x,y))
+    {
+        std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+        mBuildings[actor->getId()] = actor;
 
-    return actor;
+        return actor;
+    }
+    return nullptr;
 }
 
 template <typename T, typename ... Args>
