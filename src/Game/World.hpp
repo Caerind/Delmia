@@ -22,6 +22,8 @@ class World
 
         bool collide(int x, int y, bool isSolid = true);
 
+        void clear();
+
         template <typename T>
         bool buildingPlacing(int x, int y);
 

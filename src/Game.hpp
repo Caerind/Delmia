@@ -3,6 +3,7 @@
 
 #include "Game/Entity.hpp"
 #include "Game/Map.hpp"
+#include "Game/Chunk.hpp"
 #include "Game/World.hpp"
 
 #include "Game/Buildings/Building.hpp"

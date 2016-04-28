@@ -21,6 +21,7 @@ void NParticleSystem::setTexture(sf::Texture& texture)
 std::size_t NParticleSystem::addTextureRect(sf::IntRect const& rect)
 {
     mTextureRects.push_back(rect);
+    return mTextureRects.size()-1;
 }
 
 void NParticleSystem::addAffector(Affector affector)

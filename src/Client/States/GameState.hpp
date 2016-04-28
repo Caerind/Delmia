@@ -17,6 +17,8 @@ class GameState : public ah::State
         void handlePlacement(sf::Event const& event);
         void movePlacement(sf::Vector2i const& coords);
 
+        void onDeactivate();
+
     protected:
         World mWorld;
 

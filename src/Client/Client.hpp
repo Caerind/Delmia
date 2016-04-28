@@ -4,4 +4,10 @@
 #include <iostream>
 #include <string>
 
+class Client
+{
+    public:
+        static bool isOnline();
+};
+
 #endif // CLIENT_HPP

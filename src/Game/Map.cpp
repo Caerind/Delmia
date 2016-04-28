@@ -1,31 +1,50 @@
 #include "Map.hpp"
 
+#include "../Client.hpp"
+
 Map::Map()
 {
+}
+
+Map::~Map()
+{
+    for (std::size_t i = 0; i < mChunks.size(); i++)
+    {
+        if (!Client::isOnline())
+        {
+            mChunks[i]->saveToFile();
+        }
+        delete mChunks[i];
+    }
+    mChunks.clear();
 }
 
 void Map::tick(sf::Time dt)
 {
     // TODO : Remove useless chunks
+    if (getChunkCount() > 20)
+    {
+        for (std::size_t i = 0; i < mChunks.size(); i++)
+        {
+
+        }
+    }
 
     // TODO : Add usefull chunks
 }
 
 void Map::addChunk(int cx, int cy)
 {
-    mChunks.push_back(new Chunk());
-    mChunks.back()->layer.create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
-    mChunks.back()->layer.setPosition(getChunkSize().x * getTileSize().x * cx, getChunkSize().y * getTileSize().y * cy,-10.f);
-    mChunks.back()->coords = sf::Vector2i(cx,cy);
-
-    attachComponent(&mChunks.back()->layer);
-
-    sf::Vector2i coords;
-    for (coords.x = 0; coords.x < getChunkSize().x; coords.x++)
+    mChunks.push_back(new Chunk(sf::Vector2i(cx,cy)));
+    if (Client::isOnline())
     {
-        for (coords.y = 0; coords.y < getChunkSize().y; coords.y++)
+        // TODO : Load from online
+    }
+    else
+    {
+        if (!mChunks.back()->loadFromFile())
         {
-            mChunks.back()->layer.setTileId(coords,Tile::Dirt);
+            mChunks.back()->generate();
         }
     }
 }
@@ -35,8 +54,12 @@ void Map::removeChunk(int cx, int cy)
     sf::Vector2i coords = sf::Vector2i(cx,cy);
     for (std::size_t i = 0; i < mChunks.size();)
     {
-        if (mChunks[i]->coords == coords)
+        if (mChunks[i]->getCoords() == coords)
         {
+            if (!Client::isOnline())
+            {
+                mChunks[i]->saveToFile();
+            }
             delete mChunks[i];
             mChunks[i] = nullptr;
             mChunks.erase(mChunks.begin() + i);
@@ -46,16 +69,6 @@ void Map::removeChunk(int cx, int cy)
             i++;
         }
     }
-}
-
-sf::Vector2i Map::getChunkSize()
-{
-    return sf::Vector2i(16,64);
-}
-
-sf::Vector2i Map::getTileSize()
-{
-    return sf::Vector2i(256,128);
 }
 
 std::size_t Map::getChunkCount() const
@@ -68,13 +81,16 @@ void Map::setTileId(int cx, int cy, int x, int y, int id)
     Chunk* c = getChunk(cx,cy);
     if (c != nullptr)
     {
-        c->layer.setTileId(sf::Vector2i(x,y),id);
+        c->setTileId(x,y,id);
     }
 }
 
 void Map::setTileId(int x, int y, int id)
 {
+    sf::Vector2i chunkCoords;
+    sf::Vector2i tileCoords;
     // TODO : global to chunk and global to pos
+    setTileId(chunkCoords.x,chunkCoords.y,tileCoords.x,tileCoords.y,id);
 }
 
 int Map::getTileId(int cx, int cy, int x, int y)
@@ -82,15 +98,17 @@ int Map::getTileId(int cx, int cy, int x, int y)
     Chunk* c = getChunk(cx,cy);
     if (c != nullptr)
     {
-        return c->layer.getTileId(sf::Vector2i(x,y));
+        return c->getTileId(x,y);
     }
     return 0;
 }
 
 int Map::getTileId(int x, int y)
 {
+    sf::Vector2i chunkCoords;
+    sf::Vector2i tileCoords;
     // TODO : global to chunk and global to pos
-    return 0;
+    return getTileId(chunkCoords.x,chunkCoords.y,tileCoords.x,tileCoords.y);
 }
 
 void Map::load(pugi::xml_node& node)
@@ -102,12 +120,12 @@ void Map::save(pugi::xml_node& node)
     node.append_attribute("type") = "Map";
 }
 
-Map::Chunk* Map::getChunk(int cx, int cy)
+Chunk* Map::getChunk(int cx, int cy)
 {
     sf::Vector2i coords = sf::Vector2i(cx,cy);
     for (std::size_t i = 0; i < mChunks.size(); i++)
     {
-        if (mChunks[i]->coords == coords)
+        if (mChunks[i]->getCoords() == coords)
         {
             return mChunks[i];
         }

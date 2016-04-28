@@ -59,6 +59,15 @@ void StateManager::clearStates()
 	mPendingList.push_back(PendingChange(Clear));
 }
 
+void StateManager::clear()
+{
+    for (std::size_t i = 0; i < mStates.size(); i++)
+    {
+        mStates[i]->onDeactivate();
+    }
+    mStates.clear();
+}
+
 bool StateManager::empty() const
 {
 	return mStates.empty();
@@ -71,9 +80,9 @@ std::size_t StateManager::size() const
 
 void StateManager::applyPendingChanges()
 {
-    for(PendingChange change : mPendingList)
+    for (PendingChange change : mPendingList)
 	{
-		switch(change.action)
+		switch (change.action)
 		{
 			case Action::Push:
                 if (!mStates.empty())

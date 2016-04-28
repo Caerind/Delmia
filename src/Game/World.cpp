@@ -107,3 +107,9 @@ bool World::collide(int x, int y, bool isSolid)
 
     return false;
 }
+
+void World::clear()
+{
+    mMap = nullptr;
+    NWorld::clear();
+}

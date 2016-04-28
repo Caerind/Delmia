@@ -116,3 +116,8 @@ void GameState::movePlacement(sf::Vector2i const& coords)
     }
     mPlacement->setColor((mPlacingCollide) ? sf::Color::Red : sf::Color::Green);
 }
+
+void GameState::onDeactivate()
+{
+    mWorld.clear();
+}
