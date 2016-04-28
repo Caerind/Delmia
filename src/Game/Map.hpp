@@ -21,25 +21,35 @@ class Map : public NActor
     public:
         Map();
 
-        sf::Vector2i getChunkSize() const;
-        sf::Vector2i getTileSize() const;
+        void tick(sf::Time dt);
 
+        void addChunk(int cx, int cy);
+        void removeChunk(int cx, int cy);
+
+        static sf::Vector2i getChunkSize();
+        static sf::Vector2i getTileSize();
+
+        std::size_t getChunkCount() const;
+
+        void setTileId(int cx, int cy, int x, int y, int id);
         void setTileId(int x, int y, int id);
-        void setRoadId(int x, int y, int id);
+
+        int getTileId(int cx, int cy, int x, int y);
         int getTileId(int x, int y);
-        int getRoadId(int x, int y);
 
         struct Chunk
         {
             sf::Vector2i coords;
-            NLayerComponent map;
-            NLayerComponent road;
+            NLayerComponent layer;
         };
 
         void load(pugi::xml_node& node);
         void save(pugi::xml_node& node);
 
-    private:
+    protected:
+        Chunk* getChunk(int cx, int cy);
+
+    protected:
         std::vector<Chunk*> mChunks;
 };
 

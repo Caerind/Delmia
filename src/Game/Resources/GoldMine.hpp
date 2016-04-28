@@ -1,7 +1,7 @@
 #ifndef GOLDMINE_HPP
 #define GOLDMINE_HPP
 
-#include "Resources.hpp"
+#include "Resource.hpp"
 
 class GoldMine : public Resource
 {

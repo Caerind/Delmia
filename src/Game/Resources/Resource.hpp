@@ -2,6 +2,7 @@
 #define RESOURCE_HPP
 
 #include "../Buildings/Building.hpp"
+#include "Resources.hpp"
 
 class Resource : public Building
 {

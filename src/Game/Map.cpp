@@ -2,69 +2,95 @@
 
 Map::Map()
 {
-    setPosition(0,0,0);
+}
 
-    mChunks.emplace_back();
-    mChunks.back() = new Chunk();
-    mChunks.back()->map.create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
-    mChunks.back()->map.setPosition(0,0);
-    mChunks.back()->map.setPositionZ(0.f);
+void Map::tick(sf::Time dt)
+{
+    // TODO : Remove useless chunks
 
-    mChunks.back()->road.create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
-    mChunks.back()->road.setPosition(0,0);
-    mChunks.back()->road.setPositionZ(0.1f);
+    // TODO : Add usefull chunks
+}
 
-    mChunks.back()->coords = sf::Vector2i(0,0);
+void Map::addChunk(int cx, int cy)
+{
+    mChunks.push_back(new Chunk());
+    mChunks.back()->layer.create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
+    mChunks.back()->layer.setPosition(getChunkSize().x * getTileSize().x * cx, getChunkSize().y * getTileSize().y * cy,-10.f);
+    mChunks.back()->coords = sf::Vector2i(cx,cy);
 
-    attachComponent(&mChunks.back()->map);
-    attachComponent(&mChunks.back()->road);
+    attachComponent(&mChunks.back()->layer);
 
     sf::Vector2i coords;
     for (coords.x = 0; coords.x < getChunkSize().x; coords.x++)
     {
         for (coords.y = 0; coords.y < getChunkSize().y; coords.y++)
         {
-            if (coords.y > 10 && coords.x > 10)
-            {
-                mChunks.back()->map.setTileId(coords,Tile::Water);
-            }
-            else
-            {
-                mChunks.back()->map.setTileId(coords,Tile::Dirt);
-            }
-            mChunks.back()->road.setTileId(coords,Tile::None);
+            mChunks.back()->layer.setTileId(coords,Tile::Dirt);
         }
     }
 }
 
-sf::Vector2i Map::getChunkSize() const
+void Map::removeChunk(int cx, int cy)
+{
+    sf::Vector2i coords = sf::Vector2i(cx,cy);
+    for (std::size_t i = 0; i < mChunks.size();)
+    {
+        if (mChunks[i]->coords == coords)
+        {
+            delete mChunks[i];
+            mChunks[i] = nullptr;
+            mChunks.erase(mChunks.begin() + i);
+        }
+        else
+        {
+            i++;
+        }
+    }
+}
+
+sf::Vector2i Map::getChunkSize()
 {
     return sf::Vector2i(16,64);
 }
 
-sf::Vector2i Map::getTileSize() const
+sf::Vector2i Map::getTileSize()
 {
     return sf::Vector2i(256,128);
 }
 
-void Map::setTileId(int x, int y, int id)
+std::size_t Map::getChunkCount() const
 {
-    mChunks.back()->map.setTileId(sf::Vector2i(x,y),id);
+    return mChunks.size();
 }
 
-void Map::setRoadId(int x, int y, int id)
+void Map::setTileId(int cx, int cy, int x, int y, int id)
 {
-    mChunks.back()->road.setTileId(sf::Vector2i(x,y),id);
+    Chunk* c = getChunk(cx,cy);
+    if (c != nullptr)
+    {
+        c->layer.setTileId(sf::Vector2i(x,y),id);
+    }
+}
+
+void Map::setTileId(int x, int y, int id)
+{
+    // TODO : global to chunk and global to pos
+}
+
+int Map::getTileId(int cx, int cy, int x, int y)
+{
+    Chunk* c = getChunk(cx,cy);
+    if (c != nullptr)
+    {
+        return c->layer.getTileId(sf::Vector2i(x,y));
+    }
+    return 0;
 }
 
 int Map::getTileId(int x, int y)
 {
-    return mChunks.back()->map.getTileId(sf::Vector2i(x,y));
-}
-
-int Map::getRoadId(int x, int y)
-{
-    return mChunks.back()->road.getTileId(sf::Vector2i(x,y));
+    // TODO : global to chunk and global to pos
+    return 0;
 }
 
 void Map::load(pugi::xml_node& node)
@@ -74,4 +100,17 @@ void Map::load(pugi::xml_node& node)
 void Map::save(pugi::xml_node& node)
 {
     node.append_attribute("type") = "Map";
+}
+
+Map::Chunk* Map::getChunk(int cx, int cy)
+{
+    sf::Vector2i coords = sf::Vector2i(cx,cy);
+    for (std::size_t i = 0; i < mChunks.size(); i++)
+    {
+        if (mChunks[i]->coords == coords)
+        {
+            return mChunks[i];
+        }
+    }
+    return nullptr;
 }

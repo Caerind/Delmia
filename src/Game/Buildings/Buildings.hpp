@@ -1,10 +1,6 @@
 #ifndef BUILDINGS_HPP_INCLUDED
 #define BUILDINGS_HPP_INCLUDED
 
-#include "Barrack.hpp"
-#include "Hall.hpp"
-#include "Market.hpp"
-
 namespace Buildings
 {
 

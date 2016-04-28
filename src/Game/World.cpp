@@ -3,6 +3,8 @@
 World::World()
 {
     mMap = NWorld::createActor<Map>();
+    mMap->addChunk(0,0);
+    mMap->addChunk(1,0);
 }
 
 void World::handleEvent(sf::Event const& event)
@@ -61,6 +63,7 @@ void World::update(sf::Time dt)
     NWorld::getWindow().setDebugInfo("actors",std::to_string(NWorld::getActorCount()));
     NWorld::getWindow().setDebugInfo("tickables",std::to_string(NWorld::getTickableCount()));
     NWorld::getWindow().setDebugInfo("renderables",std::to_string(NWorld::getRenderableCount()));
+    NWorld::getWindow().setDebugInfo("chunks",std::to_string(mMap->getChunkCount()));
 }
 
 void World::render(sf::RenderTarget& target)
