@@ -1,16 +1,22 @@
 #include "Building.hpp"
 
 Building::Building()
+: mCoords(sf::Vector2i(0,0))
+, mColor(sf::Color::White)
+, mTiles()
+{
+}
+
+Building::Building(int x, int y)
+: mCoords(sf::Vector2i(x,y))
+, mColor(sf::Color::White)
+, mTiles()
 {
 }
 
 Building::~Building()
 {
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        delete mTiles[i].sprite;
-    }
-    mTiles.clear();
+    clearTiles();
 }
 
 std::vector<sf::Vector2i> Building::getTilesBlueprint(int x, int y)
@@ -35,21 +41,6 @@ std::vector<std::pair<sf::Vector2i,sf::IntRect>> Building::getTiles(int x, int y
 }
 */
 
-void Building::generate(int x, int y)
-{
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        detachComponent(mTiles[i].sprite);
-    }
-    mTiles.clear();
-
-    std::vector<std::pair<sf::Vector2i,sf::IntRect>> tiles = getTiles(x,y);
-    for (std::size_t i = 0; i < tiles.size(); i++)
-    {
-        addTile(tiles[i].first.x,tiles[i].first.y,tiles[i].second);
-    }
-}
-
 void Building::addTile(int x, int y, sf::IntRect rect)
 {
     sf::Vector2i coords = sf::Vector2i(x,y);
@@ -61,8 +52,26 @@ void Building::addTile(int x, int y, sf::IntRect rect)
     mTiles.back().sprite->setOrigin(rect.width/2,rect.height-64);
     mTiles.back().sprite->setPosition(NMapUtility::Isometric::coordsToWorld(coords));
     mTiles.back().sprite->setPositionZ(1.f);
+    mTiles.back().sprite->setColor(mColor);
 
     attachComponent(mTiles.back().sprite);
+}
+
+void Building::generate()
+{
+    clearTiles();
+
+    std::vector<std::pair<sf::Vector2i,sf::IntRect>> tiles = getTiles(mCoords.x,mCoords.y);
+    for (std::size_t i = 0; i < tiles.size(); i++)
+    {
+        addTile(tiles[i].first.x,tiles[i].first.y,tiles[i].second);
+    }
+}
+
+void Building::generate(int x, int y)
+{
+    setCoords(x,y);
+    generate();
 }
 
 bool Building::collide(int x, int y)
@@ -84,4 +93,38 @@ void Building::load(pugi::xml_node& node)
 
 void Building::save(pugi::xml_node& node)
 {
+}
+
+void Building::setCoords(int x, int y)
+{
+    mCoords = sf::Vector2i(x,y);
+}
+
+sf::Vector2i Building::getCoords() const
+{
+    return mCoords;
+}
+
+void Building::setColor(sf::Color color)
+{
+    mColor = color;
+    for (std::size_t i = 0; i < mTiles.size(); i++)
+    {
+        mTiles[i].sprite->setColor(mColor);
+    }
+}
+
+sf::Color Building::getColor() const
+{
+    return mColor;
+}
+
+void Building::clearTiles()
+{
+    for (std::size_t i = 0; i < mTiles.size(); i++)
+    {
+        detachComponent(mTiles[i].sprite);
+        delete mTiles[i].sprite;
+    }
+    mTiles.clear();
 }

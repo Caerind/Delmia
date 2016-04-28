@@ -1,13 +1,12 @@
 #include "Barrack.hpp"
 
-Barrack::Barrack()
+Barrack::Barrack() : Building()
 {
-    generate(0,0);
 }
 
-Barrack::Barrack(int x, int y)
+Barrack::Barrack(int x, int y) : Building(x,y)
 {
-    generate(x,y);
+    generate();
 }
 
 std::vector<sf::Vector2i> Barrack::getTilesBlueprint(int x, int y)

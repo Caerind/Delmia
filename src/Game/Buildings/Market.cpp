@@ -1,13 +1,12 @@
 #include "Market.hpp"
 
-Market::Market()
+Market::Market() : Building()
 {
-    generate(0,0);
 }
 
-Market::Market(int x, int y)
+Market::Market(int x, int y) : Building(x,y)
 {
-    generate(x,y);
+    generate();
 }
 
 std::vector<sf::Vector2i> Market::getTilesBlueprint(int x, int y)

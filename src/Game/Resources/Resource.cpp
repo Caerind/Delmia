@@ -1,18 +1,9 @@
 #include "Resource.hpp"
 
-Resource::Resource()
+Resource::Resource() : Building()
 {
-    mCoords.x = 0;
-    mCoords.y = 0;
 }
 
-Resource::Resource(int x, int y)
+Resource::Resource(int x, int y) : Building(x,y)
 {
-    mCoords.x = x;
-    mCoords.y = y;
-}
-
-sf::Vector2i Resource::getCoords() const
-{
-    return mCoords;
 }

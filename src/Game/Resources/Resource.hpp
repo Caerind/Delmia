@@ -11,11 +11,6 @@ class Resource : public Building
     public:
         Resource();
         Resource(int x, int y);
-
-        sf::Vector2i getCoords() const;
-
-    protected:
-        sf::Vector2i mCoords;
 };
 
 #endif // RESOURCE_HPP

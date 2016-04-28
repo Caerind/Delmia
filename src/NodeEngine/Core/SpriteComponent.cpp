@@ -46,6 +46,16 @@ sf::IntRect NSpriteComponent::getTextureRect() const
     return mSprite.getTextureRect();
 }
 
+void NSpriteComponent::setColor(sf::Color const& color)
+{
+    mSprite.setColor(color);
+}
+
+sf::Color NSpriteComponent::getColor() const
+{
+    return mSprite.getColor();
+}
+
 void NSpriteComponent::render(sf::RenderTarget& target)
 {
     sf::RenderStates states;

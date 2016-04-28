@@ -14,9 +14,14 @@ class GameState : public ah::State
         bool update(sf::Time dt);
         void render(sf::RenderTarget& target, sf::RenderStates states);
 
+        void handlePlacement(sf::Event const& event);
+
     protected:
         World mWorld;
-        int mType;
+
+        bool mPlacing;
+        int mPlacingType;
+        Building::Ptr mPlacement;
 };
 
 
