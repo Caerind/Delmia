@@ -1,7 +1,8 @@
 #include "Building.hpp"
 
 Building::Building()
-: mCoords(sf::Vector2i(0,0))
+: mType(Buildings::DefaultBuilding)
+, mCoords(sf::Vector2i(0,0))
 , mColor(sf::Color::White)
 , mTiles()
 , mBuilt(false)
@@ -23,6 +24,11 @@ Building::Building(int x, int y)
 Building::~Building()
 {
     clearTiles();
+}
+
+std::size_t Building::getType() const
+{
+    return mType;
 }
 
 std::vector<sf::Vector2i> Building::getTilesBlueprint(int x, int y)

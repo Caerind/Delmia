@@ -2,10 +2,12 @@
 
 Barrack::Barrack() : Building()
 {
+    mType = Buildings::Barrack;
 }
 
 Barrack::Barrack(int x, int y) : Building(x,y)
 {
+    mType = Buildings::Barrack;
     generate();
 }
 

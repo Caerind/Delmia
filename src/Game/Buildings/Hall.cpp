@@ -2,10 +2,12 @@
 
 Hall::Hall() : Building()
 {
+    mType = Buildings::Hall;
 }
 
 Hall::Hall(int x, int y) : Building(x,y)
 {
+    mType = Buildings::Hall;
     generate();
 }
 

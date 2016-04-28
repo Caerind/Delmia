@@ -2,10 +2,12 @@
 
 Market::Market() : Building()
 {
+    mType = Buildings::Market;
 }
 
 Market::Market(int x, int y) : Building(x,y)
 {
+    mType = Buildings::Market;
     generate();
 }
 

@@ -2,12 +2,14 @@
 
 Forest::Forest() : Resource(0,0)
 {
+    mType = Buildings::Forest;
     generate(0,0);
     addResource(Resources::Wood,1000);
 }
 
 Forest::Forest(int x, int y) : Resource(x,y)
 {
+    mType = Buildings::Forest;
     generate(x,y);
     addResource(Resources::Wood,1000);
 }

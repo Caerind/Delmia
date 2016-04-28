@@ -2,12 +2,14 @@
 
 Quarry::Quarry() : Resource(0,0)
 {
+    mType = Buildings::Quarry;
     generate(0,0);
     addResource(Resources::Rock,1000);
 }
 
 Quarry::Quarry(int x, int y) : Resource(x,y)
 {
+    mType = Buildings::Quarry;
     generate(x,y);
     addResource(Resources::Rock,1000);
 }

@@ -2,12 +2,14 @@
 
 GoldMine::GoldMine() : Resource(0,0)
 {
+    mType = Buildings::GoldMine;
     generate(0,0);
     addResource(Resources::Gold,1000);
 }
 
 GoldMine::GoldMine(int x, int y) : Resource(x,y)
 {
+    mType = Buildings::GoldMine;
     generate(x,y);
     addResource(Resources::Gold,1000);
 }
