@@ -41,12 +41,20 @@ class Building : public Entity
         void setColor(sf::Color color);
         sf::Color getColor() const;
 
+        virtual void setBuilt(bool built);
+        virtual void build(float unit);
+        virtual void onBuildEnded();
+        bool isBuilt() const;
+
         void clearTiles();
+
+        void tick(sf::Time dt);
 
     protected:
         sf::Vector2i mCoords;
         sf::Color mColor;
         std::vector<TileBuilding> mTiles;
+        bool mBuilt;
 };
 
 #endif // BUILDING_HPP

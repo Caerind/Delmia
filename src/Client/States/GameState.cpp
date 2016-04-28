@@ -46,10 +46,19 @@ void GameState::handlePlacement(sf::Event const& event)
             case 3: mPlacement = mWorld.createActor<Hall>(); break;
             case 4: mPlacement = mWorld.createActor<Market>(); break;
             case 5: mPlacement = mWorld.createActor<Barrack>(); break;
-            default: break;
+            default: mPlacement = nullptr; break;
         }
-        mPlacement->setPositionZ(100000.f);
-        movePlacement(c);
+        if (mPlacement != nullptr)
+        {
+            mPlacement->setPositionZ(100000.f);
+            movePlacement(c);
+            mPlacement->setBuilt(true);
+        }
+        else
+        {
+            mPlacing = false;
+            mPlacingCollide = false;
+        }
     }
 
     // Left Click Released

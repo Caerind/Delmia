@@ -4,14 +4,20 @@ Building::Building()
 : mCoords(sf::Vector2i(0,0))
 , mColor(sf::Color::White)
 , mTiles()
+, mBuilt(false)
 {
+    mLife = 1.f;
+    mLifeMax = 6.f;
 }
 
 Building::Building(int x, int y)
 : mCoords(sf::Vector2i(x,y))
 , mColor(sf::Color::White)
 , mTiles()
+, mBuilt(false)
 {
+    mLife = 1.f;
+    mLifeMax = 6.f;
 }
 
 Building::~Building()
@@ -64,7 +70,16 @@ void Building::generate()
     std::vector<std::pair<sf::Vector2i,sf::IntRect>> tiles = getTiles(mCoords.x,mCoords.y);
     for (std::size_t i = 0; i < tiles.size(); i++)
     {
-        addTile(tiles[i].first.x,tiles[i].first.y,tiles[i].second);
+        sf::IntRect rect;
+        if (mBuilt)
+        {
+            rect = tiles[i].second;
+        }
+        else
+        {
+            rect = sf::IntRect(1536,0,256,256);
+        }
+        addTile(tiles[i].first.x,tiles[i].first.y,rect);
     }
 }
 
@@ -119,6 +134,42 @@ sf::Color Building::getColor() const
     return mColor;
 }
 
+void Building::setBuilt(bool built)
+{
+    if (mBuilt != built)
+    {
+        mBuilt = built;
+        generate();
+
+        if (mBuilt)
+        {
+            onBuildEnded();
+        }
+    }
+}
+
+void Building::build(float unit)
+{
+    if (!mBuilt)
+    {
+        mLife += unit;
+        if (mLife >= mLifeMax)
+        {
+            mLife = mLifeMax;
+            setBuilt(true);
+        }
+    }
+}
+
+void Building::onBuildEnded()
+{
+}
+
+bool Building::isBuilt() const
+{
+    return mBuilt;
+}
+
 void Building::clearTiles()
 {
     for (std::size_t i = 0; i < mTiles.size(); i++)
@@ -127,4 +178,9 @@ void Building::clearTiles()
         delete mTiles[i].sprite;
     }
     mTiles.clear();
+}
+
+void Building::tick(sf::Time dt)
+{
+    build(dt.asSeconds());
 }
