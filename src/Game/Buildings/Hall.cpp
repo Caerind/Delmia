@@ -1,13 +1,14 @@
 #include "Hall.hpp"
 
-Hall::Hall()
+Hall::Hall() : Building()
 {
-    generate(0,0);
+    mType = Buildings::Hall;
 }
 
-Hall::Hall(int x, int y)
+Hall::Hall(int x, int y) : Building(x,y)
 {
-    generate(x,y);
+    mType = Buildings::Hall;
+    generate();
 }
 
 std::vector<sf::Vector2i> Hall::getTilesBlueprint(int x, int y)

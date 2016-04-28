@@ -1,13 +1,14 @@
 #include "Barrack.hpp"
 
-Barrack::Barrack()
+Barrack::Barrack() : Building()
 {
-    generate(0,0);
+    mType = Buildings::Barrack;
 }
 
-Barrack::Barrack(int x, int y)
+Barrack::Barrack(int x, int y) : Building(x,y)
 {
-    generate(x,y);
+    mType = Buildings::Barrack;
+    generate();
 }
 
 std::vector<sf::Vector2i> Barrack::getTilesBlueprint(int x, int y)
@@ -41,7 +42,7 @@ std::vector<std::pair<sf::Vector2i,sf::IntRect>> Barrack::getTiles(int x, int y)
     }
     for (std::size_t i = 0; i < tiles.size(); i++)
     {
-        tiles[i].second = sf::IntRect(0,0,256,256);
+        tiles[i].second = sf::IntRect(1280,0,256,256);
     }
     return tiles;
 }

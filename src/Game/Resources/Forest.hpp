@@ -1,7 +1,7 @@
 #ifndef FOREST_HPP
 #define FOREST_HPP
 
-#include "Resources.hpp"
+#include "Resource.hpp"
 
 class Forest : public Resource
 {

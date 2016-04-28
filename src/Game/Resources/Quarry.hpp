@@ -1,7 +1,7 @@
 #ifndef QUARRY_HPP
 #define QUARRY_HPP
 
-#include "Resources.hpp"
+#include "Resource.hpp"
 
 class Quarry : public Resource
 {

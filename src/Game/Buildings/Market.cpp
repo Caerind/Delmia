@@ -1,13 +1,14 @@
 #include "Market.hpp"
 
-Market::Market()
+Market::Market() : Building()
 {
-    generate(0,0);
+    mType = Buildings::Market;
 }
 
-Market::Market(int x, int y)
+Market::Market(int x, int y) : Building(x,y)
 {
-    generate(x,y);
+    mType = Buildings::Market;
+    generate();
 }
 
 std::vector<sf::Vector2i> Market::getTilesBlueprint(int x, int y)
@@ -37,7 +38,7 @@ std::vector<std::pair<sf::Vector2i,sf::IntRect>> Market::getTiles(int x, int y)
     }
     for (std::size_t i = 0; i < tiles.size(); i++)
     {
-        tiles[i].second = sf::IntRect(0,0,256,256);
+        tiles[i].second = sf::IntRect(1792,0,256,256);
     }
     return tiles;
 }
