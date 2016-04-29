@@ -7,7 +7,7 @@ Chunk::Chunk(sf::Vector2i coords)
 {
     mCoords = coords;
     mLayer.create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
-    mLayer.setPosition(getChunkSize().x * getTileSize().x * coords.x, getChunkSize().y * getTileSize().y * coords.y, -10.f);
+    mLayer.setPosition(getChunkSize().x * getTileSize().x * coords.x, 0.5f * getChunkSize().y * getTileSize().y * coords.y, -10.f);
 }
 
 bool Chunk::loadFromFile()

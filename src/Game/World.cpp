@@ -4,7 +4,16 @@ World::World()
 {
     mMap = NWorld::createActor<Map>();
     mMap->addChunk(0,0);
+    mMap->addChunk(0,1);
+    mMap->addChunk(0,2);
+    mMap->addChunk(0,3);
+    mMap->addChunk(0,4);
     mMap->addChunk(1,0);
+    mMap->addChunk(2,0);
+    mMap->addChunk(3,0);
+    mMap->addChunk(2,2);
+    mMap->addChunk(-1,-1);
+    mMap->addChunk(-2,-2);
 }
 
 void World::handleEvent(sf::Event const& event)
@@ -29,6 +38,12 @@ void World::handleEvent(sf::Event const& event)
 void World::update(sf::Time dt)
 {
     NWorld::tick(dt);
+
+    sf::Vector2i c = getMouseCoords();
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+    {
+        mMap->setTileId(c.x,c.y,3);
+    }
 
     sf::Vector2f mvt;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
@@ -64,6 +79,10 @@ void World::update(sf::Time dt)
     NWorld::getWindow().setDebugInfo("tickables",std::to_string(NWorld::getTickableCount()));
     NWorld::getWindow().setDebugInfo("renderables",std::to_string(NWorld::getRenderableCount()));
     NWorld::getWindow().setDebugInfo("chunks",std::to_string(mMap->getChunkCount()));
+
+    NWorld::getWindow().setDebugInfo("pos-g",std::to_string(c.x) + "," + std::to_string(c.y));
+    NWorld::getWindow().setDebugInfo("pos-c",std::to_string(Map::globalToChunk(c).x) + "," + std::to_string(Map::globalToChunk(c).y));
+    NWorld::getWindow().setDebugInfo("pos-r",std::to_string(Map::globalToRelative(c).x) + "," + std::to_string(Map::globalToRelative(c).y));
 }
 
 void World::render(sf::RenderTarget& target)

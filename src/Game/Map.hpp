@@ -15,6 +15,10 @@ class Map : public NActor
         Map();
         ~Map();
 
+        static sf::Vector2i worldToChunk(sf::Vector2f const& pos);
+        static sf::Vector2i globalToChunk(sf::Vector2i const& pos);
+        static sf::Vector2i globalToRelative(sf::Vector2i const& pos);
+
         void tick(sf::Time dt);
 
         void addChunk(int cx, int cy);
