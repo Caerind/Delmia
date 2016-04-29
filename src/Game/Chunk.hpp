@@ -1,6 +1,8 @@
 #ifndef CHUNK_HPP
 #define CHUNK_HPP
 
+#include <memory>
+
 #include "../NodeEngine/Core/LayerComponent.hpp"
 
 enum Tile
@@ -13,6 +15,9 @@ enum Tile
 
 class Chunk
 {
+    public:
+        typedef std::shared_ptr<Chunk> Ptr;
+
     public:
         Chunk(sf::Vector2i coords = sf::Vector2i(0,0));
 
@@ -37,7 +42,7 @@ class Chunk
 
     protected:
         sf::Vector2i mCoords;
-        NLayerComponent mLayer;
+        NLayerComponent* mLayer;
 };
 
 #endif // CHUNK_HPP

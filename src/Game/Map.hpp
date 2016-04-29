@@ -35,11 +35,15 @@ class Map : public NActor
         void load(pugi::xml_node& node);
         void save(pugi::xml_node& node);
 
-    protected:
-        Chunk* getChunk(int cx, int cy);
+        void removeUselessChunks();
+        void addUsefullChunks();
 
     protected:
-        std::vector<Chunk*> mChunks;
+        Chunk::Ptr getChunk(int cx, int cy);
+        std::vector<sf::Vector2i> determineUsefullChunks();
+
+    protected:
+        std::vector<Chunk::Ptr> mChunks;
 };
 
 #endif // MAP_HPP

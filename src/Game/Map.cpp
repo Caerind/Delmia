@@ -8,13 +8,12 @@ Map::Map()
 
 Map::~Map()
 {
-    for (std::size_t i = 0; i < mChunks.size(); i++)
+    if (!Client::isOnline())
     {
-        if (!Client::isOnline())
+        for (std::size_t i = 0; i < mChunks.size(); i++)
         {
             mChunks[i]->saveToFile();
         }
-        delete mChunks[i];
     }
     mChunks.clear();
 }
@@ -69,68 +68,13 @@ sf::Vector2i Map::globalToRelative(sf::Vector2i const& pos)
 
 void Map::tick(sf::Time dt)
 {
-    /*
-
-    sf::View& view = NWorld::getActiveView();
-    sf::Vector2f delta = sf::Vector2f(50,50);
-    sf::Vector2i begin = worldToChunk(view.getCenter() - view.getSize() * 0.5f - delta);
-    sf::Vector2i end = worldToChunk(view.getCenter() + view.getSize() * 0.5f + delta);
-
-    sf::Vector2i coords;
-    std::vector<sf::Vector2i> usefullCoords;
-    for (coords.x = begin.x; coords.x <= end.x; coords.x++)
-    {
-        for (coords.y = begin.y; coords.y <= end.y; coords.y++)
-        {
-            usefullCoords.push_back(coords);
-        }
-    }
-
-    // Remove Useless Chunks
-    for (std::size_t i = 0; i < mChunks.size();)
-    {
-        bool found = false;
-        for (std::size_t j = 0; usefullCoords.size(); j++)
-        {
-            if (mChunks[i]->getCoords().x == usefullCoords[j].x)
-            {
-                found = true;
-                break;
-            }
-        }
-        if (!found)
-        {
-            if (!Client::isOnline())
-            {
-                mChunks[i]->saveToFile();
-            }
-            delete mChunks[i];
-            mChunks.erase(mChunks.begin() + i);
-        }
-        else
-        {
-            i++;
-        }
-    }
-
-    // Load Usefull Chunks
-    for (std::size_t i = 0; i < usefullCoords.size(); i++)
-    {
-        int x = usefullCoords[i].x;
-        int y = usefullCoords[i].y;
-        Chunk* c = getChunk(x,y);
-        if (c == nullptr)
-        {
-            addChunk(x,y);
-        }
-    }
-
-    */
+    //removeUselessChunks();
+    //addUsefullChunks();
 }
 
 void Map::addChunk(int cx, int cy)
 {
-    mChunks.push_back(new Chunk(sf::Vector2i(cx,cy)));
+    mChunks.push_back(std::make_shared<Chunk>(sf::Vector2i(cx,cy)));
     if (Client::isOnline())
     {
         // TODO : Load from online
@@ -155,8 +99,6 @@ void Map::removeChunk(int cx, int cy)
             {
                 mChunks[i]->saveToFile();
             }
-            delete mChunks[i];
-            mChunks[i] = nullptr;
             mChunks.erase(mChunks.begin() + i);
         }
         else
@@ -173,7 +115,7 @@ std::size_t Map::getChunkCount() const
 
 void Map::setTileId(int cx, int cy, int x, int y, int id)
 {
-    Chunk* c = getChunk(cx,cy);
+    Chunk::Ptr c = getChunk(cx,cy);
     if (c != nullptr)
     {
         c->setTileId(x,y,id);
@@ -191,7 +133,7 @@ void Map::setTileId(int x, int y, int id)
 
 int Map::getTileId(int cx, int cy, int x, int y)
 {
-    Chunk* c = getChunk(cx,cy);
+    Chunk::Ptr c = getChunk(cx,cy);
     if (c != nullptr)
     {
         return c->getTileId(x,y);
@@ -217,7 +159,83 @@ void Map::save(pugi::xml_node& node)
     node.append_attribute("type") = "Map";
 }
 
-Chunk* Map::getChunk(int cx, int cy)
+void Map::removeUselessChunks()
+{
+    std::vector<sf::Vector2i> u = determineUsefullChunks();
+    std::vector<sf::Vector2i> r;
+
+    for (std::size_t i = 0; i < mChunks.size();i++)
+    {
+        bool found = false;
+        for (std::size_t j = 0; u.size(); j++)
+        {
+            if (u[j] == mChunks[i]->getCoords())
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            r.push_back(mChunks[i]->getCoords());
+        }
+    }
+    for (std::size_t i = 0; i < r.size(); i++)
+    {
+        removeChunk(r[i].x,r[i].y);
+    }
+}
+
+void Map::addUsefullChunks()
+{
+    std::vector<sf::Vector2i> u = determineUsefullChunks();
+    std::vector<sf::Vector2i> a;
+
+    for (std::size_t i = 0; i < u.size(); i++)
+    {
+        bool found = false;
+        for (std::size_t j = 0; j < mChunks.size(); j++)
+        {
+            if (u[i] == mChunks[j]->getCoords())
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            a.push_back(u[i]);
+        }
+    }
+
+    for (std::size_t i = 0; i < a.size(); i++)
+    {
+        addChunk(a[i].x,a[i].y);
+    }
+}
+
+std::vector<sf::Vector2i> Map::determineUsefullChunks()
+{
+    std::vector<sf::Vector2i> usefull;
+
+    sf::View& view = NWorld::getActiveView();
+    sf::Vector2f delta = sf::Vector2f(50,50);
+    sf::Vector2i begin = worldToChunk(view.getCenter() - view.getSize() * 0.5f - delta);
+    sf::Vector2i end = worldToChunk(view.getCenter() + view.getSize() * 0.5f + delta);
+
+    sf::Vector2i coords;
+    for (coords.x = begin.x; coords.x <= end.x; coords.x++)
+    {
+        for (coords.y = begin.y; coords.y <= end.y; coords.y++)
+        {
+            usefull.push_back(coords);
+        }
+    }
+
+    return usefull;
+}
+
+Chunk::Ptr Map::getChunk(int cx, int cy)
 {
     sf::Vector2i coords = sf::Vector2i(cx,cy);
     for (std::size_t i = 0; i < mChunks.size(); i++)
