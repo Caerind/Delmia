@@ -38,8 +38,9 @@ class Map : public NActor
         void removeUselessChunks();
         void addUsefullChunks();
 
+        bool contains(sf::Vector2i const& coords) const;
+
     protected:
-        Chunk::Ptr getChunk(int cx, int cy);
         std::vector<sf::Vector2i> determineUsefullChunks();
 
     protected:

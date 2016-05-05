@@ -115,6 +115,8 @@ class NWorld
         NArray<std::string> mActorsDeletions;
 
         NArray<NTickable*> mTickables;
+        NArray<NTickable*> mTickableAdditions;
+        NArray<NTickable*> mTickableDeletions;
 
         NMap<std::string,NTimer> mTimers;
         int mTimerHandleCounter;

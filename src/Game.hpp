@@ -2,9 +2,10 @@
 #define GAME_HPP
 
 #include "Game/Entity.hpp"
-#include "Game/Map.hpp"
-#include "Game/Chunk.hpp"
 #include "Game/World.hpp"
+
+#include "Game/Map/Map.hpp"
+#include "Game/Map/Chunk.hpp"
 
 #include "Game/Buildings/Building.hpp"
 #include "Game/Buildings/Barrack.hpp"

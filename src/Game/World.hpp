@@ -5,6 +5,7 @@
 #include "../NodeEngine/Core/MapUtility.hpp"
 
 #include "../Game.hpp"
+#include "Map/Map.hpp"
 #include "Buildings/Building.hpp"
 #include "Resources/Resource.hpp"
 #include "Units/Unit.hpp"

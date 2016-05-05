@@ -3,6 +3,7 @@
 World::World()
 {
     mMap = NWorld::createActor<Map>();
+
     mMap->addChunk(0,0);
     mMap->addChunk(0,1);
     mMap->addChunk(0,2);
@@ -39,12 +40,6 @@ void World::update(sf::Time dt)
 {
     NWorld::tick(dt);
 
-    sf::Vector2i c = getMouseCoords();
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
-    {
-        mMap->setTileId(c.x,c.y,3);
-    }
-
     sf::Vector2f mvt;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
     {
@@ -62,7 +57,7 @@ void World::update(sf::Time dt)
     {
         mvt.x++;
     }
-    NWorld::getCameraManager().getView().move(dt.asSeconds() * 400.f * mvt);
+    NWorld::getCameraManager().getView().move(dt.asSeconds() * 1000.f * mvt);
 
     NVector m = NWorld::getPointerPositionView();
     m.x = (int)m.x;
@@ -70,6 +65,7 @@ void World::update(sf::Time dt)
     NVector t = NVector::SFML2IToN(NMapUtility::Isometric::worldToCoords(m));
     t.x = (int)t.x;
     t.y = (int)t.y;
+    sf::Vector2i c = getMouseCoords();
 
     NWorld::getWindow().setDebugInfo("mouse",NString::toString(m));
     NWorld::getWindow().setDebugInfo("tile",NString::toString(t));

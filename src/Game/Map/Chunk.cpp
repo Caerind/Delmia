@@ -4,11 +4,11 @@
 #include <map>
 
 Chunk::Chunk(sf::Vector2i coords)
+: mCoords(coords)
+, mLayer()
 {
-    mCoords = coords;
-    mLayer = new NLayerComponent();
-    mLayer->create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
-    mLayer->setPosition(getChunkSize().x * getTileSize().x * coords.x, 0.5f * getChunkSize().y * getTileSize().y * coords.y, -10.f);
+    mLayer.create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
+    mLayer.setPosition(getChunkSize().x * getTileSize().x * coords.x, 0.5f * getChunkSize().y * getTileSize().y * coords.y, -10.f);
 }
 
 bool Chunk::loadFromFile()
@@ -38,16 +38,16 @@ void Chunk::generate()
     {
         for (coords.y = 0; coords.y < getChunkSize().y; coords.y++)
         {
-            mLayer->setTileId(coords,Tile::Dirt);
+            mLayer.setTileId(coords,Tile::Dirt);
 
             if (coords.y + coords.x == 5)
             {
-                mLayer->setTileId(coords,Tile::Path);
+                mLayer.setTileId(coords,Tile::Path);
             }
 
             if (coords.y + coords.x == 10)
             {
-                mLayer->setTileId(coords,Tile::Water);
+                mLayer.setTileId(coords,Tile::Water);
             }
         }
     }
@@ -105,27 +105,27 @@ std::string Chunk::getFilename()
 
 sf::FloatRect Chunk::getBounds() const
 {
-    return sf::FloatRect(NVector::NToSFML2F(mLayer->getPosition()),sf::Vector2f(getChunkSize().x * getTileSize().x,getChunkSize().y * getTileSize().y));
+    return sf::FloatRect(NVector::NToSFML2F(mLayer.getPosition()),sf::Vector2f(getChunkSize().x * getTileSize().x,getChunkSize().y * getTileSize().y));
 }
 
 void Chunk::setTileId(int x, int y, int id)
 {
-    mLayer->setTileId(sf::Vector2i(x,y),id);
+    mLayer.setTileId(sf::Vector2i(x,y),id);
 }
 
 int Chunk::getTileId(int x, int y) const
 {
-    return mLayer->getTileId(sf::Vector2i(x,y));
+    return mLayer.getTileId(sf::Vector2i(x,y));
 }
 
 bool Chunk::loadFromCode(std::string const& code)
 {
-    return mLayer->loadFromCode(code);
+    return mLayer.loadFromCode(code);
 }
 
 std::string Chunk::getCode() const
 {
-    return mLayer->getCode();
+    return mLayer.getCode();
 }
 
 sf::Vector2i Chunk::getCoords() const

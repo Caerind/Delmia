@@ -20,18 +20,7 @@ Map::~Map()
 
 sf::Vector2i Map::worldToChunk(sf::Vector2f const& pos)
 {
-    sf::Vector2i c;
-    c.x = pos.x / (Chunk::getChunkSize().x * Chunk::getTileSize().x);
-    if (pos.x < 0)
-    {
-        c.x--;
-    }
-    c.y = pos.y / (Chunk::getChunkSize().y * Chunk::getTileSize().y);
-    if (pos.y < 0)
-    {
-        c.y--;
-    }
-    return c;
+    return globalToChunk(NMapUtility::Isometric::worldToCoords(pos));
 }
 
 sf::Vector2i Map::globalToChunk(sf::Vector2i const& pos)
@@ -68,22 +57,26 @@ sf::Vector2i Map::globalToRelative(sf::Vector2i const& pos)
 
 void Map::tick(sf::Time dt)
 {
-    //removeUselessChunks();
-    //addUsefullChunks();
+    removeUselessChunks();
+    addUsefullChunks();
 }
 
 void Map::addChunk(int cx, int cy)
 {
-    mChunks.push_back(std::make_shared<Chunk>(sf::Vector2i(cx,cy)));
-    if (Client::isOnline())
+    sf::Vector2i coords = sf::Vector2i(cx,cy);
+    if (!contains(coords))
     {
-        // TODO : Load from online
-    }
-    else
-    {
-        if (!mChunks.back()->loadFromFile())
+        mChunks.push_back(NWorld::createActor<Chunk>(coords));
+        if (Client::isOnline())
         {
-            mChunks.back()->generate();
+            // TODO : Load from online
+        }
+        else
+        {
+            if (!mChunks.back()->loadFromFile())
+            {
+                mChunks.back()->generate();
+            }
         }
     }
 }
@@ -99,6 +92,7 @@ void Map::removeChunk(int cx, int cy)
             {
                 mChunks[i]->saveToFile();
             }
+            NWorld::removeActor(mChunks[i]->getId());
             mChunks.erase(mChunks.begin() + i);
         }
         else
@@ -115,38 +109,40 @@ std::size_t Map::getChunkCount() const
 
 void Map::setTileId(int cx, int cy, int x, int y, int id)
 {
-    Chunk::Ptr c = getChunk(cx,cy);
-    if (c != nullptr)
+    sf::Vector2i coords = sf::Vector2i(cx,cy);
+    for (std::size_t i = 0; i < mChunks.size(); i++)
     {
-        c->setTileId(x,y,id);
+        if (mChunks[i]->getCoords() == coords)
+        {
+            mChunks[i]->setTileId(x,y,id);
+        }
     }
 }
 
 void Map::setTileId(int x, int y, int id)
 {
-    sf::Vector2i chunkCoords;
-    sf::Vector2i tileCoords;
-    chunkCoords = globalToChunk(sf::Vector2i(x,y));
-    tileCoords = globalToRelative(sf::Vector2i(x,y));
+    sf::Vector2i chunkCoords = globalToChunk(sf::Vector2i(x,y));
+    sf::Vector2i tileCoords = globalToRelative(sf::Vector2i(x,y));
     setTileId(chunkCoords.x,chunkCoords.y,tileCoords.x,tileCoords.y,id);
 }
 
 int Map::getTileId(int cx, int cy, int x, int y)
 {
-    Chunk::Ptr c = getChunk(cx,cy);
-    if (c != nullptr)
+    sf::Vector2i coords = sf::Vector2i(cx,cy);
+    for (std::size_t i = 0; i < mChunks.size(); i++)
     {
-        return c->getTileId(x,y);
+        if (mChunks[i]->getCoords() == coords)
+        {
+            return mChunks[i]->getTileId(x,y);
+        }
     }
     return 0;
 }
 
 int Map::getTileId(int x, int y)
 {
-    sf::Vector2i chunkCoords;
-    sf::Vector2i tileCoords;
-    chunkCoords = globalToChunk(sf::Vector2i(x,y));
-    tileCoords = globalToRelative(sf::Vector2i(x,y));
+    sf::Vector2i chunkCoords = globalToChunk(sf::Vector2i(x,y));
+    sf::Vector2i tileCoords = globalToRelative(sf::Vector2i(x,y));
     return getTileId(chunkCoords.x,chunkCoords.y,tileCoords.x,tileCoords.y);
 }
 
@@ -167,7 +163,7 @@ void Map::removeUselessChunks()
     for (std::size_t i = 0; i < mChunks.size();i++)
     {
         bool found = false;
-        for (std::size_t j = 0; u.size(); j++)
+        for (std::size_t j = 0; j < u.size(); j++)
         {
             if (u[j] == mChunks[i]->getCoords())
             {
@@ -214,12 +210,24 @@ void Map::addUsefullChunks()
     }
 }
 
+bool Map::contains(sf::Vector2i const& coords) const
+{
+    for (std::size_t i = 0; i < mChunks.size(); i++)
+    {
+        if (mChunks[i]->getCoords() == coords)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 std::vector<sf::Vector2i> Map::determineUsefullChunks()
 {
     std::vector<sf::Vector2i> usefull;
 
     sf::View& view = NWorld::getActiveView();
-    sf::Vector2f delta = sf::Vector2f(50,50);
+    sf::Vector2f delta = sf::Vector2f(Chunk::getTileSize().x,Chunk::getTileSize().y);
     sf::Vector2i begin = worldToChunk(view.getCenter() - view.getSize() * 0.5f - delta);
     sf::Vector2i end = worldToChunk(view.getCenter() + view.getSize() * 0.5f + delta);
 
@@ -233,17 +241,4 @@ std::vector<sf::Vector2i> Map::determineUsefullChunks()
     }
 
     return usefull;
-}
-
-Chunk::Ptr Map::getChunk(int cx, int cy)
-{
-    sf::Vector2i coords = sf::Vector2i(cx,cy);
-    for (std::size_t i = 0; i < mChunks.size(); i++)
-    {
-        if (mChunks[i]->getCoords() == coords)
-        {
-            return mChunks[i];
-        }
-    }
-    return nullptr;
 }
