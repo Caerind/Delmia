@@ -8,6 +8,7 @@ class NActor : public NComponent
 {
     public:
         NActor();
+        virtual ~NActor();
 
         typedef std::shared_ptr<NActor> Ptr;
 

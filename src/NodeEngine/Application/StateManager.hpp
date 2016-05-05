@@ -38,6 +38,8 @@ class StateManager
 		void popState();
 		void clearStates();
 
+		void clear(); // DO NOT USE IT
+
 		bool empty() const;
 		std::size_t size() const;
 

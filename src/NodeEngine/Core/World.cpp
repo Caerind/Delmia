@@ -45,21 +45,6 @@ bool NWorld::testAction(NAction const& action)
 
 void NWorld::tick(sf::Time dt)
 {
-    // Tickables
-    for (auto itr = instance().mTickables.begin(); itr != instance().mTickables.end(); itr++)
-    {
-        (*itr)->tick(dt);
-    }
-
-    // Timers
-    for (auto itr = instance().mTimers.begin(); itr != instance().mTimers.end(); itr++)
-    {
-        itr->second.update(dt);
-    }
-
-    // Events
-    instance().mEvents.clear();
-
     // Actors
     std::size_t s2, s1 = instance().mActorsDeletions.size();
     for (std::size_t i = 0; i < s1; i++)
@@ -75,6 +60,36 @@ void NWorld::tick(sf::Time dt)
         }
     }
     instance().mActorsDeletions.clear();
+
+    // Tickables
+    s1 = instance().mTickableAdditions.size();
+    for (std::size_t i = 0; i < s1; i++)
+    {
+        instance().mTickables.add(instance().mTickableAdditions[i]);
+    }
+    instance().mTickableAdditions.clear();
+
+    s2 = instance().mTickableDeletions.size();
+    for (std::size_t i = 0; i < s2; i++)
+    {
+        instance().mTickables.remove(instance().mTickableDeletions[i]);
+    }
+    instance().mTickableDeletions.clear();
+
+    // Tickables
+    for (auto itr = instance().mTickables.begin(); itr != instance().mTickables.end(); itr++)
+    {
+        (*itr)->tick(dt);
+    }
+
+    // Timers
+    for (auto itr = instance().mTimers.begin(); itr != instance().mTimers.end(); itr++)
+    {
+        itr->second.update(dt);
+    }
+
+    // Events
+    instance().mEvents.clear();
 }
 
 void NWorld::render()
@@ -319,12 +334,12 @@ void NWorld::removeRenderable(NSceneComponent* renderable)
 
 void NWorld::addTickable(NTickable* tickable)
 {
-    mTickables.add(tickable);
+    mTickableAdditions.add(tickable);
 }
 
 void NWorld::removeTickable(NTickable* tickable)
 {
-    mTickables.remove(tickable);
+    mTickableDeletions.add(tickable);
 }
 
 NParticleSystem::Ptr NWorld::getParticleSystem(std::string const& systemId)

@@ -21,3 +21,11 @@ void NCameraComponent::onMovedThis()
 {
     mView.setCenter(NVector::NToSFML2F(getFinalPosition()));
 }
+
+void NCameraComponent::onScaledThis()
+{
+}
+
+void NCameraComponent::onRotatedThis()
+{
+}

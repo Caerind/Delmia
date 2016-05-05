@@ -9,6 +9,10 @@ NActor::NActor()
     mId = std::to_string(x);
 }
 
+NActor::~NActor()
+{
+}
+
 void NActor::load(pugi::xml_node& node)
 {
     setPosition(NString::toVector(node.attribute("pos").value()));

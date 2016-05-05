@@ -2,16 +2,9 @@
 #define MAP_HPP
 
 #include "../NodeEngine/Core/World.hpp"
-#include "../NodeEngine/Core/LayerComponent.hpp"
 #include "../NodeEngine/Core/MapUtility.hpp"
 
-enum Tile
-{
-    None = 0,
-    Dirt,
-    Path,
-    Water,
-};
+#include "Chunk.hpp"
 
 class Map : public NActor
 {
@@ -20,14 +13,16 @@ class Map : public NActor
 
     public:
         Map();
+        ~Map();
+
+        static sf::Vector2i worldToChunk(sf::Vector2f const& pos);
+        static sf::Vector2i globalToChunk(sf::Vector2i const& pos);
+        static sf::Vector2i globalToRelative(sf::Vector2i const& pos);
 
         void tick(sf::Time dt);
 
         void addChunk(int cx, int cy);
         void removeChunk(int cx, int cy);
-
-        static sf::Vector2i getChunkSize();
-        static sf::Vector2i getTileSize();
 
         std::size_t getChunkCount() const;
 
@@ -37,20 +32,19 @@ class Map : public NActor
         int getTileId(int cx, int cy, int x, int y);
         int getTileId(int x, int y);
 
-        struct Chunk
-        {
-            sf::Vector2i coords;
-            NLayerComponent layer;
-        };
-
         void load(pugi::xml_node& node);
         void save(pugi::xml_node& node);
 
-    protected:
-        Chunk* getChunk(int cx, int cy);
+        void removeUselessChunks();
+        void addUsefullChunks();
+
+        bool contains(sf::Vector2i const& coords) const;
 
     protected:
-        std::vector<Chunk*> mChunks;
+        std::vector<sf::Vector2i> determineUsefullChunks();
+
+    protected:
+        std::vector<Chunk::Ptr> mChunks;
 };
 
 #endif // MAP_HPP

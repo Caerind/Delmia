@@ -22,7 +22,7 @@ class NLayerComponent : public NSceneComponent
         void create(std::string const& textureName, sf::Vector2i mapSize, sf::Vector2i tileSize, int type = Type::Orthogonal, int hexSide = 0);
 
         bool loadFromCode(std::string const& code);
-        std::string saveToCode();
+        std::string getCode() const;
 
         sf::Vector2i getMapSize() const;
         sf::Vector2i getTileSize() const;
@@ -38,10 +38,10 @@ class NLayerComponent : public NSceneComponent
         bool isHexagonal() const;
 
         void setTileId(sf::Vector2i const& coords, int id);
-        int getTileId(sf::Vector2i const& coords);
+        int getTileId(sf::Vector2i const& coords) const;
 
-        sf::IntRect idToRect(int id);
-        int rectToId(sf::IntRect const& rect);
+        sf::IntRect idToRect(int id) const;
+        int rectToId(sf::IntRect const& rect) const;
 
         virtual void load(pugi::xml_node& node, std::string const& name = "LayerComponent");
         virtual void save(pugi::xml_node& node, std::string const& name = "LayerComponent");

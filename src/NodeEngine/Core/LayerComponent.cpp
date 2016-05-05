@@ -112,7 +112,7 @@ bool NLayerComponent::loadFromCode(std::string const& code)
     return true;
 }
 
-std::string NLayerComponent::saveToCode()
+std::string NLayerComponent::getCode() const
 {
     std::string data;
     data.reserve(mMapSize.x * mMapSize.y * 4);
@@ -200,16 +200,16 @@ void NLayerComponent::setTileId(sf::Vector2i const& coords, int id)
     }
 }
 
-int NLayerComponent::getTileId(sf::Vector2i const& coords)
+int NLayerComponent::getTileId(sf::Vector2i const& coords) const
 {
     if (coords.x >= 0 && coords.x < mMapSize.x && coords.y >= 0 && coords.y < mMapSize.y)
     {
-        return rectToId(mTiles[coords.x + coords.y * mMapSize.x].getTextureRect());
+        return rectToId(mTiles.at(coords.x + coords.y * mMapSize.x).getTextureRect());
     }
     return 0;
 }
 
-sf::IntRect NLayerComponent::idToRect(int id)
+sf::IntRect NLayerComponent::idToRect(int id) const
 {
     if (mTexture != "")
     {
@@ -221,7 +221,7 @@ sf::IntRect NLayerComponent::idToRect(int id)
     return sf::IntRect();
 }
 
-int NLayerComponent::rectToId(sf::IntRect const& rect)
+int NLayerComponent::rectToId(sf::IntRect const& rect) const
 {
     if (mTexture != "")
     {
@@ -270,7 +270,7 @@ void NLayerComponent::save(pugi::xml_node& node, std::string const& name)
     n.append_attribute("sca") = NString::toString(getScale()).c_str();
     n.append_attribute("rot") = getRotation();
 
-    std::string data = saveToCode();
+    std::string data = getCode();
     if (data != "")
     {
         n.append_attribute("data") = data.c_str();
