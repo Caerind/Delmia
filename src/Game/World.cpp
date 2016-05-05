@@ -3,61 +3,17 @@
 World::World()
 {
     mMap = NWorld::createActor<Map>();
-
-    mMap->addChunk(0,0);
-    mMap->addChunk(0,1);
-    mMap->addChunk(0,2);
-    mMap->addChunk(0,3);
-    mMap->addChunk(0,4);
-    mMap->addChunk(1,0);
-    mMap->addChunk(2,0);
-    mMap->addChunk(3,0);
-    mMap->addChunk(2,2);
-    mMap->addChunk(-1,-1);
-    mMap->addChunk(-2,-2);
 }
 
 void World::handleEvent(sf::Event const& event)
 {
     // Add event to the world system
     NWorld::addEvent(event);
-
-    // Zoom
-    if (event.type == sf::Event::MouseWheelScrolled && event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
-    {
-        if (event.mouseWheelScroll.delta < 1)
-        {
-            NWorld::getCameraManager().getView().zoom(1.2f);
-        }
-        else
-        {
-            NWorld::getCameraManager().getView().zoom(0.8f);
-        }
-    }
 }
 
 void World::update(sf::Time dt)
 {
     NWorld::tick(dt);
-
-    sf::Vector2f mvt;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
-    {
-        mvt.y--;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-    {
-        mvt.x--;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-    {
-        mvt.y++;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-    {
-        mvt.x++;
-    }
-    NWorld::getCameraManager().getView().move(dt.asSeconds() * 1000.f * mvt);
 
     NVector m = NWorld::getPointerPositionView();
     m.x = (int)m.x;

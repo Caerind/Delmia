@@ -14,8 +14,11 @@ class GameState : public ah::State
         bool update(sf::Time dt);
         void render(sf::RenderTarget& target, sf::RenderStates states);
 
+        void handleZoom(sf::Event const& event);
         void handlePlacement(sf::Event const& event);
         void movePlacement(sf::Vector2i const& coords);
+
+        void handleViewMovement(sf::Time dt);
 
         void onDeactivate();
 
