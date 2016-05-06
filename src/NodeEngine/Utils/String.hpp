@@ -9,8 +9,7 @@
 
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Color.hpp>
-
-#include "Vector.hpp"
+#include <SFML/System/Vector2.hpp>
 
 namespace NString
 {
@@ -68,11 +67,13 @@ std::string limitSize(std::string str, std::size_t size);
 std::string toString(sf::FloatRect const& rect);
 std::string toString(sf::IntRect const& rect);
 std::string toString(sf::Color const& color);
-std::string toString(NVector const& v);
+std::string toString(sf::Vector2f const& v);
+std::string toString(sf::Vector2i const& v);
 sf::FloatRect toFloatRect(std::string str);
 sf::IntRect toIntRect(std::string str);
 sf::Color toColor(std::string str);
-NVector toVector(std::string str);
+sf::Vector2f toVector2f(std::string str);
+sf::Vector2i toVector2i(std::string str);
 
 } // namespace NString
 

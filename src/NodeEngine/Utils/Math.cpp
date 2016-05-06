@@ -41,4 +41,49 @@ void setRandomSeed(unsigned long seed)
 	randomGenerator.seed(seed);
 }
 
+float sin(float deg)
+{
+    return std::sin(degToRad(deg));
+}
+
+float cos(float deg)
+{
+    return std::cos(degToRad(deg));
+}
+
+float tan(float deg)
+{
+    return std::tan(degToRad(deg));
+}
+
+float asin(float value)
+{
+    return radToDeg(std::asin(value));
+}
+
+float acos(float value)
+{
+    return radToDeg(std::acos(value));
+}
+
+float atan2(float y, float x)
+{
+    return radToDeg(std::atan2(y, x));
+}
+
+float pi()
+{
+    return 3.141592f;
+}
+
+float radToDeg(float rad)
+{
+    return 180.f / pi() * rad;
+}
+
+float degToRad(float deg)
+{
+    return pi() / 180.f * deg;
+}
+
 } // namespace NMath
