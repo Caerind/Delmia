@@ -1,7 +1,7 @@
 #ifndef NCOMPONENT_HPP
 #define NCOMPONENT_HPP
 
-#include "../Utils/Array.hpp"
+#include "../Utils/Container.hpp"
 #include "../Utils/Pugixml.hpp"
 #include "../Utils/String.hpp"
 
@@ -46,7 +46,7 @@ class NComponent : public NTickable, public NTransformable
         virtual void save(pugi::xml_node& node, std::string const& name = "Component");
 
     protected:
-        NArray<NComponent*> mComponents;
+        std::vector<NComponent*> mComponents;
         NComponent* mParent;
 };
 

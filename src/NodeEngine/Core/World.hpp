@@ -9,8 +9,7 @@
 #include "Actor.hpp"
 #include "GraphicManager.hpp"
 
-#include "../Utils/Array.hpp"
-#include "../Utils/Map.hpp"
+#include "../Utils/Container.hpp"
 #include "../Utils/Pugixml.hpp"
 #include "../Utils/Timer.hpp"
 #include "../Utils/Log.hpp"
@@ -109,26 +108,26 @@ class NWorld
     private:
         NGraphicManager mGraphics;
 
-        NArray<sf::Event> mEvents;
+        std::vector<sf::Event> mEvents;
 
-        NArray<NActor::Ptr> mActors;
-        NArray<std::string> mActorsDeletions;
+        std::vector<NActor::Ptr> mActors;
+        std::vector<std::string> mActorsDeletions;
 
-        NArray<NTickable*> mTickables;
-        NArray<NTickable*> mTickableAdditions;
-        NArray<NTickable*> mTickableDeletions;
+        std::vector<NTickable*> mTickables;
+        std::vector<NTickable*> mTickableAdditions;
+        std::vector<NTickable*> mTickableDeletions;
 
-        NMap<std::string,NTimer> mTimers;
+        std::map<std::string,NTimer> mTimers;
         int mTimerHandleCounter;
 
-        NMap<std::string,std::function<NActor::Ptr()>> mActorFactory;
+        std::map<std::string,std::function<NActor::Ptr()>> mActorFactory;
 };
 
 template <typename T, typename ... Args>
 std::shared_ptr<T> NWorld::createActor(Args&& ... args)
 {
     std::shared_ptr<T> actor = std::make_shared<T>(std::forward<Args>(args)...);
-    instance().mActors.add(actor);
+    instance().mActors.push_back(actor);
     return actor;
 }
 

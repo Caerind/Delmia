@@ -36,7 +36,7 @@ void NGraphicManager::render(sf::RenderTarget& target)
 {
     if (mNeedUpdateOrder)
     {
-        mRenderables.sort(mRenderOrder);
+        std::sort(mRenderables.begin(),mRenderables.end(),mRenderOrder);
         mNeedUpdateOrder = false;
     }
 
@@ -89,19 +89,19 @@ std::size_t NGraphicManager::getRenderableCount() const
 
 void NGraphicManager::addRenderable(NSceneComponent* renderable)
 {
-    mRenderables.add(renderable);
+    mRenderables.push_back(renderable);
     needUpdateOrder();
 }
 
 void NGraphicManager::removeRenderable(NSceneComponent* renderable)
 {
-    mRenderables.remove(renderable);
+    remove(mRenderables,renderable);
     needUpdateOrder();
 }
 
 NParticleSystem::Ptr NGraphicManager::getParticleSystem(std::string const& systemId)
 {
-    if (!mParticleSystems.contains(systemId))
+    if (!contains(mParticleSystems,systemId))
     {
         mParticleSystems[systemId] = std::make_shared<NParticleSystem>();
     }
@@ -110,7 +110,7 @@ NParticleSystem::Ptr NGraphicManager::getParticleSystem(std::string const& syste
 
 void NGraphicManager::removeParticleSystem(std::string const& systemId)
 {
-    mParticleSystems.remove(systemId);
+    remove(mParticleSystems,systemId);
 }
 
 std::size_t NGraphicManager::getParticleSystemCount() const

@@ -10,7 +10,7 @@ void NComponent::attachComponent(NComponent* component)
     if (component)
     {
         component->mParent = this;
-        mComponents.add(component);
+        mComponents.push_back(component);
     }
 }
 
@@ -20,7 +20,7 @@ void NComponent::detachComponent(NComponent* component)
     {
         component->mParent = nullptr;
     }
-    mComponents.remove(component);
+    remove(mComponents,component);
 }
 
 float NComponent::getFinalZ() const

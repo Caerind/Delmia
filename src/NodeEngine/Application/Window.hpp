@@ -172,8 +172,6 @@ class Window : public sf::RenderWindow
         std::size_t mDebugInfoCharsize;
 
         sf::RectangleShape mBackground;
-
-
 };
 
 } // namespace ah

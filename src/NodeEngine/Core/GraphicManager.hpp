@@ -6,8 +6,7 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 
-#include "../Utils/Array.hpp"
-#include "../Utils/Map.hpp"
+#include "../Utils/Container.hpp"
 
 #include "CameraManager.hpp"
 #include "Effect.hpp"
@@ -49,9 +48,9 @@ class NGraphicManager
         void renderScene(sf::RenderTarget& target);
 
     private:
-        NArray<NSceneComponent*> mRenderables;
+        std::vector<NSceneComponent*> mRenderables;
 
-        NMap<std::string,NParticleSystem::Ptr> mParticleSystems;
+        std::map<std::string,NParticleSystem::Ptr> mParticleSystems;
 
         NCameraManager mCameraManager;
 
