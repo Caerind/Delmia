@@ -38,21 +38,6 @@ sf::Transform NComponent::getFinalTransform() const
     return (mParent != nullptr) ? mParent->getFinalTransform() * getTransform() : getTransform();
 }
 
-sf::Vector2f NComponent::getParentPosition() const
-{
-    return (mParent != nullptr) ? mParent->getPosition() : sf::Vector2f();
-}
-
-sf::Vector2f NComponent::getParentScale() const
-{
-    return (mParent != nullptr) ? mParent->getScale() : sf::Vector2f();
-}
-
-float NComponent::getParentRotation() const
-{
-    return (mParent != nullptr) ? mParent->getRotation() : 0.f;
-}
-
 sf::Vector2f NComponent::getActorPosition() const
 {
     return (mParent != nullptr) ? mParent->getActorPosition() : getPosition();

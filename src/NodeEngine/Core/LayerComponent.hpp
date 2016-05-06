@@ -5,6 +5,7 @@
 
 #include <SFML/Graphics/Sprite.hpp>
 
+#include "MapUtility.hpp"
 #include "SceneComponent.hpp"
 
 class NLayerComponent : public NSceneComponent
@@ -12,14 +13,7 @@ class NLayerComponent : public NSceneComponent
     public:
         NLayerComponent();
 
-        enum Type
-        {
-            Orthogonal,
-            Isometric,
-            Hexagonal,
-        };
-
-        void create(std::string const& textureName, sf::Vector2i mapSize, sf::Vector2i tileSize, int type = Type::Orthogonal, int hexSide = 0);
+        void create(std::string const& textureName, sf::Vector2i mapSize, sf::Vector2i tileSize, NMapUtility::Type::MapType type = NMapUtility::Type::Orthogonal, int hexSide = 0);
 
         bool loadFromCode(std::string const& code);
         std::string getCode() const;
@@ -32,7 +26,7 @@ class NLayerComponent : public NSceneComponent
         sf::FloatRect getBounds() const;
         bool contains(sf::Vector2f const& position) const;
 
-        int getType() const;
+        NMapUtility::Type::MapType getType() const;
         bool isOrthogonal() const;
         bool isIsometric() const;
         bool isHexagonal() const;
@@ -51,7 +45,7 @@ class NLayerComponent : public NSceneComponent
         std::string mTexture;
         sf::Vector2i mMapSize;
         sf::Vector2i mTileSize;
-        int mType;
+        NMapUtility::Type::MapType mType;
         int mHexSide;
 };
 

@@ -79,7 +79,25 @@ void NWorld::tick(sf::Time dt)
     // Tickables
     for (auto itr = instance().mTickables.begin(); itr != instance().mTickables.end(); itr++)
     {
-        (*itr)->tick(dt);
+        if (!(*itr)->hasTicked())
+        {
+            (*itr)->tick(dt);
+            (*itr)->ticked();
+        }
+        std::size_t s = instance().mTickableDeletions.size();
+        if (s > 0)
+        {
+            for (std::size_t i = 0; i < s; i++)
+            {
+                remove(instance().mTickables,instance().mTickableDeletions[i]);
+            }
+            instance().mTickableDeletions.clear();
+            itr = instance().mTickables.begin();
+        }
+    }
+    for (auto itr = instance().mTickables.begin(); itr != instance().mTickables.end(); itr++)
+    {
+        (*itr)->unticked();
     }
 
     // Timers

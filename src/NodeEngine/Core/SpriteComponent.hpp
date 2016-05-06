@@ -17,6 +17,9 @@ class NSpriteComponent : public NSceneComponent
         void setTextureRect(sf::IntRect const& rect);
         sf::IntRect getTextureRect() const;
 
+        void setOrigin(float x, float y);
+        void setOrigin(sf::Vector2f const& origin);
+
         void setColor(sf::Color const& color);
         sf::Color getColor() const;
 

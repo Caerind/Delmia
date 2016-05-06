@@ -30,6 +30,16 @@ sf::IntRect NSpriteComponent::getTextureRect() const
     return mSprite.getTextureRect();
 }
 
+void NSpriteComponent::setOrigin(float x, float y)
+{
+    mSprite.setOrigin(x,y);
+}
+
+void NSpriteComponent::setOrigin(sf::Vector2f const& origin)
+{
+    mSprite.setOrigin(origin);
+}
+
 void NSpriteComponent::setColor(sf::Color const& color)
 {
     mSprite.setColor(color);

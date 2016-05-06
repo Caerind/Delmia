@@ -20,10 +20,6 @@ class NComponent : public NTickable, public NTransformable
         sf::Vector2f getFinalPosition() const;
         sf::Transform getFinalTransform() const;
 
-        sf::Vector2f getParentPosition() const;
-        sf::Vector2f getParentScale() const;
-        float getParentRotation() const;
-
         sf::Vector2f getActorPosition() const;
         sf::Vector2f getActorScale() const;
         float getActorRotation() const;

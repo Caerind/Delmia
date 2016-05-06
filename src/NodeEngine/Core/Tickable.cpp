@@ -3,6 +3,7 @@
 
 NTickable::NTickable()
 {
+    mTicked = false;
     NWorld::instance().addTickable(this);
 }
 
@@ -13,4 +14,19 @@ NTickable::~NTickable()
 
 void NTickable::tick(sf::Time dt)
 {
+}
+
+bool NTickable::hasTicked() const
+{
+    return mTicked;
+}
+
+void NTickable::ticked()
+{
+    mTicked = true;
+}
+
+void NTickable::unticked()
+{
+    mTicked = false;
 }

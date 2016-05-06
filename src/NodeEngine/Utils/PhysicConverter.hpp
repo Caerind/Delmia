@@ -5,34 +5,23 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include "Math.hpp"
+
 //#include <Box2D/Box2D.h>
 
 namespace Physic
 {
     // Pixels / Meters
-    constexpr double PIXELS_PER_METERS = 32.0;
+    constexpr float PIXELS_PER_METERS = 32.f;
     template<typename T>
     constexpr T pixelsToMeters(const T& x)
     {
-        return x/PIXELS_PER_METERS;
+        return x / PIXELS_PER_METERS;
     }
     template<typename T>
     constexpr T metersToPixels(const T& x)
     {
-        return x*PIXELS_PER_METERS;
-    }
-
-    // Degrees / Radians
-    constexpr double PI = 3.14159265358979323846;
-    template<typename T>
-    constexpr T degToRad(const T& x)
-    {
-        return PI*x/180.0;
-    }
-    template<typename T>
-    constexpr T radToDeg(const T& x)
-    {
-        return 180.0*x/PI;
+        return x * PIXELS_PER_METERS;
     }
 
     /*

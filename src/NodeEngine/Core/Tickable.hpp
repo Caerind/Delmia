@@ -10,6 +10,13 @@ class NTickable
         ~NTickable();
 
         virtual void tick(sf::Time dt);
+
+        bool hasTicked() const;
+        void ticked();
+        void unticked();
+
+    private:
+        bool mTicked;
 };
 
 #endif // NTICKABLE_HPP
