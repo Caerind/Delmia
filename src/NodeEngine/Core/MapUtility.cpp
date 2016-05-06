@@ -1,8 +1,8 @@
 #include "MapUtility.hpp"
 
 #include <cmath>
-#include "../Utils/Math.hpp"
 #include "../Utils/Container.hpp"
+#include "../Utils/Math.hpp"
 
 namespace NMapUtility
 {

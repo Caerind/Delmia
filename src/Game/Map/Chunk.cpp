@@ -91,7 +91,7 @@ void Chunk::saveToFile()
 
 sf::Vector2i Chunk::getChunkSize()
 {
-    return {32,128};
+    return {16,64};
 }
 
 sf::Vector2i Chunk::getTileSize()

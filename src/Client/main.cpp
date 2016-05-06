@@ -14,8 +14,8 @@ int main()
     ah::Application::getWindow().setDebugInfoFont(&ah::Application::getResources().getFont("coolveticca"));
     ah::Application::getWindow().setDebugInfoColor(sf::Color::White);
 
-    ah::Application::getStates().registerState<GameState>();
-    ah::Application::getStates().pushState<GameState>();
+    ah::Application::getStates().registerState<GameState>("GameState");
+    ah::Application::getStates().pushState("GameState");
 
     ah::Application::run();
 
