@@ -13,7 +13,7 @@ NCameraManager::~NCameraManager()
 
 void NCameraManager::addCamera(NCameraComponent* camera)
 {
-    mCameras.add(camera);
+    mCameras.push_back(camera);
     if (mActive == -1 && camera != nullptr)
     {
         mActive = (int)mCameras.size() - 1;
@@ -22,7 +22,7 @@ void NCameraManager::addCamera(NCameraComponent* camera)
 
 void NCameraManager::removeCamera(NCameraComponent* camera)
 {
-    mCameras.remove(camera);
+    remove(mCameras,camera);
 }
 
 sf::View& NCameraManager::getView()

@@ -87,7 +87,7 @@ void NParticleComponent::emitParticles(std::size_t particleAmount)
     for (std::size_t i = 0; i < particleAmount; ++i)
 	{
 		NParticleSystem::Particle particle(mParticleLifetime);
-		particle.position = mParticlePosition + NVector::NToSFML2F(getFinalPosition());
+		particle.position = mParticlePosition + getFinalPosition();
 		particle.velocity = mParticleVelocity;
 		particle.rotation = mParticleRotation;
 		particle.rotationSpeed = mParticleRotationSpeed;

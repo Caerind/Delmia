@@ -10,17 +10,22 @@ class NTransformable
     public:
         NTransformable();
 
-        virtual NVector getPosition() const;
-        virtual void setPosition(NVector const& position);
-        virtual void setPosition(sf::Vector2f const& position, float z = 0.f);
-        virtual void setPosition(float x, float y, float z = 0.f);
-        virtual void setPositionZ(float z);
-        void move(NVector const& movement);
-        void move(float x, float y, float z = 0.f);
+        virtual sf::Vector2f getPosition() const;
+        virtual void setPosition(sf::Vector2f const& position);
+        virtual void setPosition(float x, float y);
+        virtual void move(sf::Vector2f const& movement);
+        virtual void move(float x, float y);
 
-        virtual NVector getScale() const;
-        virtual void setScale(NVector const& scale);
-        virtual void setScale(sf::Vector2f const& position);
+        virtual sf::Vector2f getOrigin() const;
+        virtual void setOrigin(sf::Vector2f const& origin);
+        virtual void setOrigin(float x, float y);
+
+        virtual float getPositionZ() const;
+        virtual void setPositionZ(float z);
+        virtual void moveZ(float z);
+
+        virtual sf::Vector2f getScale() const;
+        virtual void setScale(sf::Vector2f const& scale);
         virtual void setScale(float x, float y);
 
         virtual float getRotation() const;

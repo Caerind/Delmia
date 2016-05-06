@@ -2,7 +2,7 @@
 #define NCAMERAMANAGER_HPP
 
 #include "CameraComponent.hpp"
-#include "../Utils/Array.hpp"
+#include "../Utils/Container.hpp"
 
 class NCameraManager
 {
@@ -20,7 +20,7 @@ class NCameraManager
         void clear();
 
     protected:
-        NArray<NCameraComponent*> mCameras;
+        std::vector<NCameraComponent*> mCameras;
         sf::View mView;
         int mActive;
 };

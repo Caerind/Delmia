@@ -15,9 +15,9 @@ class ValueContainer
 
         bool exist(std::string const& id) const;
 
-        void setString(std::string const& id, std::string const& value);
-        void setString(std::string const& id, std::string const& value, bool save);
-        std::string getString(std::string const& id) const;
+        void set(std::string const& id, std::string const& value);
+        void set(std::string const& id, std::string const& value, bool save);
+        std::string get(std::string const& id) const;
 
         void setInt(std::string const& id, int value);
         void setInt(std::string const& id, int value, bool save);

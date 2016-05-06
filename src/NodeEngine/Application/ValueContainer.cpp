@@ -13,18 +13,18 @@ bool ValueContainer::exist(std::string const& id) const
     return (mValues.find(id) != mValues.end());
 }
 
-void ValueContainer::setString(std::string const& id, std::string const& value)
+void ValueContainer::set(std::string const& id, std::string const& value)
 {
     mValues[id].first = value;
 }
 
-void ValueContainer::setString(std::string const& id, std::string const& value, bool save)
+void ValueContainer::set(std::string const& id, std::string const& value, bool save)
 {
-    setString(id,value);
+    set(id,value);
     setSaved(id,save);
 }
 
-std::string ValueContainer::getString(std::string const& id) const
+std::string ValueContainer::get(std::string const& id) const
 {
     if (!exist(id))
     {
@@ -99,9 +99,7 @@ bool ValueContainer::load(std::string const& filename)
     {
         for (pugi::xml_node v = values.child("Value"); v; v = v.next_sibling("Value"))
         {
-            std::string id = v.attribute("id").value();
-            std::string val = v.attribute("value").value();
-            setString(id,val,true);
+            set(v.attribute("id").value(),v.attribute("value").value(),true);
         }
         return true;
     }

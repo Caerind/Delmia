@@ -1,33 +1,39 @@
 #include "MapUtility.hpp"
 
+#include <cmath>
+#include "../Utils/Math.hpp"
+
 namespace NMapUtility
 {
 
 namespace Orthogonal
 {
 
-std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords)
+std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
 {
     std::vector<sf::Vector2i> n;
-	n.push_back(sf::Vector2i(coords.x,coords.y-1));
-	n.push_back(sf::Vector2i(coords.x,coords.y+1));
-	n.push_back(sf::Vector2i(coords.x-1,coords.y));
-	n.push_back(sf::Vector2i(coords.x+1,coords.y));
+	n.push_back({coords.x, coords.y - 1});
+	n.push_back({coords.x, coords.y + 1});
+	n.push_back({coords.x - 1, coords.y});
+	n.push_back({coords.x + 1, coords.y});
+	if (diag)
+    {
+        n.push_back({coords.x + 1, coords.y - 1});
+        n.push_back({coords.x + 1, coords.y + 1});
+        n.push_back({coords.x - 1, coords.y + 1});
+        n.push_back({coords.x - 1, coords.y - 1});
+    }
     return n;
 }
 
-sf::Vector2i worldToCoords(NVector const& pos)
+sf::Vector2i worldToCoords(sf::Vector2f const& pos)
 {
-    sf::Vector2f spos = NVector::NToSFML2F(pos);
-    return sf::Vector2i(spos.x/32,spos.y/32);
+    return {(int)pos.x / 32, (int)pos.y / 32};
 }
 
-NVector coordsToWorld(sf::Vector2i const& coords) // center of the tile
+sf::Vector2f coordsToWorld(sf::Vector2i const& coords) // center of the tile
 {
-    sf::Vector2f ret;
-	ret.x = coords.x * 32 + 0.5f * 32;
-	ret.y = coords.y * 32 + 0.5f * 32;
-    return NVector::SFML2FToN(ret);
+    return {coords.x * 32 + 0.5f * 32, coords.y * 32 + 0.5f * 32};
 }
 
 } // namespace Orthogonal
@@ -40,37 +46,37 @@ std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
     std::vector<sf::Vector2i> n;
     if (coords.y % 2 == 0)
     {
-        n.push_back(sf::Vector2i(coords.x-1,coords.y-1));
-        n.push_back(sf::Vector2i(coords.x,coords.y-1));
-        n.push_back(sf::Vector2i(coords.x-1,coords.y+1));
-        n.push_back(sf::Vector2i(coords.x,coords.y+1));
+        n.push_back({coords.x - 1, coords.y - 1});
+        n.push_back({coords.x, coords.y - 1});
+        n.push_back({coords.x - 1, coords.y + 1});
+        n.push_back({coords.x, coords.y + 1});
     }
     else
     {
-        n.push_back(sf::Vector2i(coords.x,coords.y-1));
-        n.push_back(sf::Vector2i(coords.x+1,coords.y-1));
-        n.push_back(sf::Vector2i(coords.x,coords.y+1));
-        n.push_back(sf::Vector2i(coords.x+1,coords.y+1));
+        n.push_back({coords.x, coords.y - 1});
+        n.push_back({coords.x + 1, coords.y - 1});
+        n.push_back({coords.x, coords.y + 1});
+        n.push_back({coords.x + 1, coords.y + 1});
     }
     if (diag)
     {
-        n.push_back(sf::Vector2i(coords.x,coords.y-1));
-        n.push_back(sf::Vector2i(coords.x+1,coords.y));
-        n.push_back(sf::Vector2i(coords.x,coords.y+1));
-        n.push_back(sf::Vector2i(coords.x-1,coords.y));
+        n.push_back({coords.x, coords.y - 1});
+        n.push_back({coords.x + 1, coords.y});
+        n.push_back({coords.x, coords.y + 1});
+        n.push_back({coords.x - 1, coords.y});
     }
     return n;
 }
 
-sf::Vector2i worldToCoords(NVector const& pos)
+sf::Vector2i worldToCoords(sf::Vector2f const& pos)
 {
-    sf::Vector2f spos = NVector::NToSFML2F(pos);
-    sf::Vector2f s = {256 * 0.5f, 128 * 0.5f};
-    sf::Vector2f mc = sf::Vector2f(floor(spos.x / s.x),floor(spos.y / s.y));
-    sf::Vector2f p = spos - sf::Vector2f(mc.x * s.x, mc.y * s.y);
+    sf::Vector2f s = {256.f * 0.5f, 128.f * 0.5f}; // HERE YOUR TILE SIZE
+    sf::Vector2f mc = {1.f * floor(pos.x / s.x), 1.f * floor(pos.y / s.y)};
+    sf::Vector2f p = pos;
+    p -= {mc.x * s.x, mc.y * s.y};
     if (((int)mc.x + (int)mc.y) % 2 == 0)
     {
-        if (std::atan2(s.y - p.y,p.x) * 180.f / 3.14152f > 30)
+        if (NMath::atan2(s.y - p.y,p.x) > 30.f)
         {
             mc.x--;
             mc.y--;
@@ -78,7 +84,7 @@ sf::Vector2i worldToCoords(NVector const& pos)
     }
     else
     {
-        if (std::atan2(-p.y,p.x) * 180.f / 3.14152f > -30)
+        if (NMath::atan2(-p.y,p.x) > -30.f)
         {
             mc.y--;
         }
@@ -87,10 +93,10 @@ sf::Vector2i worldToCoords(NVector const& pos)
             mc.x--;
         }
     }
-    return sf::Vector2i(floor(mc.x * 0.5f),mc.y);
+    return {(int)floor(mc.x * 0.5f),(int)mc.y};
 }
 
-NVector coordsToWorld(sf::Vector2i const& coords)
+sf::Vector2f coordsToWorld(sf::Vector2i const& coords)
 {
     sf::Vector2f ret;
     ret.y = coords.y * 128 * 0.5f + 128 * 0.5f;
@@ -102,7 +108,7 @@ NVector coordsToWorld(sf::Vector2i const& coords)
     {
         ret.x = coords.x * 256 + 256;
     }
-    return NVector::SFML2FToN(ret);
+    return ret;
 }
 
 } // namespace Isometric
@@ -116,14 +122,14 @@ std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords)
     return n;
 }
 
-sf::Vector2i worldToCoords(NVector const& pos)
+sf::Vector2i worldToCoords(sf::Vector2f const& pos)
 {
-    return NVector::NToSFML2I(pos);
+    return {};
 }
 
-NVector coordsToWorld(sf::Vector2i const& coords)
+sf::Vector2f coordsToWorld(sf::Vector2i const& coords)
 {
-    return NVector::SFML2FToN(sf::Vector2f());
+    return {};
 }
 
 } // namespace Hexagonal
