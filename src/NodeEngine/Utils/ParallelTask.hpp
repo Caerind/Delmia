@@ -15,18 +15,18 @@ class ParallelTask
 	public:
         ParallelTask();
 
-		void				execute();
-		bool				isFinished();
-		float				getCompletion();
+		void execute();
+		bool isFinished();
+		float getCompletion();
 
     protected:
-		void				runTask();
+		void runTask();
 
 	private:
-		sf::Thread			mThread;
-		bool				mFinished;
-		sf::Clock			mElapsedTime;
-		sf::Mutex			mMutex;
+		sf::Thread mThread;
+		bool mFinished;
+		sf::Clock mElapsedTime;
+		sf::Mutex mMutex;
 };
 
 } // namespace lp

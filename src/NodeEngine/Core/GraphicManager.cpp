@@ -4,22 +4,30 @@ NGraphicManager::NGraphicManager() : mEffect(nullptr)
 {
     mRenderOrder = [](NSceneComponent* a, NSceneComponent* b) -> bool
     {
-       if (a != nullptr && b != nullptr)
-       {
-           if (a->getFinalZ() < b->getFinalZ())
-           {
+        if (a != nullptr && b != nullptr)
+        {
+            if (a->getFinalZ() < b->getFinalZ())
+            {
                 return true;
-           }
-           else if (a->getFinalZ() > b->getFinalZ())
-           {
-               return false;
-           }
-           else
-           {
-               return (a->getFinalPosition().y < b->getFinalPosition().y);
-           }
-       }
-       return true;
+            }
+            else if (a->getFinalZ() > b->getFinalZ())
+            {
+                return false;
+            }
+            else if (a->getFinalPosition().y < b->getFinalPosition().y)
+            {
+                return true;
+            }
+            else if (a->getFinalPosition().y > b->getFinalPosition().y)
+            {
+                return false;
+            }
+            else
+            {
+                return (a->getFinalPosition().x < b->getFinalPosition().x);
+            }
+        }
+        return true;
     };
 
     mNeedUpdateOrder = true;

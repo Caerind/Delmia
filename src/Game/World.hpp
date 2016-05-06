@@ -23,6 +23,8 @@ class World
 
         bool collide(int x, int y, bool isSolid = true);
 
+        std::vector<Unit::Ptr> selectUnits(sf::FloatRect const& zone);
+
         void clear();
 
         template <typename T>
@@ -33,6 +35,9 @@ class World
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createResource(int x, int y, Args&& ... args);
+
+        template <typename T, typename ... Args>
+        std::shared_ptr<T> createUnit(float x, float y, Args&& ... args);
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createActor(Args&& ... args);
@@ -89,21 +94,21 @@ std::shared_ptr<T> World::createResource(int x, int y, Args&& ... args)
 
     std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
     mResources[actor->getId()] = actor;
+    return actor;
+}
 
+template <typename T, typename ... Args>
+std::shared_ptr<T> World::createUnit(float x, float y, Args&& ... args)
+{
+    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    mUnits[actor->getId()] = actor;
     return actor;
 }
 
 template <typename T, typename ... Args>
 std::shared_ptr<T> World::createActor(Args&& ... args)
 {
-    std::shared_ptr<T> actor = NWorld::createActor<T>(std::forward<Args>(args)...);
-
-    std::shared_ptr<Unit> unit;
-    if(unit = std::dynamic_pointer_cast<Unit>(actor))
-    {
-        mUnits[actor->getId()] = unit;
-    }
-    return actor;
+    return NWorld::createActor<T>(std::forward<Args>(args)...);
 }
 
 #endif // WORLD_HPP

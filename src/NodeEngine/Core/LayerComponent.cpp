@@ -7,7 +7,7 @@ NLayerComponent::NLayerComponent()
 {
 }
 
-void NLayerComponent::create(std::string const& textureName, sf::Vector2i mapSize, sf::Vector2i tileSize, int type, int hexSide)
+void NLayerComponent::create(std::string const& textureName, sf::Vector2i mapSize, sf::Vector2i tileSize, NMapUtility::Type::MapType type, int hexSide)
 {
     mTexture = textureName;
     mMapSize = mapSize;
@@ -172,24 +172,24 @@ bool NLayerComponent::contains(sf::Vector2f const& position) const
     return getBounds().contains(position);
 }
 
-int NLayerComponent::getType() const
+NMapUtility::Type::MapType NLayerComponent::getType() const
 {
     return mType;
 }
 
 bool NLayerComponent::isOrthogonal() const
 {
-    return (mType == NLayerComponent::Orthogonal);
+    return (mType == NMapUtility::Type::Orthogonal);
 }
 
 bool NLayerComponent::isIsometric() const
 {
-    return (mType == NLayerComponent::Isometric);
+    return (mType == NMapUtility::Type::Isometric);
 }
 
 bool NLayerComponent::isHexagonal() const
 {
-    return (mType == NLayerComponent::Hexagonal);
+    return (mType == NMapUtility::Type::Hexagonal);
 }
 
 void NLayerComponent::setTileId(sf::Vector2i const& coords, int id)
@@ -244,7 +244,7 @@ void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
     }
     mMapSize = NString::toVector2i(n.attribute("msize").value());
     mTileSize = NString::toVector2i(n.attribute("tsize").value());
-    mType = n.attribute("type").as_int();
+    mType = static_cast<NMapUtility::Type::MapType>(n.attribute("type").as_int());
     mHexSide = n.attribute("hexside").as_int();
     setPosition(NString::toVector2f(n.attribute("pos").value()));
     setOrigin(NString::toVector2f(n.attribute("ori").value()));

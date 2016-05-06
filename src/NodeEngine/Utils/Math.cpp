@@ -78,7 +78,12 @@ float pi()
 
 float radToDeg(float rad)
 {
-    return 180.f / pi() * rad;
+    float a = 180.f / pi() * rad;
+    if (a < 0.f)
+    {
+        a += 360.f;
+    }
+    return a;
 }
 
 float degToRad(float deg)

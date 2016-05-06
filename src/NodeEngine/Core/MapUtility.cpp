@@ -1,6 +1,7 @@
 #include "MapUtility.hpp"
 
 #include <cmath>
+#include "../Utils/Container.hpp"
 #include "../Utils/Math.hpp"
 
 namespace NMapUtility
@@ -71,7 +72,7 @@ std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
 sf::Vector2i worldToCoords(sf::Vector2f const& pos)
 {
     sf::Vector2f s = {256.f * 0.5f, 128.f * 0.5f}; // HERE YOUR TILE SIZE
-    sf::Vector2f mc = {1.f * floor(pos.x / s.x), 1.f * floor(pos.y / s.y)};
+    sf::Vector2f mc = {(float)floor(pos.x / s.x), (float)floor(pos.y / s.y)};
     sf::Vector2f p = pos;
     p -= {mc.x * s.x, mc.y * s.y};
     if (((int)mc.x + (int)mc.y) % 2 == 0)
@@ -133,5 +134,82 @@ sf::Vector2f coordsToWorld(sf::Vector2i const& coords)
 }
 
 } // namespace Hexagonal
+
+std::vector<sf::Vector2i> pathfinding(Type::MapType type, sf::Vector2i const& begin, sf::Vector2i const& end)
+{
+    std::vector<priv::Node> container;
+    add(container, priv::Node(begin,begin));
+    std::size_t test = 0;
+    bool reached = false;
+    while (test < 50 && !reached)
+    {
+        std::vector<priv::Node> temp;
+        for (std::size_t i = 0; i < container.size(); i++)
+        {
+            std::vector<sf::Vector2i> n;
+            switch (type)
+            {
+                case Type::Orthogonal: n = Orthogonal::getNeighboors(container[i].coords); break;
+                case Type::Isometric: n = Isometric::getNeighboors(container[i].coords); break;
+                case Type::Hexagonal: n = Hexagonal::getNeighboors(container[i].coords); break;
+                default: break;
+            }
+            for (std::size_t j = 0; j < n.size(); j++)
+            {
+                bool found = false;
+                for (std::size_t k = 0; k < container.size(); k++)
+                {
+                    if (container[k].coords == n[j])
+                    {
+                        found = true;
+                    }
+                }
+                for (std::size_t k = 0; k < temp.size(); k++)
+                {
+                    if (temp[k].coords == n[j])
+                    {
+                        found = true;
+                    }
+                }
+                if (!found)
+                {
+                    add(temp, priv::Node(n[j], container[i].coords));
+                    if (n[j] == end)
+                    {
+                        reached = true;
+                    }
+                }
+            }
+        }
+        append(container, temp);
+        test++;
+    }
+
+    std::vector<sf::Vector2i> path;
+    if (reached)
+    {
+        sf::Vector2i pos = end;
+        reached = false;
+        while (!reached)
+        {
+            bool handled = false;
+            for (std::size_t i = 0; i < container.size(); i++)
+            {
+                if (container[i].coords == pos && !handled)
+                {
+                    add(path, pos);
+                    if (container[i].parent == container[i].coords)
+                    {
+                        reached = true;
+                    }
+                    pos = container[i].parent;
+                    handled = true;
+                }
+            }
+        }
+        std::reverse(path.begin(),path.end());
+    }
+    return path;
+}
 
 } // namespace NMapUtility

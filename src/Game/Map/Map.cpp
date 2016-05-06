@@ -66,7 +66,7 @@ void Map::addChunk(int cx, int cy)
     sf::Vector2i coords = sf::Vector2i(cx,cy);
     if (!contains(coords))
     {
-        mChunks.push_back(NWorld::createActor<Chunk>(coords));
+        mChunks.push_back(std::make_shared<Chunk>(coords));
         if (Client::isOnline())
         {
             // TODO : Load from online
@@ -92,7 +92,6 @@ void Map::removeChunk(int cx, int cy)
             {
                 mChunks[i]->saveToFile();
             }
-            NWorld::removeActor(mChunks[i]->getId());
             mChunks.erase(mChunks.begin() + i);
         }
         else

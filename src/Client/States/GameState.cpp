@@ -7,6 +7,11 @@ GameState::GameState(ah::StateManager& manager)
     mPlacingCollide = false;
     mPlacingType = 0;
     mPlacement = nullptr;
+
+    mSelecting = false;
+    mSelectionZone.setFillColor(sf::Color::Transparent);
+    mSelectionZone.setOutlineColor(sf::Color::Black);
+    mSelectionZone.setOutlineThickness(2.f);
 }
 
 bool GameState::handleEvent(sf::Event const& event)
@@ -15,6 +20,21 @@ bool GameState::handleEvent(sf::Event const& event)
 
     handleZoom(event);
     handlePlacement(event);
+    handleUnit(event);
+
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
+    {
+        if (oldC != sf::Vector2i())
+        {
+            std::vector<sf::Vector2i> p = NMapUtility::pathfinding(NMapUtility::Type::Isometric,oldC,mWorld.getMouseCoords());
+            for (std::size_t i = 0; i < p.size(); i++)
+            {
+                std::cout << p[i].x << " " << p[i].y << std::endl;
+            }
+        }
+
+        oldC = mWorld.getMouseCoords();
+    }
 
     return true;
 }
@@ -30,7 +50,17 @@ bool GameState::update(sf::Time dt)
 
 void GameState::render(sf::RenderTarget& target, sf::RenderStates states)
 {
+    sf::View v = target.getView();
+    target.setView(NWorld::getActiveView());
+
     mWorld.render(target);
+
+    if (mSelecting)
+    {
+        target.draw(mSelectionZone);
+    }
+
+    target.setView(v);
 }
 
 void GameState::handleZoom(sf::Event const& event)
@@ -54,7 +84,7 @@ void GameState::handlePlacement(sf::Event const& event)
     sf::Vector2i c = mWorld.getMouseCoords();
 
     // Left Click Pressed
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left && !mPlacing)
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right && !mPlacing)
     {
         mPlacing = true;
         switch (mPlacingType)
@@ -76,7 +106,7 @@ void GameState::handlePlacement(sf::Event const& event)
     }
 
     // Left Click Released
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left && mPlacing)
+    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right && mPlacing)
     {
         mPlacing = false;
         if (mPlacement != nullptr)
@@ -102,7 +132,7 @@ void GameState::handlePlacement(sf::Event const& event)
     }
 
     // Mouse Moved
-    if (event.type == sf::Event::MouseMoved && mPlacing)
+    if (event.type == sf::Event::MouseMoved && mPlacing && sf::Mouse::isButtonPressed(sf::Mouse::Right))
     {
         if (mPlacement != nullptr)
         {
@@ -114,7 +144,7 @@ void GameState::handlePlacement(sf::Event const& event)
     }
 
     // Press A
-    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A)
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::B)
     {
         mPlacingType = (mPlacingType >= 6) ? 0 : mPlacingType + 1;
         if (mPlacing)
@@ -160,6 +190,41 @@ void GameState::movePlacement(sf::Vector2i const& coords)
             default: mPlacingCollide = false; break;
         }
         mPlacement->setColor((mPlacingCollide) ? sf::Color::Red : sf::Color::Green);
+    }
+}
+
+void GameState::handleUnit(sf::Event const& event)
+{
+    sf::Vector2f p = NWorld::getPointerPositionView();
+
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::U)
+    {
+        mWorld.createUnit<Unit>(p.x,p.y);
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left && !mSelecting)
+    {
+        mSelecting = true;
+        mSelectionZone.setPosition(p);
+        mSelectedUnits.clear();
+    }
+    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left && mSelecting)
+    {
+        mSelectedUnits = mWorld.selectUnits(mSelectionZone.getGlobalBounds());
+        mSelecting = false;
+        mSelectionZone.setSize({0.f, 0.f});
+    }
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && mSelecting && event.type == sf::Event::MouseMoved)
+    {
+        mSelectionZone.setSize(p - mSelectionZone.getPosition());
+    }
+
+    if (mSelectedUnits.size() > 0 && event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Middle)
+    {
+        for (std::size_t i = 0; i < mSelectedUnits.size(); i++)
+        {
+            mSelectedUnits[i]->positionOrder(NWorld::getPointerPositionView());
+        }
     }
 }
 
