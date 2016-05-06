@@ -63,8 +63,8 @@ class NWorld
         static std::size_t getRenderableCount();
         static std::size_t getTickableCount();
 
-        static NVector getPointerPositionScreen(int touchIndex = 0);
-        static NVector getPointerPositionView(int touchIndex = 0);
+        static sf::Vector2f getPointerPositionScreen(int touchIndex = 0);
+        static sf::Vector2f getPointerPositionView(int touchIndex = 0);
 
         static ah::ResourceManager& getResources();
         static ah::Window& getWindow();

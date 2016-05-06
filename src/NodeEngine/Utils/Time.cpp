@@ -60,6 +60,8 @@ int getYear()
     return std::stoi(getTime("%y"));
 }
 
+} // namespace NTime
+
 NTimer::NTimer()
 {
     mDuration = sf::Time::Zero;
@@ -162,5 +164,3 @@ void NTimer::stop()
     mDuration = sf::Time::Zero;
     mElapsed = sf::Time::Zero;
 }
-
-} // namespace NTime

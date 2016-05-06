@@ -5,22 +5,6 @@ NSpriteComponent::NSpriteComponent() : mTexture("")
 {
 }
 
-void NSpriteComponent::setOrigin(float x, float y, float z)
-{
-    setOrigin(NVector(x,y,z));
-}
-
-void NSpriteComponent::setOrigin(NVector const& origin)
-{
-    mOrigin = origin;
-    mSprite.setOrigin(NVector::NToSFML2F(origin));
-}
-
-NVector NSpriteComponent::getOrigin() const
-{
-    return NVector::SFML2FToN(mSprite.getOrigin());
-}
-
 void NSpriteComponent::setTexture(std::string const& textureName, sf::IntRect const& rect)
 {
     setTexture(NWorld::getResources().getTexture(textureName),rect);
@@ -71,9 +55,9 @@ sf::FloatRect NSpriteComponent::getBounds() const
     return r;
 }
 
-bool NSpriteComponent::contains(NVector const& position) const
+bool NSpriteComponent::contains(sf::Vector2f const& position) const
 {
-    return getBounds().contains(NVector::NToSFML2F(position));
+    return getBounds().contains(position);
 }
 
 void NSpriteComponent::load(pugi::xml_node& node, std::string const& name)
@@ -85,10 +69,10 @@ void NSpriteComponent::load(pugi::xml_node& node, std::string const& name)
         setTexture(texture.value());
         setTextureRect(NString::toIntRect(n.attribute("rect").value()));
     }
-    setPosition(NString::toVector(n.attribute("pos").value()));
-    setScale(NString::toVector(n.attribute("sca").value()));
+    setPosition(NString::toVector2f(n.attribute("pos").value()));
+    setOrigin(NString::toVector2f(n.attribute("ori").value()));
+    setScale(NString::toVector2f(n.attribute("sca").value()));
     setRotation(n.attribute("rot").as_float());
-    setOrigin(NString::toVector(n.attribute("ori").value()));
 }
 
 void NSpriteComponent::save(pugi::xml_node& node, std::string const& name)
@@ -100,7 +84,7 @@ void NSpriteComponent::save(pugi::xml_node& node, std::string const& name)
         n.append_attribute("rect") = NString::toString(mSprite.getTextureRect()).c_str();
     }
     n.append_attribute("pos") = NString::toString(getPosition()).c_str();
+    n.append_attribute("ori") = NString::toString(getOrigin()).c_str();
     n.append_attribute("sca") = NString::toString(getScale()).c_str();
     n.append_attribute("rot") = getRotation();
-    n.append_attribute("ori") = NString::toString(mOrigin).c_str();
 }

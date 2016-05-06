@@ -30,7 +30,7 @@ class NLayerComponent : public NSceneComponent
         void render(sf::RenderTarget& target);
 
         sf::FloatRect getBounds() const;
-        bool contains(NVector const& position) const;
+        bool contains(sf::Vector2f const& position) const;
 
         int getType() const;
         bool isOrthogonal() const;

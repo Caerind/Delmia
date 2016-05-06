@@ -15,14 +15,16 @@ NActor::~NActor()
 
 void NActor::load(pugi::xml_node& node)
 {
-    setPosition(NString::toVector(node.attribute("pos").value()));
-    setScale(NString::toVector(node.attribute("sca").value()));
+    setPosition(NString::toVector2f(node.attribute("pos").value()));
+    setOrigin(NString::toVector2f(node.attribute("ori").value()));
+    setScale(NString::toVector2f(node.attribute("sca").value()));
     setRotation(node.attribute("rot").as_float());
 }
 
 void NActor::save(pugi::xml_node& node)
 {
     node.append_attribute("pos") = NString::toString(getPosition()).c_str();
+    node.append_attribute("ori") = NString::toString(getOrigin()).c_str();
     node.append_attribute("sca") = NString::toString(getScale()).c_str();
     node.append_attribute("rot") = getRotation();
 }

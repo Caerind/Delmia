@@ -7,8 +7,10 @@ Chunk::Chunk(sf::Vector2i coords)
 : mCoords(coords)
 , mLayer()
 {
+    setPositionZ(-10.f);
     mLayer.create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
-    mLayer.setPosition(getChunkSize().x * getTileSize().x * coords.x, 0.5f * getChunkSize().y * getTileSize().y * coords.y, -10.f);
+    mLayer.setPosition(getChunkSize().x * getTileSize().x * coords.x, 0.5f * getChunkSize().y * getTileSize().y * coords.y);
+    attachComponent(&mLayer);
 }
 
 bool Chunk::loadFromFile()
@@ -90,12 +92,12 @@ void Chunk::saveToFile()
 
 sf::Vector2i Chunk::getChunkSize()
 {
-    return sf::Vector2i(16,64);
+    return {16,64};
 }
 
 sf::Vector2i Chunk::getTileSize()
 {
-    return sf::Vector2i(256,128);
+    return {256,128};
 }
 
 std::string Chunk::getFilename()
@@ -105,17 +107,17 @@ std::string Chunk::getFilename()
 
 sf::FloatRect Chunk::getBounds() const
 {
-    return sf::FloatRect(NVector::NToSFML2F(mLayer.getPosition()),sf::Vector2f(getChunkSize().x * getTileSize().x,getChunkSize().y * getTileSize().y));
+    return sf::FloatRect(mLayer.getPosition(),{1.f * getChunkSize().x * getTileSize().x, 1.f * getChunkSize().y * getTileSize().y});
 }
 
 void Chunk::setTileId(int x, int y, int id)
 {
-    mLayer.setTileId(sf::Vector2i(x,y),id);
+    mLayer.setTileId({x,y},id);
 }
 
 int Chunk::getTileId(int x, int y) const
 {
-    return mLayer.getTileId(sf::Vector2i(x,y));
+    return mLayer.getTileId({x,y});
 }
 
 bool Chunk::loadFromCode(std::string const& code)

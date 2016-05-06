@@ -91,9 +91,14 @@ std::string toString(sf::Color const& color)
     return std::to_string(color.r) + "," + std::to_string(color.g) + "," + std::to_string(color.b) + "," + std::to_string(color.a);
 }
 
-std::string toString(NVector const& v)
+std::string toString(sf::Vector2f const& v)
 {
-    return std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z);
+    return std::to_string(v.x) + "," + std::to_string(v.y);
+}
+
+std::string toString(sf::Vector2i const& v)
+{
+    return std::to_string(v.x) + "," + std::to_string(v.y);
 }
 
 sf::FloatRect toFloatRect(std::string str)
@@ -126,12 +131,19 @@ sf::Color toColor(std::string str)
     return c;
 }
 
-NVector toVector(std::string str)
+sf::Vector2f toVector2f(std::string str)
 {
-    NVector v;
+    sf::Vector2f v;
     v.x = std::stof(split(str,","));
-    v.y = std::stof(split(str,","));
-    v.z = std::stof(str);
+    v.y = std::stof(str);
+    return v;
+}
+
+sf::Vector2i toVector2i(std::string str)
+{
+    sf::Vector2i v;
+    v.x = std::stof(split(str,","));
+    v.y = std::stof(str);
     return v;
 }
 

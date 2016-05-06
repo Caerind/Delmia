@@ -19,7 +19,7 @@ sf::View& NCameraComponent::getView()
 
 void NCameraComponent::onMovedThis()
 {
-    mView.setCenter(NVector::NToSFML2F(getFinalPosition()));
+    mView.setCenter(getFinalPosition());
 }
 
 void NCameraComponent::onScaledThis()

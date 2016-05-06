@@ -218,14 +218,14 @@ std::size_t NWorld::getTickableCount()
     return instance().mTickables.size();
 }
 
-NVector NWorld::getPointerPositionScreen(int touchIndex)
+sf::Vector2f NWorld::getPointerPositionScreen(int touchIndex)
 {
-    return NVector::SFML2FToN(getWindow().getPointerPosition(touchIndex));
+    return getWindow().getPointerPosition(touchIndex);
 }
 
-NVector NWorld::getPointerPositionView(int touchIndex)
+sf::Vector2f NWorld::getPointerPositionView(int touchIndex)
 {
-    return NVector::SFML2FToN(getWindow().getPointerPositionView(getActiveView(),touchIndex));
+    return getWindow().getPointerPositionView(getActiveView(),touchIndex);
 }
 
 ah::ResourceManager& NWorld::getResources()

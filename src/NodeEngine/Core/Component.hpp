@@ -17,19 +17,19 @@ class NComponent : public NTickable, public NTransformable
         void detachComponent(NComponent* component);
 
         float getFinalZ() const;
-        NVector getFinalPosition() const;
+        sf::Vector2f getFinalPosition() const;
         sf::Transform getFinalTransform() const;
 
-        NVector getParentPosition() const;
-        NVector getParentScale() const;
+        sf::Vector2f getParentPosition() const;
+        sf::Vector2f getParentScale() const;
         float getParentRotation() const;
 
-        NVector getActorPosition() const;
-        NVector getActorScale() const;
+        sf::Vector2f getActorPosition() const;
+        sf::Vector2f getActorScale() const;
         float getActorRotation() const;
 
-        void setActorPosition(NVector const& position);
-        void setActorScale(NVector const& scale);
+        void setActorPosition(sf::Vector2f const& position);
+        void setActorScale(sf::Vector2f const& scale);
         void setActorRotation(float rotation);
 
         virtual void onMoved();

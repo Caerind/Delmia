@@ -167,9 +167,9 @@ sf::FloatRect NLayerComponent::getBounds() const
     return getFinalTransform().transformRect(sf::FloatRect(0,0,mTileSize.x * mMapSize.x,mTileSize.y * mMapSize.y));
 }
 
-bool NLayerComponent::contains(NVector const& position) const
+bool NLayerComponent::contains(sf::Vector2f const& position) const
 {
-    return getBounds().contains(NVector::NToSFML2F(position));
+    return getBounds().contains(position);
 }
 
 int NLayerComponent::getType() const
@@ -242,12 +242,13 @@ void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
     {
         mTexture = texture.value();
     }
-    mMapSize = NVector::NToSFML2I(NString::toVector(n.attribute("msize").value()));
-    mTileSize = NVector::NToSFML2I(NString::toVector(n.attribute("tsize").value()));
+    mMapSize = NString::toVector2i(n.attribute("msize").value());
+    mTileSize = NString::toVector2i(n.attribute("tsize").value());
     mType = n.attribute("type").as_int();
     mHexSide = n.attribute("hexside").as_int();
-    setPosition(NString::toVector(n.attribute("pos").value()));
-    setScale(NString::toVector(n.attribute("sca").value()));
+    setPosition(NString::toVector2f(n.attribute("pos").value()));
+    setOrigin(NString::toVector2f(n.attribute("ori").value()));
+    setScale(NString::toVector2f(n.attribute("sca").value()));
     setRotation(n.attribute("rot").as_float());
 
     create(mTexture,mMapSize,mTileSize,mType,mHexSide);
@@ -267,6 +268,7 @@ void NLayerComponent::save(pugi::xml_node& node, std::string const& name)
     n.append_attribute("type") = mType;
     n.append_attribute("hexside") = mHexSide;
     n.append_attribute("pos") = NString::toString(getPosition()).c_str();
+    n.append_attribute("ori") = NString::toString(getOrigin()).c_str();
     n.append_attribute("sca") = NString::toString(getScale()).c_str();
     n.append_attribute("rot") = getRotation();
 

@@ -15,10 +15,10 @@ void World::update(sf::Time dt)
 {
     NWorld::tick(dt);
 
-    NVector m = NWorld::getPointerPositionView();
+    sf::Vector2f m = NWorld::getPointerPositionView();
     m.x = (int)m.x;
     m.y = (int)m.y;
-    NVector t = NVector::SFML2IToN(NMapUtility::Isometric::worldToCoords(m));
+    sf::Vector2i t = NMapUtility::Isometric::worldToCoords(m);
     t.x = (int)t.x;
     t.y = (int)t.y;
     sf::Vector2i c = getMouseCoords();

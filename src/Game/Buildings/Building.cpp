@@ -61,7 +61,7 @@ void Building::addTile(int x, int y, sf::IntRect rect)
     mTiles.back().coords = coords;
     mTiles.back().sprite = new NSpriteComponent();
     mTiles.back().sprite->setTexture("building",rect);
-    mTiles.back().sprite->setOrigin(rect.width/2,rect.height-64);
+    mTiles.back().sprite->setOrigin({rect.width * 0.5f, rect.height - 64.f});
     mTiles.back().sprite->setPosition(NMapUtility::Isometric::coordsToWorld(coords));
     mTiles.back().sprite->setPositionZ(1.f);
     mTiles.back().sprite->setColor(mColor);
