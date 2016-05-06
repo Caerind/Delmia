@@ -79,6 +79,20 @@ bool World::collide(int x, int y, bool isSolid)
     return false;
 }
 
+std::vector<Unit::Ptr> World::selectUnits(sf::FloatRect const& rect)
+{
+    std::vector<Unit::Ptr> units;
+    for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
+    {
+        if (rect.contains(itr->second->getPosition()))
+        {
+            units.push_back(itr->second);
+        }
+    }
+    // TODO : Remove units from gamestate if deleted
+    return units;
+}
+
 void World::clear()
 {
     mMap = nullptr;
