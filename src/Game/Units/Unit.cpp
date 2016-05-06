@@ -9,10 +9,10 @@ Unit::Unit()
     attachComponent(&mSprite);
     mSprite.setPositionZ(1.f);
     initSprite("unit",{61,121},{30.f,110.f});
-
     setPosition(0.f,0.f);
 
     mSpeed = 300.f;
+    mMovingTime = sf::Time::Zero;
 }
 
 Unit::Unit(float x, float y)
@@ -22,18 +22,10 @@ Unit::Unit(float x, float y)
     attachComponent(&mSprite);
     mSprite.setPositionZ(1.f);
     initSprite("unit",{61,121},{30.f,110.f});
-
-    attachComponent(&mRoot);
-    mRoot.setPositionZ(100.f);
-    mRoot.setRadius(3.f);
-    mRoot.setColor(sf::Color::Blue);
-
-    mSprite.attachComponent(&mNode);
-    mNode.setPositionZ(100.f);
-
     setPosition(x,y);
 
     mSpeed = 300.f;
+    mMovingTime = sf::Time::Zero;
 }
 
 std::size_t Unit::getType() const
@@ -49,10 +41,15 @@ void Unit::initSprite(std::string const& texture, sf::Vector2i tileSize, sf::Vec
     setDirection(Direction::S);
 }
 
+sf::Vector2i Unit::getCoords() const
+{
+    return NMapUtility::Isometric::worldToCoords(getPosition());
+}
+
 void Unit::setDirection(Direction dir)
 {
     mDirection = (dir < Direction::Count) ? dir : dir % Direction::Count;
-    mSprite.setTextureRect(sf::IntRect({0, (int)mDirection * mTileSize.y}, mTileSize));
+    updateTextureRect();
 }
 
 void Unit::setDirection(float angle)
@@ -104,6 +101,54 @@ std::size_t Unit::getDirection() const
     return mDirection;
 }
 
+void Unit::moveToDest(sf::Vector2f const& dest, sf::Time dt)
+{
+    sf::Vector2f delta = dest - getPosition();
+    if (!isZero(delta))
+    {
+        mMovingTime += dt;
+        if (mMovingTime >= sf::seconds(0.8f))
+        {
+            mMovingTime = sf::Time::Zero;
+        }
+        move(normalizedVector(delta) * dt.asSeconds() * mSpeed);
+        setDirection(getPolarAngle(delta));
+    }
+}
+
+void Unit::updateTextureRect()
+{
+    mSprite.setTextureRect(sf::IntRect({mTileSize.x * ((int)(mMovingTime.asSeconds() * 10.f)), (int)mDirection * mTileSize.y}, mTileSize));
+}
+
+void Unit::calculatePath()
+{
+    sf::Vector2i b = NMapUtility::Isometric::worldToCoords(getPosition());
+    sf::Vector2i e = NMapUtility::Isometric::worldToCoords(mPositionOrder);
+    NClockedTask t([b,e,this]()
+    {
+        mPath = NMapUtility::pathfinding(NMapUtility::Type::Isometric,b,e);
+    });
+    std::cout << "Path in : " << t.execute().asSeconds() << "s" << std::endl;
+    mPathDone = true;
+}
+
+void Unit::onBuildingAdded(std::vector<sf::Vector2i> tiles)
+{
+    bool recalculated = false;
+    for (std::size_t i = 0; i < mPath.size(); i++)
+    {
+        for (std::size_t j = 0; j < tiles.size(); j++)
+        {
+            if (!recalculated && mPath[i] == tiles[j])
+            {
+                calculatePath();
+                recalculated = true;
+            }
+        }
+    }
+}
+
 void Unit::positionOrder(sf::Vector2f const& position)
 {
     mPositionOrder = position;
@@ -116,43 +161,29 @@ void Unit::tick(sf::Time dt)
     {
         if (!mPathDone)
         {
-            sf::Vector2i b = NMapUtility::Isometric::worldToCoords(getPosition());
-            sf::Vector2i e = NMapUtility::Isometric::worldToCoords(mPositionOrder);
-            NClockedTask t([b,e,this]()
-            {
-                mPath = NMapUtility::pathfinding(NMapUtility::Type::Isometric,b,e);
-            });
-            std::cout << "Path in : " << t.execute().asSeconds() << "s" << std::endl;
-            mPathDone = true;
+            calculatePath();
         }
-
-        sf::Vector2f dest;
-        if (mPath.size() > 0)
-        {
-            dest = NMapUtility::Isometric::coordsToWorld(mPath.front());
-        }
-        else
-        {
-            dest = mPositionOrder;
-        }
-
-        sf::Vector2f delta = dest - getPosition();
-        move(normalizedVector(delta) * dt.asSeconds() * mSpeed);
-        setDirection(getPolarAngle(delta));
 
         if (mPath.size() > 0)
         {
             sf::Vector2f p = NMapUtility::Isometric::coordsToWorld(mPath.front());
-            if (getLength(getPosition() - p) < 30.f)
+            moveToDest(p, dt);
+            if (getLength(p - getPosition()) < 50.f)
             {
                 erase(mPath, 0);
             }
         }
+        else
+        {
+            moveToDest(mPositionOrder, dt);
+        }
 
-        if (getLength(mPositionOrder - getPosition()) < 30.f)
+        if (getLength(mPositionOrder - getPosition()) < 50.f)
         {
             mPositionOrder = sf::Vector2f();
             mPathDone = false;
+            mMovingTime = sf::Time::Zero;
+            updateTextureRect();
         }
     }
 }
