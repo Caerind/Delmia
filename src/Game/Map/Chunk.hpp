@@ -13,7 +13,7 @@ enum Tile
     Water,
 };
 
-class Chunk : public NActor
+class Chunk
 {
     public:
         typedef std::shared_ptr<Chunk> Ptr;

@@ -7,10 +7,9 @@ Chunk::Chunk(sf::Vector2i coords)
 : mCoords(coords)
 , mLayer()
 {
-    setPositionZ(-10.f);
-    mLayer.create("iso",getChunkSize(),getTileSize(),NLayerComponent::Isometric);
+    mLayer.create("iso",getChunkSize(),getTileSize(),NMapUtility::Type::Isometric);
     mLayer.setPosition(getChunkSize().x * getTileSize().x * coords.x, 0.5f * getChunkSize().y * getTileSize().y * coords.y);
-    attachComponent(&mLayer);
+    mLayer.setPositionZ(-10.f);
 }
 
 bool Chunk::loadFromFile()
@@ -92,7 +91,7 @@ void Chunk::saveToFile()
 
 sf::Vector2i Chunk::getChunkSize()
 {
-    return {16,64};
+    return {32,128};
 }
 
 sf::Vector2i Chunk::getTileSize()
