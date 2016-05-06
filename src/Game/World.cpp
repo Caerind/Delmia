@@ -93,8 +93,32 @@ std::vector<Unit::Ptr> World::selectUnits(sf::FloatRect const& rect)
     return units;
 }
 
+void World::removeActor(std::string const& id)
+{
+    NWorld::removeActor(id);
+
+    if (contains(mBuildings, id))
+    {
+        remove(mBuildings, id);
+    }
+    if (contains(mResources, id))
+    {
+        remove(mResources, id);
+    }
+    if (contains(mUnits,id))
+    {
+        remove(mUnits, id);
+        // TODO : Remove selected units from game state
+    }
+}
+
 void World::clear()
 {
     mMap = nullptr;
     NWorld::clear();
+}
+
+Map::Ptr World::getMap()
+{
+    return mMap;
 }

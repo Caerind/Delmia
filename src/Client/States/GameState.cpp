@@ -111,7 +111,7 @@ void GameState::handlePlacement(sf::Event const& event)
         mPlacing = false;
         if (mPlacement != nullptr)
         {
-            NWorld::removeActor(mPlacement->getId());
+            mWorld.removeActor(mPlacement->getId());
             mPlacement = nullptr;
         }
 
@@ -151,7 +151,7 @@ void GameState::handlePlacement(sf::Event const& event)
         {
             if (mPlacement != nullptr)
             {
-                NWorld::removeActor(mPlacement->getId());
+                mWorld.removeActor(mPlacement->getId());
             }
             switch (mPlacingType)
             {

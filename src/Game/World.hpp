@@ -25,6 +25,8 @@ class World
 
         std::vector<Unit::Ptr> selectUnits(sf::FloatRect const& zone);
 
+        void removeActor(std::string const& id);
+
         void clear();
 
         template <typename T>
@@ -41,6 +43,8 @@ class World
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createActor(Args&& ... args);
+
+        Map::Ptr getMap();
 
     protected:
         std::shared_ptr<Map> mMap;
@@ -67,6 +71,13 @@ bool World::buildingPlacing(int x, int y)
                 return false;
             }
         }
+        for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
+        {
+            if (itr->second->getCoords() == t)
+            {
+                return false;
+            }
+        }
     }
     return true;
 }
@@ -74,14 +85,20 @@ bool World::buildingPlacing(int x, int y)
 template <typename T, typename ... Args>
 std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
 {
-    if (buildingPlacing<T>(x,y))
+    if (!buildingPlacing<T>(x,y))
     {
-        std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
-        mBuildings[actor->getId()] = actor;
-
-        return actor;
+        return nullptr;
     }
-    return nullptr;
+
+    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    mBuildings[actor->getId()] = actor;
+
+    for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
+    {
+        itr->second->onBuildingAdded(T::getTilesBlueprint(x,y));
+    }
+
+    return actor;
 }
 
 template <typename T, typename ... Args>
@@ -94,6 +111,12 @@ std::shared_ptr<T> World::createResource(int x, int y, Args&& ... args)
 
     std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
     mResources[actor->getId()] = actor;
+
+    for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
+    {
+        itr->second->onBuildingAdded(T::getTilesBlueprint(x,y));
+    }
+
     return actor;
 }
 

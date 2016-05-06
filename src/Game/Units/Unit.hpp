@@ -36,9 +36,17 @@ class Unit : public Entity
 
         void initSprite(std::string const& texture, sf::Vector2i tileSize, sf::Vector2f origin);
 
+        sf::Vector2i getCoords() const;
+
         void setDirection(Direction dir);
         void setDirection(float angle);
         std::size_t getDirection() const;
+
+        void moveToDest(sf::Vector2f const& dest, sf::Time dt);
+        void updateTextureRect();
+
+        void calculatePath();
+        void onBuildingAdded(std::vector<sf::Vector2i> tiles);
 
         void positionOrder(sf::Vector2f const& position);
 
@@ -50,12 +58,11 @@ class Unit : public Entity
     protected:
         std::size_t mType;
         NSpriteComponent mSprite;
-        NPointComponent mRoot;
-        NPointComponent mNode;
         sf::Vector2i mTileSize;
         std::size_t mDirection;
 
         float mSpeed;
+        sf::Time mMovingTime;
 
         sf::Vector2f mPositionOrder;
         bool mPathDone;
