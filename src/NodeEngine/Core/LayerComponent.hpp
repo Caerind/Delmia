@@ -45,36 +45,4 @@ class NLayerComponent : public NSceneComponent
         sf::Vector2i mTileSize;
 };
 
-namespace NOrthogonal
-{
-class NLayerComponent : public ::NLayerComponent
-{
-    public:
-        NLayerComponent(sf::Vector2i coords = sf::Vector2i(0,0)) { mCoords = coords; }
-
-        // This is just to have the same interface for all type
-};
-} // namespace NOrthogonal
-
-namespace NHexagonal
-{
-class NLayerComponent : public ::NLayerComponent
-{
-    public:
-        NLayerComponent(sf::Vector2i coords = sf::Vector2i(0,0));
-        NLayerComponent(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, int hexSide, sf::Vector2i coords = sf::Vector2i(0,0));
-
-        void create(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, int hexSide);
-
-        sf::FloatRect getBounds() const;
-
-        virtual void load(pugi::xml_node& node, std::string const& name = "LayerComponent");
-        virtual void save(pugi::xml_node& node, std::string const& name = "LayerComponent");
-
-    protected:
-        int mHexSide;
-};
-} // namespace NHexagonal
-
-
 #endif // NLAYERCOMPONENT_HPP

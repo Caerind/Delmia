@@ -1,10 +1,10 @@
-#include "Isometric.hpp"
+#include "Hexagonal.hpp"
 
 #include "../Utils/Container.hpp"
 #include "../Utils/Math.hpp"
 #include "World.hpp"
 
-namespace NIsometric
+namespace NHexagonal
 {
 
 sf::Vector2i gTileSize = sf::Vector2i(1,1);
@@ -12,28 +12,20 @@ sf::Vector2i gLayerSize = sf::Vector2i(1,1);
 
 NLayerComponent::NLayerComponent(sf::Vector2i coords)
 {
-    mCoords = coords;
 }
 
-NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i coords)
+NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, int hexSide, sf::Vector2i coords)
 {
-    mCoords = coords;
-    setPosition(mCoords.x * NIsometric::getLayerSize().x * NIsometric::getTileSize().x, mCoords.y * 0.5f * NIsometric::getLayerSize().y * NIsometric::getTileSize().y);
-    create(textureName,NIsometric::getLayerSize(),NIsometric::getTileSize());
+    setPosition(mCoords.x * layerSize.x * tileSize.x, mCoords.y * layerSize.y * tileSize.y);
+    create(textureName,layerSize,tileSize,hexSide);
 }
 
-NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, sf::Vector2i coords)
-{
-    mCoords = coords;
-    setPosition(mCoords.x * layerSize.x * tileSize.x, mCoords.y * 0.5f * layerSize.y * tileSize.y);
-    create(textureName,layerSize,tileSize);
-}
-
-void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize)
+void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, int hexSide)
 {
     mTexture = textureName;
     mLayerSize = layerSize;
     mTileSize = tileSize;
+    mHexSide = hexSide;
 
     mTiles.resize(mLayerSize.x * mLayerSize.y);
 
@@ -42,13 +34,28 @@ void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerS
         for (int j = 0; j < mLayerSize.y; ++j)
         {
             sf::Sprite& tile = mTiles[i + j * mLayerSize.x];
-            if (j % 2 == 0)
+            int sSize = (std::max(mTileSize.x,mTileSize.y) - mHexSide) /2;
+            if (mTileSize.x > mTileSize.y)
             {
-                tile.setPosition(i * mTileSize.x, j * mTileSize.y * 0.5f);
+                if (j % 2 == 0)
+                {
+                    tile.setPosition(i * (mTileSize.x + mHexSide), j * mTileSize.y * 0.5f);
+                }
+                else
+                {
+                    tile.setPosition(i * (mTileSize.x + mHexSide) + sSize + mHexSide, j * mTileSize.y * 0.5f);
+                }
             }
             else
             {
-                tile.setPosition((i + 0.5f) * mTileSize.x, j * mTileSize.y * 0.5f);
+                if (i % 2 == 0)
+                {
+                    tile.setPosition(i * mTileSize.x * 0.5f, j * (mTileSize.y + mHexSide));
+                }
+                else
+                {
+                    tile.setPosition(i * mTileSize.x * 0.5f, j * (mTileSize.y + mHexSide) + sSize + mHexSide);
+                }
             }
         }
     }
@@ -62,36 +69,59 @@ void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerS
 
 sf::FloatRect NLayerComponent::getBounds() const
 {
-    return getFinalTransform().transformRect(sf::FloatRect(0, 0, mTileSize.x * mLayerSize.x, mTileSize.y * mLayerSize.y * 0.5f));
+    return getFinalTransform().transformRect(sf::FloatRect(0, 0, mTileSize.x * mLayerSize.x, mTileSize.y * mLayerSize.y));
+}
+
+void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
+{
+    pugi::xml_node n = node.child(name.c_str());
+    pugi::xml_attribute texture = n.attribute("texture");
+    if (texture)
+    {
+        mTexture = texture.value();
+    }
+    mLayerSize = NString::toVector2i(n.attribute("lsize").value());
+    mTileSize = NString::toVector2i(n.attribute("tsize").value());
+    mHexSide = n.attribute("hexside").as_int();
+    setPosition(NString::toVector2f(n.attribute("pos").value()));
+    setOrigin(NString::toVector2f(n.attribute("ori").value()));
+    setScale(NString::toVector2f(n.attribute("sca").value()));
+    setRotation(n.attribute("rot").as_float());
+
+    create(mTexture,mLayerSize,mTileSize,mHexSide);
+
+    if (!loadFromCode(n.attribute("data").value()))
+    {
+        std::cout << "Layer loading problem" << std::endl;
+    }
+}
+
+void NLayerComponent::save(pugi::xml_node& node, std::string const& name)
+{
+    pugi::xml_node n = node.append_child(name.c_str());
+    if (mTexture != "")
+    {
+        n.append_attribute("texture") = mTexture.c_str();
+    }
+    n.append_attribute("lsize") = NString::toString(mLayerSize).c_str();
+    n.append_attribute("tsize") = NString::toString(mTileSize).c_str();
+    n.append_attribute("pos") = NString::toString(getPosition()).c_str();
+    n.append_attribute("ori") = NString::toString(getOrigin()).c_str();
+    n.append_attribute("sca") = NString::toString(getScale()).c_str();
+    n.append_attribute("rot") = getRotation();
+
+    std::string data = getCode();
+    if (data != "")
+    {
+        n.append_attribute("data") = data.c_str();
+    }
 }
 
 
 sf::Vector2i worldToCoords(sf::Vector2f const& pos)
 {
-    sf::Vector2f s = {getTileSize().x * 0.5f, getTileSize().y * 0.5f};
-    sf::Vector2f mc = {(float)floor(pos.x / s.x), (float)floor(pos.y / s.y)};
-    sf::Vector2f p = pos;
-    p -= {mc.x * s.x, mc.y * s.y};
-    if (((int)mc.x + (int)mc.y) % 2 == 0)
-    {
-        if (NMath::atan2(s.y - p.y,p.x) > 30.f)
-        {
-            mc.x--;
-            mc.y--;
-        }
-    }
-    else
-    {
-        if (NMath::atan2(-p.y,p.x) > -30.f)
-        {
-            mc.y--;
-        }
-        else
-        {
-            mc.x--;
-        }
-    }
-    return {(int)floor(mc.x * 0.5f),(int)mc.y};
+    // TODO : Hexa - worldToCoords
+    return sf::Vector2i();
 }
 
 sf::Vector2i worldToChunk(sf::Vector2f const& pos)
@@ -106,17 +136,8 @@ sf::Vector2i worldToRelative(sf::Vector2f const& pos)
 
 sf::Vector2f coordsToWorld(sf::Vector2i const& coords)
 {
-    sf::Vector2f ret;
-    ret.y = coords.y * getTileSize().y * 0.5f + getTileSize().y * 0.5f;
-    if (coords.y % 2 == 0)
-    {
-        ret.x = coords.x * getTileSize().x + getTileSize().x * 0.5f;
-    }
-    else
-    {
-        ret.x = coords.x * getTileSize().x + getTileSize().x;
-    }
-    return ret;
+    // TODO : Hexa - coordsToWorld
+    return sf::Vector2f();
 }
 
 sf::Vector2i coordsToChunk(sf::Vector2i const& coords)
@@ -157,27 +178,7 @@ sf::Vector2i coordsToRelative(sf::Vector2i const& coords)
 std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
 {
     std::vector<sf::Vector2i> n;
-    if (coords.y % 2 == 0)
-    {
-        n.push_back({coords.x - 1, coords.y - 1});
-        n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x - 1, coords.y + 1});
-        n.push_back({coords.x, coords.y + 1});
-    }
-    else
-    {
-        n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x + 1, coords.y - 1});
-        n.push_back({coords.x, coords.y + 1});
-        n.push_back({coords.x + 1, coords.y + 1});
-    }
-    if (diag)
-    {
-        n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x + 1, coords.y});
-        n.push_back({coords.x, coords.y + 1});
-        n.push_back({coords.x - 1, coords.y});
-    }
+    // TODO : Hexa - Neighboors
     return n;
 }
 
@@ -281,4 +282,4 @@ sf::Vector2i getLayerSize()
     return gLayerSize;
 }
 
-} // namespace NIsometric
+} // namespace NHexagonal

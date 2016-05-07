@@ -1,97 +1,17 @@
-#include "Isometric.hpp"
+#include "Orthogonal.hpp"
 
 #include "../Utils/Container.hpp"
 #include "../Utils/Math.hpp"
-#include "World.hpp"
 
-namespace NIsometric
+namespace NOrthogonal
 {
 
 sf::Vector2i gTileSize = sf::Vector2i(1,1);
 sf::Vector2i gLayerSize = sf::Vector2i(1,1);
 
-NLayerComponent::NLayerComponent(sf::Vector2i coords)
-{
-    mCoords = coords;
-}
-
-NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i coords)
-{
-    mCoords = coords;
-    setPosition(mCoords.x * NIsometric::getLayerSize().x * NIsometric::getTileSize().x, mCoords.y * 0.5f * NIsometric::getLayerSize().y * NIsometric::getTileSize().y);
-    create(textureName,NIsometric::getLayerSize(),NIsometric::getTileSize());
-}
-
-NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, sf::Vector2i coords)
-{
-    mCoords = coords;
-    setPosition(mCoords.x * layerSize.x * tileSize.x, mCoords.y * 0.5f * layerSize.y * tileSize.y);
-    create(textureName,layerSize,tileSize);
-}
-
-void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize)
-{
-    mTexture = textureName;
-    mLayerSize = layerSize;
-    mTileSize = tileSize;
-
-    mTiles.resize(mLayerSize.x * mLayerSize.y);
-
-    for (int i = 0; i < mLayerSize.x; ++i)
-    {
-        for (int j = 0; j < mLayerSize.y; ++j)
-        {
-            sf::Sprite& tile = mTiles[i + j * mLayerSize.x];
-            if (j % 2 == 0)
-            {
-                tile.setPosition(i * mTileSize.x, j * mTileSize.y * 0.5f);
-            }
-            else
-            {
-                tile.setPosition((i + 0.5f) * mTileSize.x, j * mTileSize.y * 0.5f);
-            }
-        }
-    }
-
-    sf::Texture& texture = NWorld::getResources().getTexture(textureName);
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        mTiles[i].setTexture(texture);
-    }
-}
-
-sf::FloatRect NLayerComponent::getBounds() const
-{
-    return getFinalTransform().transformRect(sf::FloatRect(0, 0, mTileSize.x * mLayerSize.x, mTileSize.y * mLayerSize.y * 0.5f));
-}
-
-
 sf::Vector2i worldToCoords(sf::Vector2f const& pos)
 {
-    sf::Vector2f s = {getTileSize().x * 0.5f, getTileSize().y * 0.5f};
-    sf::Vector2f mc = {(float)floor(pos.x / s.x), (float)floor(pos.y / s.y)};
-    sf::Vector2f p = pos;
-    p -= {mc.x * s.x, mc.y * s.y};
-    if (((int)mc.x + (int)mc.y) % 2 == 0)
-    {
-        if (NMath::atan2(s.y - p.y,p.x) > 30.f)
-        {
-            mc.x--;
-            mc.y--;
-        }
-    }
-    else
-    {
-        if (NMath::atan2(-p.y,p.x) > -30.f)
-        {
-            mc.y--;
-        }
-        else
-        {
-            mc.x--;
-        }
-    }
-    return {(int)floor(mc.x * 0.5f),(int)mc.y};
+    return {(int)pos.x / getTileSize().x, (int)pos.y / getTileSize().y};
 }
 
 sf::Vector2i worldToChunk(sf::Vector2f const& pos)
@@ -106,17 +26,7 @@ sf::Vector2i worldToRelative(sf::Vector2f const& pos)
 
 sf::Vector2f coordsToWorld(sf::Vector2i const& coords)
 {
-    sf::Vector2f ret;
-    ret.y = coords.y * getTileSize().y * 0.5f + getTileSize().y * 0.5f;
-    if (coords.y % 2 == 0)
-    {
-        ret.x = coords.x * getTileSize().x + getTileSize().x * 0.5f;
-    }
-    else
-    {
-        ret.x = coords.x * getTileSize().x + getTileSize().x;
-    }
-    return ret;
+    return {coords.x * getTileSize().x + 0.5f * getTileSize().x, coords.y * getTileSize().y + 0.5f * getTileSize().y};
 }
 
 sf::Vector2i coordsToChunk(sf::Vector2i const& coords)
@@ -157,26 +67,16 @@ sf::Vector2i coordsToRelative(sf::Vector2i const& coords)
 std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
 {
     std::vector<sf::Vector2i> n;
-    if (coords.y % 2 == 0)
+	n.push_back({coords.x, coords.y - 1});
+	n.push_back({coords.x, coords.y + 1});
+	n.push_back({coords.x - 1, coords.y});
+	n.push_back({coords.x + 1, coords.y});
+	if (diag)
     {
-        n.push_back({coords.x - 1, coords.y - 1});
-        n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x - 1, coords.y + 1});
-        n.push_back({coords.x, coords.y + 1});
-    }
-    else
-    {
-        n.push_back({coords.x, coords.y - 1});
         n.push_back({coords.x + 1, coords.y - 1});
-        n.push_back({coords.x, coords.y + 1});
         n.push_back({coords.x + 1, coords.y + 1});
-    }
-    if (diag)
-    {
-        n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x + 1, coords.y});
-        n.push_back({coords.x, coords.y + 1});
-        n.push_back({coords.x - 1, coords.y});
+        n.push_back({coords.x - 1, coords.y + 1});
+        n.push_back({coords.x - 1, coords.y - 1});
     }
     return n;
 }
@@ -281,4 +181,4 @@ sf::Vector2i getLayerSize()
     return gLayerSize;
 }
 
-} // namespace NIsometric
+} // namespace NOrthogonal
