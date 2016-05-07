@@ -39,81 +39,6 @@ sf::Vector2f coordsToWorld(sf::Vector2i const& coords) // center of the tile
 
 } // namespace Orthogonal
 
-namespace Isometric
-{
-
-std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
-{
-    std::vector<sf::Vector2i> n;
-    if (coords.y % 2 == 0)
-    {
-        n.push_back({coords.x - 1, coords.y - 1});
-        n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x - 1, coords.y + 1});
-        n.push_back({coords.x, coords.y + 1});
-    }
-    else
-    {
-        n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x + 1, coords.y - 1});
-        n.push_back({coords.x, coords.y + 1});
-        n.push_back({coords.x + 1, coords.y + 1});
-    }
-    if (diag)
-    {
-        n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x + 1, coords.y});
-        n.push_back({coords.x, coords.y + 1});
-        n.push_back({coords.x - 1, coords.y});
-    }
-    return n;
-}
-
-sf::Vector2i worldToCoords(sf::Vector2f const& pos)
-{
-    sf::Vector2f s = {256.f * 0.5f, 128.f * 0.5f}; // HERE YOUR TILE SIZE
-    sf::Vector2f mc = {(float)floor(pos.x / s.x), (float)floor(pos.y / s.y)};
-    sf::Vector2f p = pos;
-    p -= {mc.x * s.x, mc.y * s.y};
-    if (((int)mc.x + (int)mc.y) % 2 == 0)
-    {
-        if (NMath::atan2(s.y - p.y,p.x) > 30.f)
-        {
-            mc.x--;
-            mc.y--;
-        }
-    }
-    else
-    {
-        if (NMath::atan2(-p.y,p.x) > -30.f)
-        {
-            mc.y--;
-        }
-        else
-        {
-            mc.x--;
-        }
-    }
-    return {(int)floor(mc.x * 0.5f),(int)mc.y};
-}
-
-sf::Vector2f coordsToWorld(sf::Vector2i const& coords)
-{
-    sf::Vector2f ret;
-    ret.y = coords.y * 128 * 0.5f + 128 * 0.5f;
-    if (coords.y % 2 == 0)
-    {
-        ret.x = coords.x * 256 + 256 * 0.5f;
-    }
-    else
-    {
-        ret.x = coords.x * 256 + 256;
-    }
-    return ret;
-}
-
-} // namespace Isometric
-
 namespace Hexagonal
 {
 
@@ -150,7 +75,6 @@ std::vector<sf::Vector2i> pathfinding(Type::MapType type, sf::Vector2i const& be
             switch (type)
             {
                 case Type::Orthogonal: n = Orthogonal::getNeighboors(container[i].coords); break;
-                case Type::Isometric: n = Isometric::getNeighboors(container[i].coords); break;
                 case Type::Hexagonal: n = Hexagonal::getNeighboors(container[i].coords); break;
                 default: break;
             }

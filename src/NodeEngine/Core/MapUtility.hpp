@@ -24,13 +24,6 @@ namespace NMapUtility
 		sf::Vector2f coordsToWorld(sf::Vector2i const& coords); // center of the tile
 	}
 
-	namespace Isometric
-	{
-		std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag = false);
-		sf::Vector2i worldToCoords(sf::Vector2f const& pos);
-		sf::Vector2f coordsToWorld(sf::Vector2i const& coords); // center of the tile
-	}
-
 	namespace Hexagonal
 	{
 		std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords);

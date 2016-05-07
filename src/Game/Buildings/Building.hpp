@@ -2,7 +2,7 @@
 #define BUILDING_HPP
 
 #include "../../NodeEngine/Core/SpriteComponent.hpp"
-#include "../../NodeEngine/Core/MapUtility.hpp"
+#include "../../NodeEngine/Core/Isometric.hpp"
 
 #include "../Entity.hpp"
 

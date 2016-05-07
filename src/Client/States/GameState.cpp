@@ -26,7 +26,7 @@ bool GameState::handleEvent(sf::Event const& event)
     {
         if (oldC != sf::Vector2i())
         {
-            std::vector<sf::Vector2i> p = NMapUtility::pathfinding(NMapUtility::Type::Isometric,oldC,mWorld.getMouseCoords());
+            std::vector<sf::Vector2i> p = NIsometric::pathfinding(oldC,mWorld.getMouseCoords());
             for (std::size_t i = 0; i < p.size(); i++)
             {
                 std::cout << p[i].x << " " << p[i].y << std::endl;

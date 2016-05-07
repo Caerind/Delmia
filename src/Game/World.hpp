@@ -2,7 +2,7 @@
 #define WORLD_HPP
 
 #include "../NodeEngine/Core/World.hpp"
-#include "../NodeEngine/Core/MapUtility.hpp"
+#include "../NodeEngine/Core/Isometric.hpp"
 
 #include "../Game.hpp"
 #include "Map/Map.hpp"
@@ -63,7 +63,7 @@ bool World::buildingPlacing(int x, int y)
         {
             return false;
         }
-        std::vector<sf::Vector2i> neighboors = NMapUtility::Isometric::getNeighboors(t,true);
+        std::vector<sf::Vector2i> neighboors = NIsometric::getNeighboors(t,true);
         for (sf::Vector2i const& n : neighboors)
         {
             if (collide(n.x,n.y,false))
