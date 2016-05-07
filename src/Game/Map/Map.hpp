@@ -2,9 +2,15 @@
 #define MAP_HPP
 
 #include "../NodeEngine/Core/World.hpp"
-#include "../NodeEngine/Core/MapUtility.hpp"
+#include "../NodeEngine/Core/Isometric.hpp"
 
-#include "Chunk.hpp"
+enum Tile
+{
+    None = 0,
+    Dirt,
+    Path,
+    Water,
+};
 
 class Map : public NActor
 {
@@ -14,10 +20,6 @@ class Map : public NActor
     public:
         Map();
         ~Map();
-
-        static sf::Vector2i worldToChunk(sf::Vector2f const& pos);
-        static sf::Vector2i globalToChunk(sf::Vector2i const& pos);
-        static sf::Vector2i globalToRelative(sf::Vector2i const& pos);
 
         void tick(sf::Time dt);
 
@@ -32,6 +34,8 @@ class Map : public NActor
         int getTileId(int cx, int cy, int x, int y);
         int getTileId(int x, int y);
 
+        void generate(NIsometric::NLayerComponent* chunk);
+
         void load(pugi::xml_node& node);
         void save(pugi::xml_node& node);
 
@@ -44,7 +48,7 @@ class Map : public NActor
         std::vector<sf::Vector2i> determineUsefullChunks();
 
     protected:
-        std::vector<Chunk::Ptr> mChunks;
+        std::vector<NIsometric::NLayerComponent*> mChunks;
 };
 
 #endif // MAP_HPP

@@ -2,7 +2,7 @@
 #define UNIT_HPP
 
 #include "../../NodeEngine/Core/SpriteComponent.hpp"
-#include "../../NodeEngine/Core/MapUtility.hpp"
+#include "../../NodeEngine/Core/Isometric.hpp"
 
 #include "../../NodeEngine/Core/PointComponent.hpp"
 

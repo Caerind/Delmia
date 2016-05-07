@@ -5,7 +5,6 @@
 #include "Game/World.hpp"
 
 #include "Game/Map/Map.hpp"
-#include "Game/Map/Chunk.hpp"
 
 #include "Game/Buildings/Building.hpp"
 #include "Game/Buildings/Barrack.hpp"

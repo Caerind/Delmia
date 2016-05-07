@@ -18,7 +18,7 @@ void World::update(sf::Time dt)
     sf::Vector2f m = NWorld::getPointerPositionView();
     m.x = (int)m.x;
     m.y = (int)m.y;
-    sf::Vector2i t = NMapUtility::Isometric::worldToCoords(m);
+    sf::Vector2i t = NIsometric::worldToCoords(m);
     t.x = (int)t.x;
     t.y = (int)t.y;
     sf::Vector2i c = getMouseCoords();
@@ -33,8 +33,8 @@ void World::update(sf::Time dt)
     NWorld::getWindow().setDebugInfo("chunks",std::to_string(mMap->getChunkCount()));
 
     NWorld::getWindow().setDebugInfo("pos-g",std::to_string(c.x) + "," + std::to_string(c.y));
-    NWorld::getWindow().setDebugInfo("pos-c",std::to_string(Map::globalToChunk(c).x) + "," + std::to_string(Map::globalToChunk(c).y));
-    NWorld::getWindow().setDebugInfo("pos-r",std::to_string(Map::globalToRelative(c).x) + "," + std::to_string(Map::globalToRelative(c).y));
+    NWorld::getWindow().setDebugInfo("pos-c",std::to_string(NIsometric::coordsToChunk(c).x) + "," + std::to_string(NIsometric::coordsToChunk(c).y));
+    NWorld::getWindow().setDebugInfo("pos-r",std::to_string(NIsometric::coordsToRelative(c).x) + "," + std::to_string(NIsometric::coordsToRelative(c).y));
 }
 
 void World::render(sf::RenderTarget& target)
@@ -44,7 +44,7 @@ void World::render(sf::RenderTarget& target)
 
 sf::Vector2i World::getMouseCoords()
 {
-    return NMapUtility::Isometric::worldToCoords(NWorld::getPointerPositionView());
+    return NIsometric::worldToCoords(NWorld::getPointerPositionView());
 }
 
 bool World::collide(int x, int y, bool isSolid)
@@ -89,7 +89,6 @@ std::vector<Unit::Ptr> World::selectUnits(sf::FloatRect const& rect)
             units.push_back(itr->second);
         }
     }
-    // TODO : Remove units from gamestate if deleted
     return units;
 }
 

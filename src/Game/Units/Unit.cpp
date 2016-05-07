@@ -43,7 +43,7 @@ void Unit::initSprite(std::string const& texture, sf::Vector2i tileSize, sf::Vec
 
 sf::Vector2i Unit::getCoords() const
 {
-    return NMapUtility::Isometric::worldToCoords(getPosition());
+    return NIsometric::worldToCoords(getPosition());
 }
 
 void Unit::setDirection(Direction dir)
@@ -123,11 +123,11 @@ void Unit::updateTextureRect()
 
 void Unit::calculatePath()
 {
-    sf::Vector2i b = NMapUtility::Isometric::worldToCoords(getPosition());
-    sf::Vector2i e = NMapUtility::Isometric::worldToCoords(mPositionOrder);
+    sf::Vector2i b = NIsometric::worldToCoords(getPosition());
+    sf::Vector2i e = NIsometric::worldToCoords(mPositionOrder);
     NClockedTask t([b,e,this]()
     {
-        mPath = NMapUtility::pathfinding(NMapUtility::Type::Isometric,b,e);
+        mPath = NIsometric::pathfinding(b,e);
     });
     std::cout << "Path in : " << t.execute().asSeconds() << "s" << std::endl;
     mPathDone = true;
@@ -166,7 +166,7 @@ void Unit::tick(sf::Time dt)
 
         if (mPath.size() > 0)
         {
-            sf::Vector2f p = NMapUtility::Isometric::coordsToWorld(mPath.front());
+            sf::Vector2f p = NIsometric::coordsToWorld(mPath.front());
             moveToDest(p, dt);
             if (getLength(p - getPosition()) < 50.f)
             {

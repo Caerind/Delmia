@@ -4,6 +4,8 @@
 
 Map::Map()
 {
+    NIsometric::setLayerSize(sf::Vector2i(16,64));
+    NIsometric::setTileSize(sf::Vector2i(256,128));
 }
 
 Map::~Map()
@@ -12,47 +14,10 @@ Map::~Map()
     {
         for (std::size_t i = 0; i < mChunks.size(); i++)
         {
-            mChunks[i]->saveToFile();
+            //mChunks[i]->saveToFile();
         }
     }
     mChunks.clear();
-}
-
-sf::Vector2i Map::worldToChunk(sf::Vector2f const& pos)
-{
-    return globalToChunk(NMapUtility::Isometric::worldToCoords(pos));
-}
-
-sf::Vector2i Map::globalToChunk(sf::Vector2i const& pos)
-{
-    sf::Vector2i c;
-    c.x = pos.x / Chunk::getChunkSize().x;
-    if (pos.x < 0)
-    {
-        c.x--;
-    }
-    c.y = pos.y / Chunk::getChunkSize().y;
-    if (pos.y < 0)
-    {
-        c.y--;
-    }
-    return c;
-}
-
-sf::Vector2i Map::globalToRelative(sf::Vector2i const& pos)
-{
-    sf::Vector2i c;
-    c.x  = pos.x % Chunk::getChunkSize().x;
-    c.y  = pos.y % Chunk::getChunkSize().y;
-    if (c.x < 0)
-    {
-        c.x += Chunk::getChunkSize().x;
-    }
-    if (c.y < 0)
-    {
-        c.y += Chunk::getChunkSize().y;
-    }
-    return c;
 }
 
 void Map::tick(sf::Time dt)
@@ -66,8 +31,8 @@ void Map::addChunk(int cx, int cy)
     sf::Vector2i coords = sf::Vector2i(cx,cy);
     if (!contains(coords))
     {
-        mChunks.push_back(std::make_shared<Chunk>(coords));
-        if (Client::isOnline())
+        mChunks.push_back(new NIsometric::NLayerComponent("iso",coords));
+        /*if (Client::isOnline())
         {
             // TODO : Load from online
         }
@@ -78,6 +43,9 @@ void Map::addChunk(int cx, int cy)
                 mChunks.back()->generate();
             }
         }
+        */
+        mChunks.back()->setPositionZ(-10.f);
+        generate(mChunks.back());
     }
 }
 
@@ -90,8 +58,9 @@ void Map::removeChunk(int cx, int cy)
         {
             if (!Client::isOnline())
             {
-                mChunks[i]->saveToFile();
+                //mChunks[i]->saveToFile();
             }
+            delete mChunks[i];
             mChunks.erase(mChunks.begin() + i);
         }
         else
@@ -113,15 +82,15 @@ void Map::setTileId(int cx, int cy, int x, int y, int id)
     {
         if (mChunks[i]->getCoords() == coords)
         {
-            mChunks[i]->setTileId(x,y,id);
+            mChunks[i]->setTileId({x,y},id);
         }
     }
 }
 
 void Map::setTileId(int x, int y, int id)
 {
-    sf::Vector2i chunkCoords = globalToChunk(sf::Vector2i(x,y));
-    sf::Vector2i tileCoords = globalToRelative(sf::Vector2i(x,y));
+    sf::Vector2i chunkCoords = NIsometric::coordsToChunk(sf::Vector2i(x,y));
+    sf::Vector2i tileCoords = NIsometric::coordsToRelative(sf::Vector2i(x,y));
     setTileId(chunkCoords.x,chunkCoords.y,tileCoords.x,tileCoords.y,id);
 }
 
@@ -132,7 +101,7 @@ int Map::getTileId(int cx, int cy, int x, int y)
     {
         if (mChunks[i]->getCoords() == coords)
         {
-            return mChunks[i]->getTileId(x,y);
+            return mChunks[i]->getTileId({x,y});
         }
     }
     return 0;
@@ -140,9 +109,31 @@ int Map::getTileId(int cx, int cy, int x, int y)
 
 int Map::getTileId(int x, int y)
 {
-    sf::Vector2i chunkCoords = globalToChunk(sf::Vector2i(x,y));
-    sf::Vector2i tileCoords = globalToRelative(sf::Vector2i(x,y));
+    sf::Vector2i chunkCoords = NIsometric::coordsToChunk(sf::Vector2i(x,y));
+    sf::Vector2i tileCoords = NIsometric::coordsToRelative(sf::Vector2i(x,y));
     return getTileId(chunkCoords.x,chunkCoords.y,tileCoords.x,tileCoords.y);
+}
+
+void Map::generate(NIsometric::NLayerComponent* chunk)
+{
+    sf::Vector2i coords;
+    for (coords.x = 0; coords.x < chunk->getLayerSize().x; coords.x++)
+    {
+        for (coords.y = 0; coords.y < chunk->getLayerSize().y; coords.y++)
+        {
+            chunk->setTileId(coords,Tile::Dirt);
+
+            if (coords.y + coords.x == 5)
+            {
+                chunk->setTileId(coords,Tile::Path);
+            }
+
+            if (coords.y + coords.x == 10)
+            {
+                chunk->setTileId(coords,Tile::Water);
+            }
+        }
+    }
 }
 
 void Map::load(pugi::xml_node& node)
@@ -226,9 +217,9 @@ std::vector<sf::Vector2i> Map::determineUsefullChunks()
     std::vector<sf::Vector2i> usefull;
 
     sf::View& view = NWorld::getActiveView();
-    sf::Vector2f delta = sf::Vector2f(Chunk::getTileSize().x,Chunk::getTileSize().y);
-    sf::Vector2i begin = worldToChunk(view.getCenter() - view.getSize() * 0.5f - delta);
-    sf::Vector2i end = worldToChunk(view.getCenter() + view.getSize() * 0.5f + delta);
+    sf::Vector2f delta = sf::Vector2f(NIsometric::getTileSize().x, NIsometric::getTileSize().y);
+    sf::Vector2i begin = NIsometric::worldToChunk(view.getCenter() - view.getSize() * 0.5f - delta);
+    sf::Vector2i end = NIsometric::worldToChunk(view.getCenter() + view.getSize() * 0.5f + delta);
 
     sf::Vector2i coords;
     for (coords.x = begin.x; coords.x <= end.x; coords.x++)
