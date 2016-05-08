@@ -31,32 +31,36 @@ NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i la
 
 void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize)
 {
-    mTexture = textureName;
+    mTextureName = textureName;
     mLayerSize = layerSize;
     mTileSize = tileSize;
 
-    mTiles.resize(mLayerSize.x * mLayerSize.y);
+    mTexture = nullptr;
+    mTexture = &NWorld::getResources().getTexture(textureName);
+
+    mVertices.setPrimitiveType(sf::Quads);
+    mVertices.resize(mLayerSize.x * mLayerSize.y * 4);
 
     for (int i = 0; i < mLayerSize.x; ++i)
     {
         for (int j = 0; j < mLayerSize.y; ++j)
         {
-            sf::Sprite& tile = mTiles[i + j * mLayerSize.x];
+            sf::Vertex* quad = &mVertices[(i + j * mLayerSize.x) * 4];
             if (j % 2 == 0)
             {
-                tile.setPosition(i * mTileSize.x, j * mTileSize.y * 0.5f);
+                quad[0].position = {i * mTileSize.x * 1.f, j * mTileSize.y * 0.5f};
+                quad[1].position = {(i + 1) * mTileSize.x * 1.f, j * mTileSize.y * 0.5f};
+                quad[2].position = {(i + 1) * mTileSize.x * 1.f, j * mTileSize.y * 0.5f + mTileSize.y};
+                quad[3].position = {i * mTileSize.x * 1.f, j * mTileSize.y * 0.5f + mTileSize.y};
             }
             else
             {
-                tile.setPosition((i + 0.5f) * mTileSize.x, j * mTileSize.y * 0.5f);
+                quad[0].position = {(i + 0.5f) * mTileSize.x, j * mTileSize.y * 0.5f};
+                quad[1].position = {(i + 1.5f) * mTileSize.x, j * mTileSize.y * 0.5f};
+                quad[2].position = {(i + 1.5f) * mTileSize.x, j * mTileSize.y * 0.5f + mTileSize.y};
+                quad[3].position = {(i + 0.5f) * mTileSize.x, j * mTileSize.y * 0.5f + mTileSize.y};
             }
         }
-    }
-
-    sf::Texture& texture = NWorld::getResources().getTexture(textureName);
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        mTiles[i].setTexture(texture);
     }
 }
 
@@ -161,15 +165,15 @@ std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
     {
         n.push_back({coords.x - 1, coords.y - 1});
         n.push_back({coords.x, coords.y - 1});
-        n.push_back({coords.x - 1, coords.y + 1});
         n.push_back({coords.x, coords.y + 1});
+        n.push_back({coords.x - 1, coords.y + 1});
     }
     else
     {
         n.push_back({coords.x, coords.y - 1});
         n.push_back({coords.x + 1, coords.y - 1});
-        n.push_back({coords.x, coords.y + 1});
         n.push_back({coords.x + 1, coords.y + 1});
+        n.push_back({coords.x, coords.y + 1});
     }
     if (diag)
     {
@@ -189,38 +193,115 @@ namespace priv
         sf::Vector2i coords;
         sf::Vector2i parent;
     };
+
+std::vector<sf::Vector2i> reorganizedNeighboors(sf::Vector2i const& pos, sf::Vector2i const& end)
+{
+    std::vector<sf::Vector2i> n = getNeighboors(pos,false);
+    std::vector<sf::Vector2i> p;
+    sf::Vector2f delta = coordsToWorld(end) - coordsToWorld(pos);
+    if (isZero(delta))
+    {
+        return n;
+    }
+    float angle = getPolarAngle(delta);
+    if (0.f <= angle && angle < 30.f) // 2130
+    {
+        p.push_back(n.at(2));
+        p.push_back(n.at(1));
+        p.push_back(n.at(3));
+        p.push_back(n.at(0));
+    }
+    else if (30.f <= angle && angle < 90.f) // 2310
+    {
+        p.push_back(n.at(2));
+        p.push_back(n.at(3));
+        p.push_back(n.at(1));
+        p.push_back(n.at(0));
+    }
+    else if (90.f <= angle && angle < 150.f) // 3201
+    {
+        p.push_back(n.at(3));
+        p.push_back(n.at(2));
+        p.push_back(n.at(0));
+        p.push_back(n.at(1));
+    }
+    else if (150.f <= angle && angle < 180.f) // 3021
+    {
+        p.push_back(n.at(3));
+        p.push_back(n.at(0));
+        p.push_back(n.at(2));
+        p.push_back(n.at(1));
+    }
+    else if (180.f <= angle && angle < 210.f) // 0312
+    {
+        p.push_back(n.at(0));
+        p.push_back(n.at(3));
+        p.push_back(n.at(1));
+        p.push_back(n.at(2));
+    }
+    else if (210.f <= angle && angle < 270.f) // 0132
+    {
+        p.push_back(n.at(0));
+        p.push_back(n.at(1));
+        p.push_back(n.at(3));
+        p.push_back(n.at(2));
+    }
+    else if (270.f <= angle && angle < 330.f) // 1023
+    {
+        p.push_back(n.at(1));
+        p.push_back(n.at(0));
+        p.push_back(n.at(2));
+        p.push_back(n.at(3));
+    }
+    else // 1203
+    {
+        p.push_back(n.at(1));
+        p.push_back(n.at(2));
+        p.push_back(n.at(0));
+        p.push_back(n.at(3));
+    }
+    return p;
+}
+
 } // namespace priv
 
-std::vector<sf::Vector2i> pathfinding(sf::Vector2i const& begin, sf::Vector2i const& end)
+std::vector<sf::Vector2i> pathfinding(sf::Vector2i const& begin, sf::Vector2i const& end, std::function<bool(sf::Vector2i const& coords)> collisions)
 {
     std::vector<priv::Node> container;
     add(container, priv::Node(begin,begin));
     std::size_t test = 0;
     bool reached = false;
-    while (test < 50 && !reached)
+    while (test < 20 && !reached)
     {
         std::vector<priv::Node> temp;
         for (std::size_t i = 0; i < container.size(); i++)
         {
-            std::vector<sf::Vector2i> n = getNeighboors(container[i].coords);
+            std::vector<sf::Vector2i> n = priv::reorganizedNeighboors(container[i].coords, end);
             for (std::size_t j = 0; j < n.size(); j++)
             {
-                bool found = false;
+                bool addToList = true;
+                if (collisions)
+                {
+                    if (collisions(n[j]))
+                    {
+                        addToList = false;
+                    }
+                }
                 for (std::size_t k = 0; k < container.size(); k++)
                 {
                     if (container[k].coords == n[j])
                     {
-                        found = true;
+                        addToList = false;
                     }
                 }
                 for (std::size_t k = 0; k < temp.size(); k++)
                 {
                     if (temp[k].coords == n[j])
                     {
-                        found = true;
+                        addToList = false;
                     }
                 }
-                if (!found)
+                if (addToList)
                 {
                     add(temp, priv::Node(n[j], container[i].coords));
                     if (n[j] == end)
@@ -233,7 +314,6 @@ std::vector<sf::Vector2i> pathfinding(sf::Vector2i const& begin, sf::Vector2i co
         append(container, temp);
         test++;
     }
-
     std::vector<sf::Vector2i> path;
     if (reached)
     {

@@ -17,7 +17,7 @@ class Shader : public sf::Shader
         void setUniform(std::string const& name, float x);
         float getUniformFloat(std::string const& name);
 
-        // TODO : Add types
+        // TODO : Add Shader Uniform Types : Waiting for the SFML new version documentation
 
     protected:
         std::map<std::string,float> mFloats;

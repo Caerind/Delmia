@@ -5,11 +5,13 @@
 
 NLayerComponent::NLayerComponent(sf::Vector2i coords)
 : mCoords(coords)
+, mTexture(nullptr)
 {
 }
 
 NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, sf::Vector2i coords)
 : mCoords(coords)
+, mTexture(nullptr)
 {
     setPosition(mCoords.x * layerSize.x * tileSize.x, mCoords.y * layerSize.y * tileSize.y);
     create(textureName,layerSize,tileSize);
@@ -17,25 +19,26 @@ NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i la
 
 void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize)
 {
-    mTexture = textureName;
+    mTextureName = textureName;
     mLayerSize = layerSize;
     mTileSize = tileSize;
 
-    mTiles.resize(mLayerSize.x * mLayerSize.y);
+    mTexture = nullptr;
+    mTexture = &NWorld::getResources().getTexture(textureName);
+
+    mVertices.setPrimitiveType(sf::Quads);
+    mVertices.resize(mLayerSize.x * mLayerSize.y * 4);
 
     for (int i = 0; i < mLayerSize.x; ++i)
     {
         for (int j = 0; j < mLayerSize.y; ++j)
         {
-            sf::Sprite& tile = mTiles[i + j * mLayerSize.x];
-            tile.setPosition(i * mTileSize.x, j * mTileSize.y);
+            sf::Vertex* quad = &mVertices[(i + j * mLayerSize.x) * 4];
+            quad[0].position = sf::Vector2f(i * mTileSize.x, j * mTileSize.y);
+            quad[1].position = sf::Vector2f((i + 1) * mTileSize.x, j * mTileSize.y);
+            quad[2].position = sf::Vector2f((i + 1) * mTileSize.x, (j + 1) * mTileSize.y);
+            quad[3].position = sf::Vector2f(i * mTileSize.x, (j + 1) * mTileSize.y);
         }
-    }
-
-    sf::Texture& texture = NWorld::getResources().getTexture(textureName);
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        mTiles[i].setTexture(texture);
     }
 }
 
@@ -120,14 +123,11 @@ void NLayerComponent::render(sf::RenderTarget& target)
 {
     sf::RenderStates states;
     states.transform *= getFinalTransform();
-    sf::Vector2i coords;
-    for (coords.x = 0; coords.x < mLayerSize.x; coords.x++)
+    if (mTexture != nullptr)
     {
-        for (coords.y = 0; coords.y < mLayerSize.y; coords.y++)
-        {
-            target.draw(mTiles[coords.x + coords.y * mLayerSize.x],states);
-        }
+        states.texture = mTexture;
     }
+    target.draw(mVertices,states);
 }
 
 sf::FloatRect NLayerComponent::getBounds() const
@@ -139,7 +139,12 @@ void NLayerComponent::setTileId(sf::Vector2i const& coords, int id)
 {
     if (0 <= coords.x && coords.x < mLayerSize.x && 0 <= coords.y && coords.y < mLayerSize.y)
     {
-        mTiles[coords.x + coords.y * mLayerSize.x].setTextureRect(idToRect(id));
+        sf::Vertex* quad = &mVertices[(coords.x + coords.y * mLayerSize.x) * 4];
+        sf::IntRect rect = idToRect(id);
+        quad[0].texCoords = sf::Vector2f(rect.left, rect.top);
+        quad[1].texCoords = sf::Vector2f(rect.left + rect.width, rect.top);
+        quad[2].texCoords = sf::Vector2f(rect.left + rect.width, rect.top + rect.height);
+        quad[3].texCoords = sf::Vector2f(rect.left, rect.top + rect.height);
     }
 }
 
@@ -147,16 +152,21 @@ int NLayerComponent::getTileId(sf::Vector2i const& coords) const
 {
     if (0 <= coords.x && coords.x < mLayerSize.x && 0 <= coords.y && coords.y < mLayerSize.y)
     {
-        return rectToId(mTiles.at(coords.x + coords.y * mLayerSize.x).getTextureRect());
+        sf::IntRect rect;
+        rect.left = mVertices[(coords.x + coords.y * mLayerSize.x) * 4].texCoords.x;
+        rect.top = mVertices[(coords.x + coords.y * mLayerSize.x) * 4].texCoords.y;
+        rect.width = mVertices[(coords.x + coords.y * mLayerSize.x) * 4 + 2].texCoords.x - rect.left;
+        rect.height = mVertices[(coords.x + coords.y * mLayerSize.x) * 4 + 2].texCoords.y - rect.top;
+        return rectToId(rect);
     }
     return 0;
 }
 
 sf::IntRect NLayerComponent::idToRect(int id) const
 {
-    if (mTexture != "")
+    if (mTexture != nullptr && mTileSize.x != 0)
     {
-        int tilePerLine = NWorld::getResources().getTexture(mTexture).getSize().x / mTileSize.x;
+        int tilePerLine = mTexture->getSize().x / mTileSize.x;
         int x = id % tilePerLine;
         int y = id / tilePerLine;
         return sf::IntRect(x * mTileSize.x,y * mTileSize.y, mTileSize.x, mTileSize.y);
@@ -166,11 +176,11 @@ sf::IntRect NLayerComponent::idToRect(int id) const
 
 int NLayerComponent::rectToId(sf::IntRect const& rect) const
 {
-    if (mTexture != "")
+    if (mTexture != nullptr && mTileSize != sf::Vector2i())
     {
         int x = rect.left / mTileSize.x;
         int y = rect.top / mTileSize.y;
-        int tilePerLine = NWorld::getResources().getTexture(mTexture).getSize().x / mTileSize.x;
+        int tilePerLine = mTexture->getSize().x / mTileSize.x;
         int id = x + y * tilePerLine;
         return id;
     }
@@ -180,10 +190,11 @@ int NLayerComponent::rectToId(sf::IntRect const& rect) const
 void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
 {
     pugi::xml_node n = node.child(name.c_str());
+    mCoords = NString::toVector2i(n.attribute("coords").value());
     pugi::xml_attribute texture = n.attribute("texture");
     if (texture)
     {
-        mTexture = texture.value();
+        mTextureName = texture.value();
     }
     mLayerSize = NString::toVector2i(n.attribute("lsize").value());
     mTileSize = NString::toVector2i(n.attribute("tsize").value());
@@ -192,20 +203,21 @@ void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
     setScale(NString::toVector2f(n.attribute("sca").value()));
     setRotation(n.attribute("rot").as_float());
 
-    create(mTexture,mLayerSize,mTileSize);
+    create(mTextureName,mLayerSize,mTileSize);
 
     if (!loadFromCode(n.attribute("data").value()))
     {
-        std::cout << "Layer loading problem" << std::endl;
+        std::cout << "Layer loading problem : bool NLayerComponent::loadFromCode(..) has returned false in NodeEngine\\Core\\LayerComponent.cpp" << std::endl;
     }
 }
 
 void NLayerComponent::save(pugi::xml_node& node, std::string const& name)
 {
     pugi::xml_node n = node.append_child(name.c_str());
-    if (mTexture != "")
+    n.append_attribute("coords") = NString::toString(mCoords).c_str();
+    if (mTextureName != "" && mTexture != nullptr)
     {
-        n.append_attribute("texture") = mTexture.c_str();
+        n.append_attribute("texture") = mTextureName.c_str();
     }
     n.append_attribute("lsize") = NString::toString(mLayerSize).c_str();
     n.append_attribute("tsize") = NString::toString(mTileSize).c_str();
