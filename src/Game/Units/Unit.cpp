@@ -1,4 +1,5 @@
 #include "Unit.hpp"
+#include "World.hpp"
 
 #include "../../NodeEngine/Utils/ClockedTask.hpp"
 
@@ -127,7 +128,7 @@ void Unit::calculatePath()
     sf::Vector2i e = NIsometric::worldToCoords(mPositionOrder);
     NClockedTask t([b,e,this]()
     {
-        mPath = NIsometric::pathfinding(b,e);
+        mPath = NIsometric::pathfinding(b,e,[this](sf::Vector2i const& coords)->bool{return mWorld->collide(coords);});
     });
     std::cout << "Path in : " << t.execute().asSeconds() << "s" << std::endl;
     mPathDone = true;

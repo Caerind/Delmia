@@ -3,6 +3,7 @@
 
 #include "../NodeEngine/Core/World.hpp"
 
+class World;
 class Entity : public NActor
 {
     public:
@@ -29,7 +30,11 @@ class Entity : public NActor
         bool hasResourceAmount(std::size_t resourceId, int value) const;
         int getResourceAmount(std::size_t resourceId) const;
 
+        void setWorld(World* world);
+
     protected:
+        World* mWorld;
+
         float mLife;
         float mLifeMax;
 
