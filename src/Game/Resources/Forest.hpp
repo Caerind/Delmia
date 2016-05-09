@@ -10,9 +10,7 @@ class Forest : public Resource
 
     public:
         Forest();
-        Forest(int x, int y);
-
-        std::vector<std::pair<sf::Vector2i,sf::IntRect>> getTiles(int x, int y);
+        Forest(sf::Vector2i const& coords);
 };
 
 #endif // FOREST_HPP

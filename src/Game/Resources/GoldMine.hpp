@@ -10,9 +10,7 @@ class GoldMine : public Resource
 
     public:
         GoldMine();
-        GoldMine(int x, int y);
-
-        std::vector<std::pair<sf::Vector2i,sf::IntRect>> getTiles(int x, int y);
+        GoldMine(sf::Vector2i const& coords);
 };
 
 #endif // GOLDMINE_HPP

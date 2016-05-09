@@ -53,7 +53,7 @@ bool World::collide(sf::Vector2i const& coords, bool isSolid)
     // Buildings
     for (auto itr = mBuildings.begin(); itr != mBuildings.end(); itr++)
     {
-        if (itr->second->collide(coords.x,coords.y))
+        if (itr->second->collide(coords))
         {
             return true;
         }
@@ -64,7 +64,7 @@ bool World::collide(sf::Vector2i const& coords, bool isSolid)
         // Resources
         for (auto itr = mResources.begin(); itr != mResources.end(); itr++)
         {
-            if (itr->second->collide(coords.x,coords.y))
+            if (itr->second->collide(coords))
             {
                 return true;
             }

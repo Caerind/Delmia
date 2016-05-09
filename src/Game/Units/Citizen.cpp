@@ -5,7 +5,7 @@ Citizen::Citizen()
     mType = Units::Citizen;
 }
 
-Citizen::Citizen(float x, float y)
+Citizen::Citizen(sf::Vector2f const& pos) : Unit(pos)
 {
     mType = Units::Citizen;
 }

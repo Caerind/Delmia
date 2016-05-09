@@ -35,7 +35,8 @@ class GameState : public ah::State
         sf::RectangleShape mSelectionZone;
         std::vector<Unit::Ptr> mSelectedUnits;
 
-        sf::Vector2i oldC;
+
+        float mCameraSpeed;
 };
 
 

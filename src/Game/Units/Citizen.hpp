@@ -10,9 +10,9 @@ class Citizen : public Unit
 
     public:
         Citizen();
-        Citizen(float x, float y);
+        Citizen(sf::Vector2f const& pos);
 
-    private:
+    protected:
 };
 
 #endif // CITIZEN_HPP

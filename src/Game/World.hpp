@@ -38,16 +38,16 @@ class World
         void clear();
 
         template <typename T>
-        bool buildingPlacing(int x, int y);
+        bool buildingPlacing(sf::Vector2i const& coords);
 
         template <typename T, typename ... Args>
-        std::shared_ptr<T> createBuilding(int x, int y, Args&& ... args);
+        std::shared_ptr<T> createBuilding(sf::Vector2i const& coords, Args&& ... args);
 
         template <typename T, typename ... Args>
-        std::shared_ptr<T> createResource(int x, int y, Args&& ... args);
+        std::shared_ptr<T> createResource(sf::Vector2i const& coords, Args&& ... args);
 
         template <typename T, typename ... Args>
-        std::shared_ptr<T> createUnit(float x, float y, Args&& ... args);
+        std::shared_ptr<T> createUnit(sf::Vector2f const& pos, Args&& ... args);
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createActor(Args&& ... args);
@@ -62,9 +62,9 @@ class World
 };
 
 template <typename T>
-bool World::buildingPlacing(int x, int y)
+bool World::buildingPlacing(sf::Vector2i const& coords)
 {
-    std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(x,y);
+    std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(coords);
     for (sf::Vector2i const& t : tiles)
     {
         if (collide(t))
@@ -91,49 +91,49 @@ bool World::buildingPlacing(int x, int y)
 }
 
 template <typename T, typename ... Args>
-std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
+std::shared_ptr<T> World::createBuilding(sf::Vector2i const& coords, Args&& ... args)
 {
-    if (!buildingPlacing<T>(x,y))
+    if (!buildingPlacing<T>(coords))
     {
         return nullptr;
     }
 
-    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    std::shared_ptr<T> actor = NWorld::createActor<T>(coords,std::forward<Args>(args)...);
     mBuildings[actor->getId()] = actor;
     actor->setWorld(this);
 
     for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
     {
-        itr->second->onBuildingAdded(T::getTilesBlueprint(x,y));
+        itr->second->onBuildingAdded(T::getTilesBlueprint(coords));
     }
 
     return actor;
 }
 
 template <typename T, typename ... Args>
-std::shared_ptr<T> World::createResource(int x, int y, Args&& ... args)
+std::shared_ptr<T> World::createResource(sf::Vector2i const& coords, Args&& ... args)
 {
-    if (collide({x,y}))
+    if (collide(coords))
     {
         return nullptr;
     }
 
-    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    std::shared_ptr<T> actor = NWorld::createActor<T>(coords,std::forward<Args>(args)...);
     mResources[actor->getId()] = actor;
     actor->setWorld(this);
 
     for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
     {
-        itr->second->onBuildingAdded(T::getTilesBlueprint(x,y));
+        itr->second->onBuildingAdded(T::getTilesBlueprint(coords));
     }
 
     return actor;
 }
 
 template <typename T, typename ... Args>
-std::shared_ptr<T> World::createUnit(float x, float y, Args&& ... args)
+std::shared_ptr<T> World::createUnit(sf::Vector2f const& pos, Args&& ... args)
 {
-    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    std::shared_ptr<T> actor = NWorld::createActor<T>(pos,std::forward<Args>(args)...);
     mUnits[actor->getId()] = actor;
     actor->setWorld(this);
     return actor;

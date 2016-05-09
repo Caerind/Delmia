@@ -22,37 +22,36 @@ class Building : public Entity
 
     public:
         Building();
-        Building(int x, int y);
+        Building(sf::Vector2i const& coords);
         ~Building();
 
         std::size_t getType() const;
 
-        static std::vector<sf::Vector2i> getTilesBlueprint(int x, int y);
-        virtual std::vector<std::pair<sf::Vector2i,sf::IntRect>> getTiles(int x, int y) = 0;
-        void addTile(int x, int y, sf::IntRect rect);
-
-        virtual void generate();
-        virtual void generate(int x, int y);
-
-        bool collide(int x, int y);
-
-        void load(pugi::xml_node& node);
-        void save(pugi::xml_node& node);
-
-        void setCoords(int x, int y);
         sf::Vector2i getCoords() const;
 
-        void setColor(sf::Color color);
         sf::Color getColor() const;
+        void setColor(sf::Color const& color);
 
-        virtual void setBuilt(bool built);
-        virtual void build(float unit);
+        static std::vector<sf::Vector2i> getTilesBlueprint(sf::Vector2i const& coords);
+        virtual std::vector<std::pair<sf::Vector2i,sf::IntRect>> getTiles(sf::Vector2i const& coords) = 0;
+        void addTile(sf::Vector2i const& coords, sf::IntRect rect);
+
+        void generate();
+        void generate(sf::Vector2i const& coords);
+
+        bool collide(sf::Vector2i const& coords);
+
+        void setBuilt(bool built);
+        void build(float unit);
         virtual void onBuildEnded();
         bool isBuilt() const;
 
         void clearTiles();
 
         void tick(sf::Time dt);
+
+        void load(pugi::xml_node& node);
+        void save(pugi::xml_node& node);
 
     protected:
         std::size_t mType;

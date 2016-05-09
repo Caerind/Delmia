@@ -166,7 +166,7 @@ std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
         n.push_back({coords.x - 1, coords.y - 1});
         n.push_back({coords.x, coords.y - 1});
         n.push_back({coords.x, coords.y + 1});
-        n.push_back({coords.x - 1, coords.y + 1})
+        n.push_back({coords.x - 1, coords.y + 1});
     }
     else
     {
@@ -268,6 +268,10 @@ std::vector<sf::Vector2i> reorganizedNeighboors(sf::Vector2i const& pos, sf::Vec
 std::vector<sf::Vector2i> pathfinding(sf::Vector2i const& begin, sf::Vector2i const& end, std::function<bool(sf::Vector2i const& coords)> collisions)
 {
     std::vector<priv::Node> container;
+    if (begin == end)
+    {
+        return {};
+    }
     add(container, priv::Node(begin,begin));
     std::size_t test = 0;
     bool reached = false;
@@ -337,6 +341,7 @@ std::vector<sf::Vector2i> pathfinding(sf::Vector2i const& begin, sf::Vector2i co
                 }
             }
         }
+        path.pop_back();
         std::reverse(path.begin(),path.end());
     }
     return path;

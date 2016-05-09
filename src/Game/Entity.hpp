@@ -25,6 +25,7 @@ class Entity : public NActor
         // ResourceHolder Properties
         void addResource(std::size_t resourceId, int value);
         void removeResource(std::size_t resourceId, int value);
+        int moveResource(std::size_t resourceId);
         int moveResource(std::size_t resourceId, int value);
         bool hasResource(std::size_t resourceId) const;
         bool hasResourceAmount(std::size_t resourceId, int value) const;

@@ -30,7 +30,7 @@ class Unit : public Entity
 
     public:
         Unit();
-        Unit(float x, float y);
+        Unit(sf::Vector2f const& pos);
 
         std::size_t getType() const;
 
@@ -51,6 +51,9 @@ class Unit : public Entity
         void positionOrder(sf::Vector2f const& position);
 
         void tick(sf::Time dt);
+
+        void takeResource(Entity* entity, std::size_t resourceId, int amount);
+        void giveResource(Entity* entity);
 
         void load(pugi::xml_node& node);
         void save(pugi::xml_node& node);
