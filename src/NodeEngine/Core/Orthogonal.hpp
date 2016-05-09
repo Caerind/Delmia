@@ -2,6 +2,8 @@
 #define NORTHOGONAL_HPP
 
 #include "LayerComponent.hpp"
+#include "Map.hpp"
+#include "World.hpp"
 
 namespace NOrthogonal
 {
@@ -28,6 +30,40 @@ void setTileSize(sf::Vector2i const& tileSize);
 void setLayerSize(sf::Vector2i const& layerSize);
 sf::Vector2i getTileSize();
 sf::Vector2i getLayerSize();
+
+class NMap : public ::NMap<NOrthogonal::NLayerComponent>
+{
+    public:
+        NMap()
+        {
+            mTileSize = getTileSize();
+            mLayerSize = getLayerSize();
+        }
+
+        void setTileId(sf::Vector2i const& chunk, sf::Vector2i const& tile, int id)
+        {
+            ::NMap<NOrthogonal::NLayerComponent>::setTileId(chunk,tile,id);
+        }
+
+        int getTileId(sf::Vector2i const& chunk, sf::Vector2i const& tile) const
+        {
+            return ::NMap<NOrthogonal::NLayerComponent>::getTileId(chunk,tile);
+        }
+
+        void setTileId(sf::Vector2i const& coords, int id)
+        {
+            sf::Vector2i chunkCoords = NOrthogonal::coordsToChunk(coords);
+            sf::Vector2i tileCoords = NOrthogonal::coordsToRelative(coords);
+            setTileId(chunkCoords, tileCoords, id);
+        }
+
+        int getTileId(sf::Vector2i const& coords) const
+        {
+            sf::Vector2i chunkCoords = NOrthogonal::coordsToChunk(coords);
+            sf::Vector2i tileCoords = NOrthogonal::coordsToRelative(coords);
+            return getTileId(chunkCoords, tileCoords);
+        }
+};
 
 } // namespace NOrthogonal
 

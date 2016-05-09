@@ -2,6 +2,11 @@
 #define NHEXAGONAL_HPP
 
 #include "LayerComponent.hpp"
+<<<<<<< HEAD
+#include "Map.hpp"
+#include "World.hpp"
+=======
+>>>>>>> refs/remotes/origin/master
 
 namespace NHexagonal
 {
@@ -38,6 +43,40 @@ void setTileSize(sf::Vector2i const& tileSize);
 void setLayerSize(sf::Vector2i const& layerSize);
 sf::Vector2i getTileSize();
 sf::Vector2i getLayerSize();
+
+class NMap : public ::NMap<NHexagonal::NLayerComponent>
+{
+    public:
+        NMap()
+        {
+            mTileSize = getTileSize();
+            mLayerSize = getLayerSize();
+        }
+
+        void setTileId(sf::Vector2i const& chunk, sf::Vector2i const& tile, int id)
+        {
+            ::NMap<NHexagonal::NLayerComponent>::setTileId(chunk,tile,id);
+        }
+
+        int getTileId(sf::Vector2i const& chunk, sf::Vector2i const& tile) const
+        {
+            return ::NMap<NHexagonal::NLayerComponent>::getTileId(chunk,tile);
+        }
+
+        void setTileId(sf::Vector2i const& coords, int id)
+        {
+            sf::Vector2i chunkCoords = NHexagonal::coordsToChunk(coords);
+            sf::Vector2i tileCoords = NHexagonal::coordsToRelative(coords);
+            setTileId(chunkCoords, tileCoords, id);
+        }
+
+        int getTileId(sf::Vector2i const& coords) const
+        {
+            sf::Vector2i chunkCoords = NHexagonal::coordsToChunk(coords);
+            sf::Vector2i tileCoords = NHexagonal::coordsToRelative(coords);
+            return getTileId(chunkCoords, tileCoords);
+        }
+};
 
 } // namespace NHexagonal
 

@@ -1,7 +1,9 @@
 #include "Entity.hpp"
+#include "World.hpp"
 
 Entity::Entity()
 {
+    mWorld = nullptr;
     mLife = 100.f;
     mLifeMax = 100.f;
 }
@@ -88,3 +90,7 @@ int Entity::getResourceAmount(std::size_t resourceId) const
     return 0;
 }
 
+void Entity::setWorld(World* world)
+{
+    mWorld = world;
+}

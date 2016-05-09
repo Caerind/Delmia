@@ -5,10 +5,18 @@
 #include "../NodeEngine/Core/Isometric.hpp"
 
 #include "../Game.hpp"
-#include "Map/Map.hpp"
+#include "Map.hpp"
 #include "Buildings/Building.hpp"
 #include "Resources/Resource.hpp"
 #include "Units/Unit.hpp"
+
+enum Tile
+{
+    None = 0,
+    Dirt,
+    Path,
+    Water,
+};
 
 class World
 {
@@ -21,7 +29,7 @@ class World
 
         sf::Vector2i getMouseCoords();
 
-        bool collide(int x, int y, bool isSolid = true);
+        bool collide(sf::Vector2i const& coords, bool isSolid = true);
 
         std::vector<Unit::Ptr> selectUnits(sf::FloatRect const& zone);
 
@@ -44,7 +52,7 @@ class World
         template <typename T, typename ... Args>
         std::shared_ptr<T> createActor(Args&& ... args);
 
-        Map::Ptr getMap();
+        std::shared_ptr<Map> getMap();
 
     protected:
         std::shared_ptr<Map> mMap;
@@ -59,14 +67,14 @@ bool World::buildingPlacing(int x, int y)
     std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(x,y);
     for (sf::Vector2i const& t : tiles)
     {
-        if (collide(t.x,t.y))
+        if (collide(t))
         {
             return false;
         }
         std::vector<sf::Vector2i> neighboors = NIsometric::getNeighboors(t,true);
         for (sf::Vector2i const& n : neighboors)
         {
-            if (collide(n.x,n.y,false))
+            if (collide(n,false))
             {
                 return false;
             }
@@ -92,6 +100,7 @@ std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
 
     std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
     mBuildings[actor->getId()] = actor;
+    actor->setWorld(this);
 
     for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
     {
@@ -104,13 +113,14 @@ std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
 template <typename T, typename ... Args>
 std::shared_ptr<T> World::createResource(int x, int y, Args&& ... args)
 {
-    if (collide(x,y))
+    if (collide({x,y}))
     {
         return nullptr;
     }
 
     std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
     mResources[actor->getId()] = actor;
+    actor->setWorld(this);
 
     for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
     {
@@ -125,6 +135,7 @@ std::shared_ptr<T> World::createUnit(float x, float y, Args&& ... args)
 {
     std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
     mUnits[actor->getId()] = actor;
+    actor->setWorld(this);
     return actor;
 }
 

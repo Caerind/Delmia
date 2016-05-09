@@ -26,7 +26,7 @@ bool GameState::handleEvent(sf::Event const& event)
     {
         if (oldC != sf::Vector2i())
         {
-            std::vector<sf::Vector2i> p = NIsometric::pathfinding(oldC,mWorld.getMouseCoords());
+            std::vector<sf::Vector2i> p = NIsometric::pathfinding(oldC,mWorld.getMouseCoords(),[](sf::Vector2i const& coords) -> bool{});
             for (std::size_t i = 0; i < p.size(); i++)
             {
                 std::cout << p[i].x << " " << p[i].y << std::endl;
@@ -181,9 +181,9 @@ void GameState::movePlacement(sf::Vector2i const& coords)
         mPlacement->generate(coords.x,coords.y);
         switch (mPlacingType)
         {
-            case 0: mPlacingCollide = mWorld.collide(coords.x,coords.y); break;
-            case 1: mPlacingCollide = mWorld.collide(coords.x,coords.y); break;
-            case 2: mPlacingCollide = mWorld.collide(coords.x,coords.y); break;
+            case 0: mPlacingCollide = mWorld.collide(coords); break;
+            case 1: mPlacingCollide = mWorld.collide(coords); break;
+            case 2: mPlacingCollide = mWorld.collide(coords); break;
             case 3: mPlacingCollide = !mWorld.buildingPlacing<Hall>(coords.x,coords.y); break;
             case 4: mPlacingCollide = !mWorld.buildingPlacing<Market>(coords.x,coords.y); break;
             case 5: mPlacingCollide = !mWorld.buildingPlacing<Barrack>(coords.x,coords.y); break;

@@ -4,6 +4,11 @@
 #include "../Utils/Math.hpp"
 #include "World.hpp"
 
+<<<<<<< HEAD
+// TODO : Hexagonal
+
+=======
+>>>>>>> refs/remotes/origin/master
 namespace NHexagonal
 {
 
@@ -22,53 +27,12 @@ NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i la
 
 void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, int hexSide)
 {
-    mTexture = textureName;
-    mLayerSize = layerSize;
-    mTileSize = tileSize;
-    mHexSide = hexSide;
-
-    mTiles.resize(mLayerSize.x * mLayerSize.y);
-
-    for (int i = 0; i < mLayerSize.x; ++i)
-    {
-        for (int j = 0; j < mLayerSize.y; ++j)
-        {
-            sf::Sprite& tile = mTiles[i + j * mLayerSize.x];
-            int sSize = (std::max(mTileSize.x,mTileSize.y) - mHexSide) /2;
-            if (mTileSize.x > mTileSize.y)
-            {
-                if (j % 2 == 0)
-                {
-                    tile.setPosition(i * (mTileSize.x + mHexSide), j * mTileSize.y * 0.5f);
-                }
-                else
-                {
-                    tile.setPosition(i * (mTileSize.x + mHexSide) + sSize + mHexSide, j * mTileSize.y * 0.5f);
-                }
-            }
-            else
-            {
-                if (i % 2 == 0)
-                {
-                    tile.setPosition(i * mTileSize.x * 0.5f, j * (mTileSize.y + mHexSide));
-                }
-                else
-                {
-                    tile.setPosition(i * mTileSize.x * 0.5f, j * (mTileSize.y + mHexSide) + sSize + mHexSide);
-                }
-            }
-        }
-    }
-
-    sf::Texture& texture = NWorld::getResources().getTexture(textureName);
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        mTiles[i].setTexture(texture);
-    }
+    // HERE
 }
 
 sf::FloatRect NLayerComponent::getBounds() const
 {
+    // HERE
     return getFinalTransform().transformRect(sf::FloatRect(0, 0, mTileSize.x * mLayerSize.x, mTileSize.y * mLayerSize.y));
 }
 
@@ -78,7 +42,7 @@ void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
     pugi::xml_attribute texture = n.attribute("texture");
     if (texture)
     {
-        mTexture = texture.value();
+        mTextureName = texture.value();
     }
     mLayerSize = NString::toVector2i(n.attribute("lsize").value());
     mTileSize = NString::toVector2i(n.attribute("tsize").value());
@@ -88,7 +52,7 @@ void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
     setScale(NString::toVector2f(n.attribute("sca").value()));
     setRotation(n.attribute("rot").as_float());
 
-    create(mTexture,mLayerSize,mTileSize,mHexSide);
+    create(mTextureName,mLayerSize,mTileSize,mHexSide);
 
     if (!loadFromCode(n.attribute("data").value()))
     {
@@ -99,9 +63,9 @@ void NLayerComponent::load(pugi::xml_node& node, std::string const& name)
 void NLayerComponent::save(pugi::xml_node& node, std::string const& name)
 {
     pugi::xml_node n = node.append_child(name.c_str());
-    if (mTexture != "")
+    if (mTextureName != "" && mTexture != nullptr)
     {
-        n.append_attribute("texture") = mTexture.c_str();
+        n.append_attribute("texture") = mTextureName.c_str();
     }
     n.append_attribute("lsize") = NString::toString(mLayerSize).c_str();
     n.append_attribute("tsize") = NString::toString(mTileSize).c_str();
@@ -120,7 +84,7 @@ void NLayerComponent::save(pugi::xml_node& node, std::string const& name)
 
 sf::Vector2i worldToCoords(sf::Vector2f const& pos)
 {
-    // TODO : Hexa - worldToCoords
+    // HERE
     return sf::Vector2i();
 }
 
@@ -136,7 +100,7 @@ sf::Vector2i worldToRelative(sf::Vector2f const& pos)
 
 sf::Vector2f coordsToWorld(sf::Vector2i const& coords)
 {
-    // TODO : Hexa - coordsToWorld
+    // HERE
     return sf::Vector2f();
 }
 
@@ -178,7 +142,7 @@ sf::Vector2i coordsToRelative(sf::Vector2i const& coords)
 std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
 {
     std::vector<sf::Vector2i> n;
-    // TODO : Hexa - Neighboors
+    // HERE
     return n;
 }
 

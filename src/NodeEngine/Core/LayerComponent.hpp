@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
 
 #include "SceneComponent.hpp"
 
@@ -37,10 +38,10 @@ class NLayerComponent : public NSceneComponent
         virtual void save(pugi::xml_node& node, std::string const& name = "LayerComponent");
 
     protected:
-        // TODO : Use Vertex Array
         sf::Vector2i mCoords;
-        std::vector<sf::Sprite> mTiles;
-        std::string mTexture;
+        sf::VertexArray mVertices;
+        sf::Texture* mTexture;
+        std::string mTextureName;
         sf::Vector2i mLayerSize;
         sf::Vector2i mTileSize;
 };
