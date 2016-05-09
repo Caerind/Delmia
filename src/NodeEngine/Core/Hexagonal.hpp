@@ -2,8 +2,11 @@
 #define NHEXAGONAL_HPP
 
 #include "LayerComponent.hpp"
+<<<<<<< HEAD
 #include "Map.hpp"
 #include "World.hpp"
+=======
+>>>>>>> refs/remotes/origin/master
 
 namespace NHexagonal
 {

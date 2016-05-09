@@ -4,8 +4,11 @@
 #include "../Utils/Math.hpp"
 #include "World.hpp"
 
+<<<<<<< HEAD
 // TODO : Hexagonal
 
+=======
+>>>>>>> refs/remotes/origin/master
 namespace NHexagonal
 {
 
@@ -24,66 +27,7 @@ NLayerComponent::NLayerComponent(std::string const& textureName, sf::Vector2i la
 
 void NLayerComponent::create(std::string const& textureName, sf::Vector2i layerSize, sf::Vector2i tileSize, int hexSide)
 {
-    mTextureName = textureName;
-    mLayerSize = layerSize;
-    mTileSize = tileSize;
-
-    mTexture = nullptr;
-    mTexture = &NWorld::getResources().getTexture(textureName);
-
-    mVertices.setPrimitiveType(sf::Quads);
-    mVertices.resize(mLayerSize.x * mLayerSize.y * 4);
-
-    for (int i = 0; i < mLayerSize.x; ++i)
-    {
-        for (int j = 0; j < mLayerSize.y; ++j)
-        {
-            // HERE
-            /*
-            sf::Vertex* quad = &mVertices[(i + j * mLayerSize.x) * 4];
-            int sSize = (std::max(mTileSize.x,mTileSize.y) - mHexSide) /2;
-            if (mTileSize.x > mTileSize.y)
-            {
-
-                if (j % 2 == 0)
-                {
-                    //tile.setPosition(i * (mTileSize.x + mHexSide), j * mTileSize.y * 0.5f);
-                    quad[0].position = {i * mTileSize.x, j * mTileSize.y};
-                    quad[1].position = {(i + 1) * mTileSize.x, j * mTileSize.y};
-                    quad[2].position = {(i + 1) * mTileSize.x, (j + 1)  * mTileSize.y};
-                    quad[3].position = {i * mTileSize.x, (j + 1) * mTileSize.y};
-                }
-                else
-                {
-                    //tile.setPosition(i * (mTileSize.x + mHexSide) + sSize + mHexSide, j * mTileSize.y * 0.5f);
-                    quad[0].position = {i * mTileSize.x, j * mTileSize.y};
-                    quad[1].position = {(i + 1) * mTileSize.x, j * mTileSize.y};
-                    quad[2].position = {(i + 1) * mTileSize.x, (j + 1)  * mTileSize.y};
-                    quad[3].position = {i * mTileSize.x, (j + 1) * mTileSize.y};
-                }
-            }
-            else
-            {
-                if (i % 2 == 0)
-                {
-                    //tile.setPosition(i * mTileSize.x * 0.5f, j * (mTileSize.y + mHexSide));
-                    quad[0].position = {i * mTileSize.x, j * mTileSize.y};
-                    quad[1].position = {(i + 1) * mTileSize.x, j * mTileSize.y};
-                    quad[2].position = {(i + 1) * mTileSize.x, (j + 1)  * mTileSize.y};
-                    quad[3].position = {i * mTileSize.x, (j + 1) * mTileSize.y};
-                }
-                else
-                {
-                    //tile.setPosition(i * mTileSize.x * 0.5f, j * (mTileSize.y + mHexSide) + sSize + mHexSide);
-                    quad[0].position = {i * mTileSize.x, j * mTileSize.y};
-                    quad[1].position = {(i + 1) * mTileSize.x, j * mTileSize.y};
-                    quad[2].position = {(i + 1) * mTileSize.x, (j + 1)  * mTileSize.y};
-                    quad[3].position = {i * mTileSize.x, (j + 1) * mTileSize.y};
-                }
-            }
-            */
-        }
-    }
+    // HERE
 }
 
 sf::FloatRect NLayerComponent::getBounds() const

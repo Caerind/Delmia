@@ -166,7 +166,7 @@ std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
         n.push_back({coords.x - 1, coords.y - 1});
         n.push_back({coords.x, coords.y - 1});
         n.push_back({coords.x, coords.y + 1});
-        n.push_back({coords.x - 1, coords.y + 1});
+        n.push_back({coords.x - 1, coords.y + 1})
     }
     else
     {
@@ -314,6 +314,7 @@ std::vector<sf::Vector2i> pathfinding(sf::Vector2i const& begin, sf::Vector2i co
         append(container, temp);
         test++;
     }
+
     std::vector<sf::Vector2i> path;
     if (reached)
     {

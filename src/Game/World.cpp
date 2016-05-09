@@ -36,7 +36,6 @@ void World::update(sf::Time dt)
     NWorld::getWindow().setDebugInfo("tickables",std::to_string(NWorld::getTickableCount()));
     NWorld::getWindow().setDebugInfo("renderables",std::to_string(NWorld::getRenderableCount()));
     NWorld::getWindow().setDebugInfo("chunks",std::to_string(mMap->getChunkCount()));
-
 }
 
 void World::render(sf::RenderTarget& target)

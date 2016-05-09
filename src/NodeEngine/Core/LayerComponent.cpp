@@ -47,6 +47,11 @@ sf::Vector2i NLayerComponent::getCoords() const
     return mCoords;
 }
 
+sf::Vector2i NLayerComponent::getCoords() const
+{
+    return mCoords;
+}
+
 bool NLayerComponent::loadFromCode(std::string const& code)
 {
     sf::Vector2i coords;
