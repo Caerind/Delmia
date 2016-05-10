@@ -62,3 +62,8 @@ bool IsometricBase::hasTile(sf::Vector2i const& coords)
     }
     return false;
 }
+
+sf::Vector2f IsometricBase::getEntryPoint() const
+{
+    return sf::Vector2f();
+}

@@ -18,6 +18,8 @@ class Resource : public Entity, public IsometricBase
 
         std::size_t getType() const;
 
+        sf::Vector2f getEntryPoint() const;
+
     protected:
         std::size_t mType;
 };

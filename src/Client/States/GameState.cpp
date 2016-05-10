@@ -13,6 +13,10 @@ GameState::GameState(ah::StateManager& manager)
     mSelectionZone.setFillColor(sf::Color::Transparent);
     mSelectionZone.setOutlineColor(sf::Color::Black);
     mSelectionZone.setOutlineThickness(2.f);
+
+    mWorld.createResource<Quarry>(sf::Vector2i(10,10));
+    mWorld.createResource<Forest>(sf::Vector2i(14,14));
+    mWorld.createResource<GoldMine>(sf::Vector2i(6,6));
 }
 
 bool GameState::handleEvent(sf::Event const& event)
@@ -203,6 +207,7 @@ void GameState::handleUnit(sf::Event const& event)
                     for (std::size_t i = 0; i < mSelected.size(); i++)
                     {
                         // Give resources
+                        //mSelected[i]->giveResource(building.get());
                     }
                 }
                 else
@@ -212,6 +217,7 @@ void GameState::handleUnit(sf::Event const& event)
                         if (mSelected[i]->getType() == Units::Citizen)
                         {
                             // Build it
+                            //mSelected[i]->build(building.get());
                         }
                     }
                 }
@@ -235,6 +241,8 @@ void GameState::handleUnit(sf::Event const& event)
                 if (mSelected[i]->getType() == Units::Citizen)
                 {
                     // Gather resources
+                    mSelected[i]->positionOrder(resource->getEntryPoint());
+                    //mSelected[i]->gatherResource(resource.get());
                 }
             }
             handled = true;

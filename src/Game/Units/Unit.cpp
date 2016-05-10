@@ -20,7 +20,7 @@ Unit::Unit()
 Unit::Unit(Player* player, sf::Vector2f const& pos)
 : PlayerOwned(player)
 {
-    mType = Units::DefaultUnit;
+    mType = Units::Citizen; // TODO : Change
 
     attachComponent(&mSprite);
     mSprite.setPositionZ(1.f);
@@ -136,18 +136,15 @@ void Unit::calculatePath()
     mPathDone = true;
 }
 
-void Unit::onBuildingAdded(std::vector<sf::Vector2i> tiles)
+void Unit::onBuildingAdded(sf::Vector2i const& coords)
 {
     bool recalculated = false;
     for (std::size_t i = 0; i < mPath.size(); i++)
     {
-        for (std::size_t j = 0; j < tiles.size(); j++)
+        if (!recalculated && mPath[i] == coords)
         {
-            if (!recalculated && mPath[i] == tiles[j])
-            {
-                calculatePath();
-                recalculated = true;
-            }
+            calculatePath();
+            recalculated = true;
         }
     }
 }

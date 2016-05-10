@@ -19,6 +19,8 @@ class IsometricBase
 
         bool hasTile(sf::Vector2i const& coords);
 
+        virtual sf::Vector2f getEntryPoint() const;
+
     protected:
         struct TileBuilding
         {

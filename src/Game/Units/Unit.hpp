@@ -47,7 +47,7 @@ class Unit : public Entity, public PlayerOwned
         void updateTextureRect();
 
         void calculatePath();
-        void onBuildingAdded(std::vector<sf::Vector2i> tiles);
+        void onBuildingAdded(sf::Vector2i const& coords);
 
         void positionOrder(sf::Vector2f const& position);
 

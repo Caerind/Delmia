@@ -104,9 +104,13 @@ std::shared_ptr<T> World::createBuilding(std::string const& playerId, sf::Vector
     mBuildings[actor->getId()] = actor;
     actor->setWorld(this);
 
+    std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(coords);
     for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
     {
-        itr->second->onBuildingAdded(T::getTilesBlueprint(coords));
+        for (std::size_t i = 0; i < tiles.size(); i++)
+        {
+            itr->second->onBuildingAdded(tiles[i]);
+        }
     }
 
     return actor;
@@ -126,7 +130,7 @@ std::shared_ptr<T> World::createResource(sf::Vector2i const& coords, Args&& ... 
 
     for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
     {
-        itr->second->onBuildingAdded(T::getTilesBlueprint(coords));
+        itr->second->onBuildingAdded(coords);
     }
 
     return actor;

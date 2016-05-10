@@ -84,6 +84,7 @@ void Building::generate()
         {
             rect = sf::IntRect(1536,0,256,256);
         }
+        std::cout << rect.left << " " << mType << std::endl;
         addTile(tiles[i].first,"building",rect);
     }
 }
