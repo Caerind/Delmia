@@ -10,7 +10,7 @@ class Citizen : public Unit
 
     public:
         Citizen();
-        Citizen(sf::Vector2f const& pos);
+        Citizen(Player* player, sf::Vector2f const& pos);
 
     protected:
 };

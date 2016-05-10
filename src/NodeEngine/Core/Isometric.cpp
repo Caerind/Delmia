@@ -158,6 +158,14 @@ sf::Vector2i coordsToRelative(sf::Vector2i const& coords)
     return c;
 }
 
+sf::Vector2i relativeToCoords(sf::Vector2i const& chunk, sf::Vector2i const& relative)
+{
+    sf::Vector2i c;
+    c.x = chunk.x * getLayerSize().x + relative.x;
+    c.y = chunk.y * getLayerSize().y + relative.y;
+    return c;
+}
+
 std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag)
 {
     std::vector<sf::Vector2i> n;

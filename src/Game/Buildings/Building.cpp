@@ -1,21 +1,21 @@
 #include "Building.hpp"
 
 Building::Building()
-: mType(Buildings::DefaultBuilding)
-, mCoords()
+: IsometricBase()
+, PlayerOwned(nullptr)
+, mType(Buildings::DefaultBuilding)
 , mColor(sf::Color::White)
-, mTiles()
 , mBuilt(false)
 {
     mLife = 1.f;
     mLifeMax = 6.f;
 }
 
-Building::Building(sf::Vector2i const& coords)
-: mType(Buildings::DefaultBuilding)
-, mCoords(coords)
+Building::Building(Player* player, sf::Vector2i const& coords)
+: IsometricBase(coords)
+, PlayerOwned(player)
+, mType(Buildings::DefaultBuilding)
 , mColor(sf::Color::White)
-, mTiles()
 , mBuilt(false)
 {
     mLife = 1.f;
@@ -31,10 +31,6 @@ std::size_t Building::getType() const
 {
     return mType;
 }
-sf::Vector2i Building::getCoords() const
-{
-    return mCoords;
-}
 
 sf::Color Building::getColor() const
 {
@@ -46,7 +42,7 @@ void Building::setColor(sf::Color const& color)
     mColor = color;
     for (std::size_t i = 0; i < mTiles.size(); i++)
     {
-        mTiles[i].sprite->setColor(mColor);
+        mTiles[i].sprite.setColor(mColor);
     }
 }
 
@@ -72,20 +68,6 @@ std::vector<std::pair<sf::Vector2i,sf::IntRect>> Building::getTiles(sf::Vector2i
 }
 */
 
-void Building::addTile(sf::Vector2i const& coords, sf::IntRect rect)
-{
-    mTiles.emplace_back();
-    mTiles.back().coords = coords;
-    mTiles.back().sprite = new NSpriteComponent();
-    mTiles.back().sprite->setTexture("building",rect);
-    mTiles.back().sprite->setOrigin({rect.width * 0.5f, rect.height - 64.f});
-    mTiles.back().sprite->setPosition(NIsometric::coordsToWorld(coords));
-    mTiles.back().sprite->setPositionZ(1.f);
-    mTiles.back().sprite->setColor(mColor);
-
-    attachComponent(mTiles.back().sprite);
-}
-
 void Building::generate()
 {
     clearTiles();
@@ -102,7 +84,7 @@ void Building::generate()
         {
             rect = sf::IntRect(1536,0,256,256);
         }
-        addTile(tiles[i].first,rect);
+        addTile(tiles[i].first,"building",rect);
     }
 }
 
@@ -110,18 +92,6 @@ void Building::generate(sf::Vector2i const& coords)
 {
     mCoords = coords;
     generate();
-}
-
-bool Building::collide(sf::Vector2i const& coords)
-{
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        if (mTiles[i].coords == coords)
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 void Building::setBuilt(bool built)
@@ -160,25 +130,7 @@ bool Building::isBuilt() const
     return mBuilt;
 }
 
-void Building::clearTiles()
-{
-    for (std::size_t i = 0; i < mTiles.size(); i++)
-    {
-        detachComponent(mTiles[i].sprite);
-        delete mTiles[i].sprite;
-    }
-    mTiles.clear();
-}
-
 void Building::tick(sf::Time dt)
 {
     build(dt.asSeconds());
-}
-
-void Building::load(pugi::xml_node& node)
-{
-}
-
-void Building::save(pugi::xml_node& node)
-{
 }

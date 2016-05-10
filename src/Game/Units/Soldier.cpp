@@ -5,7 +5,7 @@ Soldier::Soldier()
     mType = Units::Soldier;
 }
 
-Soldier::Soldier(sf::Vector2f const& pos) : Unit(pos)
+Soldier::Soldier(Player* player, sf::Vector2f const& pos) : Unit(player, pos)
 {
     mType = Units::Soldier;
 }

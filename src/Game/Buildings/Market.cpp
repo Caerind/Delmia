@@ -5,7 +5,7 @@ Market::Market() : Building()
     mType = Buildings::Market;
 }
 
-Market::Market(sf::Vector2i const& coords) : Building(coords)
+Market::Market(Player* player, sf::Vector2i const& coords) : Building(player, coords)
 {
     mType = Buildings::Market;
     generate();

@@ -7,10 +7,11 @@
 #include "../../NodeEngine/Core/PointComponent.hpp"
 
 #include "../Entity.hpp"
+#include "../PlayerOwned.hpp"
 
 #include "Units.hpp"
 
-class Unit : public Entity
+class Unit : public Entity, public PlayerOwned
 {
     public:
         typedef std::shared_ptr<Unit> Ptr;
@@ -30,7 +31,7 @@ class Unit : public Entity
 
     public:
         Unit();
-        Unit(sf::Vector2f const& pos);
+        Unit(Player* player, sf::Vector2f const& pos);
 
         std::size_t getType() const;
 

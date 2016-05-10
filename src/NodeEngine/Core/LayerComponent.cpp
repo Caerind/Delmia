@@ -135,6 +135,18 @@ sf::FloatRect NLayerComponent::getBounds() const
     return getFinalTransform().transformRect(sf::FloatRect(0, 0, mTileSize.x * mLayerSize.x, mTileSize.y * mLayerSize.y));
 }
 
+void NLayerComponent::fill(int id)
+{
+    sf::Vector2i coords;
+    for (coords.x = 0; coords.x < mLayerSize.x; coords.x++)
+    {
+        for (coords.y = 0; coords.y < mLayerSize.y; coords.y++)
+        {
+            setTileId(coords,id);
+        }
+    }
+}
+
 void NLayerComponent::setTileId(sf::Vector2i const& coords, int id)
 {
     if (0 <= coords.x && coords.x < mLayerSize.x && 0 <= coords.y && coords.y < mLayerSize.y)

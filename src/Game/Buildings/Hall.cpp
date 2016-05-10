@@ -5,7 +5,7 @@ Hall::Hall() : Building()
     mType = Buildings::Hall;
 }
 
-Hall::Hall(sf::Vector2i const& coords) : Building(coords)
+Hall::Hall(Player* player, sf::Vector2i const& coords) : Building(player, coords)
 {
     mType = Buildings::Hall;
     generate();

@@ -78,9 +78,9 @@ void GameState::handlePlacement(sf::Event const& event)
         mPlacing = true;
         switch (mPlacingType)
         {
-            case 0: mPlacement = mWorld.createActor<Hall>(c); break;
-            case 1: mPlacement = mWorld.createActor<Market>(c); break;
-            case 2: mPlacement = mWorld.createActor<Barrack>(c); break;
+            case 0: mPlacement = mWorld.createActor<Hall>(nullptr,c); break;
+            case 1: mPlacement = mWorld.createActor<Market>(nullptr,c); break;
+            case 2: mPlacement = mWorld.createActor<Barrack>(nullptr,c); break;
             default: mPlacement = nullptr; break;
         }
         if (mPlacement != nullptr)
@@ -105,9 +105,9 @@ void GameState::handlePlacement(sf::Event const& event)
         {
             switch (mPlacingType)
             {
-                case 0: mWorld.createBuilding<Hall>(c); break;
-                case 1: mWorld.createBuilding<Market>(c); break;
-                case 2: mWorld.createBuilding<Barrack>(c); break;
+                case 0: mWorld.createBuilding<Hall>(mWorld.getLocalPlayerId(),c); break;
+                case 1: mWorld.createBuilding<Market>(mWorld.getLocalPlayerId(),c); break;
+                case 2: mWorld.createBuilding<Barrack>(mWorld.getLocalPlayerId(),c); break;
                 default: break;
             }
         }
@@ -138,9 +138,9 @@ void GameState::handlePlacement(sf::Event const& event)
             }
             switch (mPlacingType)
             {
-                case 0: mPlacement = mWorld.createActor<Hall>(c); break;
-                case 1: mPlacement = mWorld.createActor<Market>(c); break;
-                case 2: mPlacement = mWorld.createActor<Barrack>(c); break;
+                case 0: mPlacement = mWorld.createActor<Hall>(nullptr,c); break;
+                case 1: mPlacement = mWorld.createActor<Market>(nullptr,c); break;
+                case 2: mPlacement = mWorld.createActor<Barrack>(nullptr,c); break;
                 default: mPlacement = nullptr; break;
             }
             if (mPlacement != nullptr)
@@ -176,7 +176,7 @@ void GameState::handleUnit(sf::Event const& event)
 
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::U)
     {
-        mWorld.createUnit<Unit>(p);
+        mWorld.createUnit<Unit>(mWorld.getLocalPlayerId(),p);
     }
 
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left && !mSelecting)
@@ -198,23 +198,75 @@ void GameState::handleUnit(sf::Event const& event)
 
     if (mSelectedUnits.size() > 0 && event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right)
     {
-        /*if (allies building not built)
-            citizens selected go build
-        if (allies building built)
-            all go depose resources
-        if (resource)
-            citizens selected go gather
-        if (enemy)
-            attack and rob
-        else
-            go
-            */
-
-
-        /*
         sf::Vector2f pos = NWorld::getPointerPositionView();
-        if (!mWorld.collide(NIsometric::worldToCoords(pos)))
+        sf::Vector2i coords = NIsometric::worldToCoords(pos);
+        Building::Ptr building = mWorld.getBuilding(coords);
+        Resource::Ptr resource = mWorld.getResource(coords);
+        Unit::Ptr unit = mWorld.getUnit(pos);
+        bool handled = false;
+        if (building != nullptr)
         {
+            if (building->getOwnerId() == mWorld.getLocalPlayerId())
+            {
+                if (building->isBuilt())
+                {
+                    for (std::size_t i = 0; i < mSelectedUnits.size(); i++)
+                    {
+                        // Give resources
+                    }
+                }
+                else
+                {
+                    for (std::size_t i = 0; i < mSelectedUnits.size(); i++)
+                    {
+                        if (mSelectedUnits[i]->getType() == Units::Citizen)
+                        {
+                            // Build it
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (std::size_t i = 0; i < mSelectedUnits.size(); i++)
+                {
+                    if (mSelectedUnits[i]->getType() == Units::Soldier)
+                    {
+                        // Attack and rob
+                    }
+                }
+            }
+            handled = true;
+        }
+        else if (resource != nullptr)
+        {
+            for (std::size_t i = 0; i < mSelectedUnits.size(); i++)
+            {
+                if (mSelectedUnits[i]->getType() == Units::Citizen)
+                {
+                    // Gather resources
+                }
+            }
+            handled = true;
+        }
+        else if (unit != nullptr)
+        {
+            if (unit->getOwnerId() == mWorld.getLocalPlayerId())
+            {
+                for (std::size_t i = 0; i < mSelectedUnits.size(); i++)
+                {
+                    if (mSelectedUnits[i]->getType() == Units::Soldier)
+                    {
+                        // Attack and rob
+                    }
+                }
+                handled = true;
+            }
+        }
+
+        if (!handled)
+        {
+            // Go
             for (std::size_t i = 0; i < mSelectedUnits.size(); i++)
             {
                 if (i > 0)
@@ -232,7 +284,6 @@ void GameState::handleUnit(sf::Event const& event)
                 mSelectedUnits[i]->positionOrder(pos);
             }
         }
-        */
     }
 }
 

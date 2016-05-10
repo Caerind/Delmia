@@ -5,7 +5,7 @@ Barrack::Barrack() : Building()
     mType = Buildings::Barrack;
 }
 
-Barrack::Barrack(sf::Vector2i const& coords) : Building(coords)
+Barrack::Barrack(Player* player, sf::Vector2i const& coords) : Building(player, coords)
 {
     mType = Buildings::Barrack;
     generate();

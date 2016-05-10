@@ -3,6 +3,14 @@
 
 #include "../NodeEngine/Core/Isometric.hpp"
 
+enum Tile
+{
+    None = 0,
+    Dirt,
+    Path,
+    Water,
+};
+
 class Map : public NIsometric::NMap
 {
     public:
@@ -18,12 +26,13 @@ class Map : public NIsometric::NMap
         void tick(sf::Time dt);
 
         bool load(NIsometric::NLayerComponent* chunk);
-        void generate(NIsometric::NLayerComponent* chunk);
         void save(NIsometric::NLayerComponent* chunk);
 
         void removeUselessChunks();
         void addUsefullChunks();
         std::vector<sf::Vector2i> determineUsefullChunks();
+
+        void generate(NIsometric::NLayerComponent* chunk);
 
     protected:
         static std::string gFilename;

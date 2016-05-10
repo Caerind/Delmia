@@ -4,6 +4,7 @@
 #include "../../NodeEngine/Utils/ClockedTask.hpp"
 
 Unit::Unit()
+: PlayerOwned(nullptr)
 {
     mType = Units::DefaultUnit;
 
@@ -16,7 +17,8 @@ Unit::Unit()
     mMovingTime = sf::Time::Zero;
 }
 
-Unit::Unit(sf::Vector2f const& pos)
+Unit::Unit(Player* player, sf::Vector2f const& pos)
+: PlayerOwned(player)
 {
     mType = Units::DefaultUnit;
 

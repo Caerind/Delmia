@@ -1,11 +1,17 @@
 #include "Player.hpp"
 
-Player::Player()
+Player::Player(std::string const& name, std::string const& id)
+: mId(id)
+, mName(name)
 {
-    mId = "ImThePlayerOne";
 }
 
 std::string Player::getId() const
 {
     return mId;
+}
+
+std::string Player::getName() const
+{
+    return mName;
 }

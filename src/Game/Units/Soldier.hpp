@@ -10,7 +10,7 @@ class Soldier : public Unit
 
     public:
         Soldier();
-        Soldier(sf::Vector2f const& pos);
+        Soldier(Player* player, sf::Vector2f const& pos);
 
     protected:
 };

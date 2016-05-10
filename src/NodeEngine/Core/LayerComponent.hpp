@@ -28,6 +28,8 @@ class NLayerComponent : public NSceneComponent
 
         sf::FloatRect getBounds() const;
 
+        void fill(int id);
+
         void setTileId(sf::Vector2i const& coords, int id);
         int getTileId(sf::Vector2i const& coords) const;
 
