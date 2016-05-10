@@ -16,10 +16,12 @@ class GameState : public ah::State
 
         void handleZoom(sf::Event const& event);
         void handlePlacement(sf::Event const& event);
-        void movePlacement(sf::Vector2i const& coords);
+        void handleSelection(sf::Event const& event);
         void handleUnit(sf::Event const& event);
-
         void handleViewMovement(sf::Time dt);
+
+        float getCameraSpeed();
+        float getCameraZoom();
 
         void onDeactivate();
 
@@ -27,14 +29,12 @@ class GameState : public ah::State
         World mWorld;
 
         bool mPlacing;
-        bool mPlacingCollide;
         int mPlacingType;
         Building::Ptr mPlacement;
 
         bool mSelecting;
         sf::RectangleShape mSelectionZone;
-        std::vector<Unit::Ptr> mSelectedUnits;
-
+        std::vector<Unit::Ptr> mSelected;
 
         float mCameraSpeed;
 };

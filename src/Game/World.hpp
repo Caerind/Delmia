@@ -48,6 +48,10 @@ class World
 
         std::string getLocalPlayerId();
 
+        std::shared_ptr<Building> getBuilding(sf::Vector2i const& coords);
+        std::shared_ptr<Resource> getResource(sf::Vector2i const& coords);
+        std::shared_ptr<Unit> getUnit(sf::Vector2f const& pos);
+
     protected:
         std::shared_ptr<Map> mMap;
         std::map<std::string,std::shared_ptr<Building>> mBuildings;

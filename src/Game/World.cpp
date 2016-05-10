@@ -133,3 +133,33 @@ std::string World::getLocalPlayerId()
 {
     return mLocalPlayerId;
 }
+
+std::shared_ptr<Building> World::getBuilding(sf::Vector2i const& coords)
+{
+    for (auto itr = mBuildings.begin(); itr != mBuildings.end(); itr++)
+    {
+        if (itr->second->hasTile(coords))
+        {
+            return itr->second;
+        }
+    }
+    return nullptr;
+}
+
+std::shared_ptr<Resource> World::getResource(sf::Vector2i const& coords)
+{
+    for (auto itr = mResources.begin(); itr != mResources.end(); itr++)
+    {
+        if (itr->second->hasTile(coords))
+        {
+            return itr->second;
+        }
+    }
+    return nullptr;
+}
+
+std::shared_ptr<Unit> World::getUnit(sf::Vector2f const& pos)
+{
+    // TODO : Unit Bounds
+    return nullptr;
+}
