@@ -9,6 +9,10 @@ int main()
     ah::Application::getResources().loadTexture("unit","assets/textures/unit.png");
     ah::Application::getResources().loadFont("coolveticca","assets/fonts/coolveticca.ttf");
 
+    ah::Application::getResources().getTexture("iso").setSmooth(true);
+    ah::Application::getResources().getTexture("building").setSmooth(true);
+    ah::Application::getResources().getTexture("unit").setSmooth(true);
+
     ah::Application::getWindow().create(sf::VideoMode(800,600),"NodeEngine",sf::Style::Close);
     ah::Application::getWindow().showDebugInfo(true);
     ah::Application::getWindow().setDebugInfoFont(&ah::Application::getResources().getFont("coolveticca"));

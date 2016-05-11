@@ -267,19 +267,22 @@ void GameState::handleUnit(sf::Event const& event)
             // Go
             for (std::size_t i = 0; i < mSelected.size(); i++)
             {
-                if (i > 0)
+                if (!mWorld.collide(NIsometric::worldToCoords(pos)))
                 {
-                    bool ok = false;
-                    do
+                    if (i > 0)
                     {
-                        pos = NWorld::getPointerPositionView() + sf::Vector2f(NMath::randomDev(0.f,40.f),NMath::randomDev(0.f,40.f));
-                        if (!mWorld.collide(NIsometric::worldToCoords(pos)))
+                        bool ok = false;
+                        do
                         {
-                            ok = true;
-                        }
-                    } while (!ok);
+                            pos = NWorld::getPointerPositionView() + sf::Vector2f(NMath::randomDev(0.f,40.f),NMath::randomDev(0.f,40.f));
+                            if (!mWorld.collide(NIsometric::worldToCoords(pos)))
+                            {
+                                ok = true;
+                            }
+                        } while (!ok);
+                    }
+                    mSelected[i]->positionOrder(pos);
                 }
-                mSelected[i]->positionOrder(pos);
             }
         }
     }

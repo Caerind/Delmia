@@ -5,6 +5,7 @@
 
 Unit::Unit()
 : PlayerOwned(nullptr)
+, mThread(&Unit::calculatePath, this)
 {
     mType = Units::DefaultUnit;
 
@@ -19,6 +20,7 @@ Unit::Unit()
 
 Unit::Unit(Player* player, sf::Vector2f const& pos)
 : PlayerOwned(player)
+, mThread(&Unit::calculatePath, this)
 {
     mType = Units::Citizen; // TODO : Change
 
@@ -126,14 +128,23 @@ void Unit::updateTextureRect()
 
 void Unit::calculatePath()
 {
+    std::vector<sf::Vector2i> tPath;
     sf::Vector2i b = NIsometric::worldToCoords(getPosition());
     sf::Vector2i e = NIsometric::worldToCoords(mPositionOrder);
-    NClockedTask t([b,e,this]()
+    NClockedTask t([b,e,&tPath,this]()
     {
-        mPath = NIsometric::pathfinding(b,e,[this](sf::Vector2i const& coords)->bool{return mWorld->collide(coords);});
+        tPath = NIsometric::pathfinding(b,e,[this](sf::Vector2i const& coords)->bool{return mWorld->collide(coords);});
     });
+
+    sf::Lock lock(mMutex);
     std::cout << "Path in : " << t.execute().asSeconds() << "s" << std::endl;
+    mPath = tPath;
     mPathDone = true;
+    if (mPath.size() == 0)
+    {
+        mPathDone = false;
+        mPositionOrder = sf::Vector2f();
+    }
 }
 
 void Unit::onBuildingAdded(sf::Vector2i const& coords)

@@ -11,6 +11,9 @@
 
 #include "Units.hpp"
 
+#include <SFML/System/Thread.hpp>
+#include <SFML/System/Mutex.hpp>
+
 class Unit : public Entity, public PlayerOwned
 {
     public:
@@ -71,6 +74,8 @@ class Unit : public Entity, public PlayerOwned
         sf::Vector2f mPositionOrder;
         bool mPathDone;
         std::vector<sf::Vector2i> mPath;
+        sf::Thread mThread;
+        sf::Mutex mMutex;
 };
 
 #endif // UNIT_HPP
