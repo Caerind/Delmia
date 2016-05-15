@@ -10,14 +10,6 @@
 #include "Resources/Resource.hpp"
 #include "Units/Unit.hpp"
 
-enum Tile
-{
-    None = 0,
-    Dirt,
-    Path,
-    Water,
-};
-
 class World
 {
     public:
@@ -38,33 +30,42 @@ class World
         void clear();
 
         template <typename T>
-        bool buildingPlacing(int x, int y);
+        bool buildingPlacing(sf::Vector2i const& coords);
 
         template <typename T, typename ... Args>
-        std::shared_ptr<T> createBuilding(int x, int y, Args&& ... args);
+        std::shared_ptr<T> createBuilding(std::string const& playerId, sf::Vector2i const& coords, Args&& ... args);
 
         template <typename T, typename ... Args>
-        std::shared_ptr<T> createResource(int x, int y, Args&& ... args);
+        std::shared_ptr<T> createResource(sf::Vector2i const& coords, Args&& ... args);
 
         template <typename T, typename ... Args>
-        std::shared_ptr<T> createUnit(float x, float y, Args&& ... args);
+        std::shared_ptr<T> createUnit(std::string const& playerId, sf::Vector2f const& pos, Args&& ... args);
 
         template <typename T, typename ... Args>
         std::shared_ptr<T> createActor(Args&& ... args);
 
         std::shared_ptr<Map> getMap();
 
+        std::string getLocalPlayerId();
+
+        std::shared_ptr<Building> getBuilding(sf::Vector2i const& coords);
+        std::shared_ptr<Resource> getResource(sf::Vector2i const& coords);
+        std::shared_ptr<Unit> getUnit(sf::Vector2f const& pos);
+
     protected:
         std::shared_ptr<Map> mMap;
         std::map<std::string,std::shared_ptr<Building>> mBuildings;
         std::map<std::string,std::shared_ptr<Resource>> mResources;
         std::map<std::string,std::shared_ptr<Unit>> mUnits;
+
+        std::string mLocalPlayerId;
+        std::map<std::string,Player> mPlayers;
 };
 
 template <typename T>
-bool World::buildingPlacing(int x, int y)
+bool World::buildingPlacing(sf::Vector2i const& coords)
 {
-    std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(x,y);
+    std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(coords);
     for (sf::Vector2i const& t : tiles)
     {
         if (collide(t))
@@ -91,49 +92,55 @@ bool World::buildingPlacing(int x, int y)
 }
 
 template <typename T, typename ... Args>
-std::shared_ptr<T> World::createBuilding(int x, int y, Args&& ... args)
+std::shared_ptr<T> World::createBuilding(std::string const& playerId, sf::Vector2i const& coords, Args&& ... args)
 {
-    if (!buildingPlacing<T>(x,y))
+    if (!buildingPlacing<T>(coords) )
     {
         return nullptr;
     }
 
-    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    Player* player = (contains(mPlayers,playerId)) ? &mPlayers.at(playerId) : nullptr;
+    std::shared_ptr<T> actor = NWorld::createActor<T>(player,coords,std::forward<Args>(args)...);
     mBuildings[actor->getId()] = actor;
     actor->setWorld(this);
 
+    std::vector<sf::Vector2i> tiles = T::getTilesBlueprint(coords);
     for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
     {
-        itr->second->onBuildingAdded(T::getTilesBlueprint(x,y));
+        for (std::size_t i = 0; i < tiles.size(); i++)
+        {
+            itr->second->onBuildingAdded(tiles[i]);
+        }
     }
 
     return actor;
 }
 
 template <typename T, typename ... Args>
-std::shared_ptr<T> World::createResource(int x, int y, Args&& ... args)
+std::shared_ptr<T> World::createResource(sf::Vector2i const& coords, Args&& ... args)
 {
-    if (collide({x,y}))
+    if (collide(coords))
     {
         return nullptr;
     }
 
-    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    std::shared_ptr<T> actor = NWorld::createActor<T>(coords,std::forward<Args>(args)...);
     mResources[actor->getId()] = actor;
     actor->setWorld(this);
 
     for (auto itr = mUnits.begin(); itr != mUnits.end(); itr++)
     {
-        itr->second->onBuildingAdded(T::getTilesBlueprint(x,y));
+        itr->second->onBuildingAdded(coords);
     }
 
     return actor;
 }
 
 template <typename T, typename ... Args>
-std::shared_ptr<T> World::createUnit(float x, float y, Args&& ... args)
+std::shared_ptr<T> World::createUnit(std::string const& playerId, sf::Vector2f const& pos, Args&& ... args)
 {
-    std::shared_ptr<T> actor = NWorld::createActor<T>(x,y,std::forward<Args>(args)...);
+    Player* player = (contains(mPlayers,playerId)) ? &mPlayers.at(playerId) : nullptr;
+    std::shared_ptr<T> actor = NWorld::createActor<T>(player,pos,std::forward<Args>(args)...);
     mUnits[actor->getId()] = actor;
     actor->setWorld(this);
     return actor;

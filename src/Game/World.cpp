@@ -6,6 +6,12 @@ World::World()
 
     NIsometric::setLayerSize(sf::Vector2i(16,64));
     NIsometric::setTileSize(sf::Vector2i(256,128));
+
+    mLocalPlayerId = "1234567890";
+    mPlayers.emplace(mLocalPlayerId,Player("TestPlayer",mLocalPlayerId));
+
+    std::string testEn = "0987654321";
+    mPlayers.emplace(testEn,Player("TestEnemy",testEn));
 }
 
 void World::handleEvent(sf::Event const& event)
@@ -53,7 +59,7 @@ bool World::collide(sf::Vector2i const& coords, bool isSolid)
     // Buildings
     for (auto itr = mBuildings.begin(); itr != mBuildings.end(); itr++)
     {
-        if (itr->second->collide(coords.x,coords.y))
+        if (itr->second->hasTile(coords))
         {
             return true;
         }
@@ -64,7 +70,7 @@ bool World::collide(sf::Vector2i const& coords, bool isSolid)
         // Resources
         for (auto itr = mResources.begin(); itr != mResources.end(); itr++)
         {
-            if (itr->second->collide(coords.x,coords.y))
+            if (itr->second->hasTile(coords))
             {
                 return true;
             }
@@ -121,4 +127,39 @@ void World::clear()
 std::shared_ptr<Map> World::getMap()
 {
     return mMap;
+}
+
+std::string World::getLocalPlayerId()
+{
+    return mLocalPlayerId;
+}
+
+std::shared_ptr<Building> World::getBuilding(sf::Vector2i const& coords)
+{
+    for (auto itr = mBuildings.begin(); itr != mBuildings.end(); itr++)
+    {
+        if (itr->second->hasTile(coords))
+        {
+            return itr->second;
+        }
+    }
+    return nullptr;
+}
+
+std::shared_ptr<Resource> World::getResource(sf::Vector2i const& coords)
+{
+    for (auto itr = mResources.begin(); itr != mResources.end(); itr++)
+    {
+        if (itr->second->hasTile(coords))
+        {
+            return itr->second;
+        }
+    }
+    return nullptr;
+}
+
+std::shared_ptr<Unit> World::getUnit(sf::Vector2f const& pos)
+{
+    // TODO : Unit Bounds
+    return nullptr;
 }

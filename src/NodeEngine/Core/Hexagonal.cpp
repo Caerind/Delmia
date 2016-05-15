@@ -4,11 +4,8 @@
 #include "../Utils/Math.hpp"
 #include "World.hpp"
 
-<<<<<<< HEAD
 // TODO : Hexagonal
 
-=======
->>>>>>> refs/remotes/origin/master
 namespace NHexagonal
 {
 

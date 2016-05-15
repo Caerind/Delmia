@@ -10,10 +10,10 @@ class Hall : public Building
 
     public:
         Hall();
-        Hall(int x, int y);
+        Hall(Player* player, sf::Vector2i const& coords);
 
-        static std::vector<sf::Vector2i> getTilesBlueprint(int x, int y);
-        std::vector<std::pair<sf::Vector2i,sf::IntRect>> getTiles(int x, int y);
+        static std::vector<sf::Vector2i> getTilesBlueprint(sf::Vector2i const& coords);
+        std::vector<std::pair<sf::Vector2i,sf::IntRect>> getTiles(sf::Vector2i const& coords);
 };
 
 #endif // HALL_HPP

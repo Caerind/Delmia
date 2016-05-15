@@ -3,6 +3,9 @@
 
 #include "Unit.hpp"
 
+#include "../Buildings/Building.hpp"
+#include "../Resources/Resource.hpp"
+
 class Citizen : public Unit
 {
     public:
@@ -10,9 +13,14 @@ class Citizen : public Unit
 
     public:
         Citizen();
-        Citizen(float x, float y);
+        Citizen(Player* player, sf::Vector2f const& pos);
 
-    private:
+        void gatherResource(Resource* resource);
+        void build(Building* building);
+
+    protected:
+        Resource* mResource;
+        Building* mBuilding;
 };
 
 #endif // CITIZEN_HPP

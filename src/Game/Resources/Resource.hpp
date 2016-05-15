@@ -1,17 +1,27 @@
 #ifndef RESOURCE_HPP
 #define RESOURCE_HPP
 
-#include "../Buildings/Building.hpp"
+#include "../Entity.hpp"
+#include "../IsometricBase.hpp"
+
+#include "../Buildings/Buildings.hpp"
 #include "Resources.hpp"
 
-class Resource : public Building
+class Resource : public Entity, public IsometricBase
 {
     public:
         typedef std::shared_ptr<Resource> Ptr;
 
     public:
         Resource();
-        Resource(int x, int y);
+        Resource(sf::Vector2i const& coords);
+
+        std::size_t getType() const;
+
+        sf::Vector2f getEntryPoint() const;
+
+    protected:
+        std::size_t mType;
 };
 
 #endif // RESOURCE_HPP

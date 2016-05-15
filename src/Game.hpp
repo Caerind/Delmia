@@ -15,4 +15,8 @@
 #include "Game/Resources/GoldMine.hpp"
 #include "Game/Resources/Quarry.hpp"
 
+#include "Game/Units/Unit.hpp"
+#include "Game/Units/Citizen.hpp"
+#include "Game/Units/Soldier.hpp"
+
 #endif // GAME_HPP

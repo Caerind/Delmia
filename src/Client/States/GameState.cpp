@@ -3,8 +3,9 @@
 GameState::GameState(ah::StateManager& manager)
 : ah::State(manager)
 {
+    mCameraSpeed = 1000.f;
+
     mPlacing = false;
-    mPlacingCollide = false;
     mPlacingType = 0;
     mPlacement = nullptr;
 
@@ -12,6 +13,10 @@ GameState::GameState(ah::StateManager& manager)
     mSelectionZone.setFillColor(sf::Color::Transparent);
     mSelectionZone.setOutlineColor(sf::Color::Black);
     mSelectionZone.setOutlineThickness(2.f);
+
+    mWorld.createResource<Quarry>(sf::Vector2i(10,10));
+    mWorld.createResource<Forest>(sf::Vector2i(14,14));
+    mWorld.createResource<GoldMine>(sf::Vector2i(6,6));
 }
 
 bool GameState::handleEvent(sf::Event const& event)
@@ -20,21 +25,8 @@ bool GameState::handleEvent(sf::Event const& event)
 
     handleZoom(event);
     handlePlacement(event);
+    handleSelection(event);
     handleUnit(event);
-
-    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
-    {
-        if (oldC != sf::Vector2i())
-        {
-            std::vector<sf::Vector2i> p = NIsometric::pathfinding(oldC,mWorld.getMouseCoords(),[](sf::Vector2i const& coords) -> bool{});
-            for (std::size_t i = 0; i < p.size(); i++)
-            {
-                std::cout << p[i].x << " " << p[i].y << std::endl;
-            }
-        }
-
-        oldC = mWorld.getMouseCoords();
-    }
 
     return true;
 }
@@ -65,6 +57,7 @@ void GameState::render(sf::RenderTarget& target, sf::RenderStates states)
 
 void GameState::handleZoom(sf::Event const& event)
 {
+    // TODO : Limit size of the view
     if (event.type == sf::Event::MouseWheelScrolled && event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
     {
         if (event.mouseWheelScroll.delta < 1)
@@ -83,134 +76,100 @@ void GameState::handlePlacement(sf::Event const& event)
     // Actual Mouse Coords
     sf::Vector2i c = mWorld.getMouseCoords();
 
-    // Left Click Pressed
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right && !mPlacing)
+    // Middle Click Pressed
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Middle && !mPlacing)
     {
         mPlacing = true;
         switch (mPlacingType)
         {
-            case 0: mPlacement = mWorld.createActor<Forest>(); break;
-            case 1: mPlacement = mWorld.createActor<GoldMine>(); break;
-            case 2: mPlacement = mWorld.createActor<Quarry>(); break;
-            case 3: mPlacement = mWorld.createActor<Hall>(); break;
-            case 4: mPlacement = mWorld.createActor<Market>(); break;
-            case 5: mPlacement = mWorld.createActor<Barrack>(); break;
+            case 0: mPlacement = mWorld.createActor<Hall>(nullptr,c); break;
+            case 1: mPlacement = mWorld.createActor<Market>(nullptr,c); break;
+            case 2: mPlacement = mWorld.createActor<Barrack>(nullptr,c); break;
             default: mPlacement = nullptr; break;
         }
         if (mPlacement != nullptr)
         {
             mPlacement->setPositionZ(100000.f);
-            movePlacement(c);
+            mPlacement->generate(c);
+            bool collide;
+            switch (mPlacingType)
+            {
+                case 0: collide = !mWorld.buildingPlacing<Hall>(c); break;
+                case 1: collide = !mWorld.buildingPlacing<Market>(c); break;
+                case 2: collide = !mWorld.buildingPlacing<Barrack>(c); break;
+                default: collide = false; break;
+            }
+            mPlacement->setColor((collide) ? sf::Color::Red : sf::Color::Green);
             mPlacement->setBuilt(true);
         }
     }
 
-    // Left Click Released
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right && mPlacing)
+    // Middle Click Released
+    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Middle && mPlacing)
     {
         mPlacing = false;
         if (mPlacement != nullptr)
         {
             mWorld.removeActor(mPlacement->getId());
             mPlacement = nullptr;
-        }
-
-        if (!mPlacingCollide)
-        {
             switch (mPlacingType)
             {
-                case 0: mWorld.createResource<Forest>(c.x,c.y); break;
-                case 1: mWorld.createResource<GoldMine>(c.x,c.y); break;
-                case 2: mWorld.createResource<Quarry>(c.x,c.y); break;
-                case 3: mWorld.createBuilding<Hall>(c.x,c.y); break;
-                case 4: mWorld.createBuilding<Market>(c.x,c.y); break;
-                case 5: mWorld.createBuilding<Barrack>(c.x,c.y); break;
+                case 0: mWorld.createBuilding<Hall>(mWorld.getLocalPlayerId(),c); break;
+                case 1: mWorld.createBuilding<Market>(mWorld.getLocalPlayerId(),c); break;
+                case 2: mWorld.createBuilding<Barrack>(mWorld.getLocalPlayerId(),c); break;
                 default: break;
             }
         }
-        mPlacingCollide = false;
     }
 
     // Mouse Moved
-    if (event.type == sf::Event::MouseMoved && mPlacing && sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    if (event.type == sf::Event::MouseMoved && mPlacing && sf::Mouse::isButtonPressed(sf::Mouse::Middle))
     {
         if (mPlacement != nullptr)
         {
             if (mPlacement->getCoords() != c)
             {
-                movePlacement(c);
+                mPlacement->generate(c);
+                bool collide;
+                switch (mPlacingType)
+                {
+                    case 0: collide = !mWorld.buildingPlacing<Hall>(c); break;
+                    case 1: collide = !mWorld.buildingPlacing<Market>(c); break;
+                    case 2: collide = !mWorld.buildingPlacing<Barrack>(c); break;
+                    default: collide = false; break;
+                }
+                mPlacement->setColor((collide) ? sf::Color::Red : sf::Color::Green);
             }
         }
     }
 
-    // Press A
+    // Press B
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::B)
     {
-        mPlacingType = (mPlacingType >= 6) ? 0 : mPlacingType + 1;
-        if (mPlacing)
-        {
-            if (mPlacement != nullptr)
-            {
-                mWorld.removeActor(mPlacement->getId());
-            }
-            switch (mPlacingType)
-            {
-                case 0: mPlacement = mWorld.createActor<Forest>(); break;
-                case 1: mPlacement = mWorld.createActor<GoldMine>(); break;
-                case 2: mPlacement = mWorld.createActor<Quarry>(); break;
-                case 3: mPlacement = mWorld.createActor<Hall>(); break;
-                case 4: mPlacement = mWorld.createActor<Market>(); break;
-                case 5: mPlacement = mWorld.createActor<Barrack>(); break;
-                default: mPlacement = nullptr; break;
-            }
-            if (mPlacement != nullptr)
-            {
-                mPlacement->setPositionZ(100000.f);
-                movePlacement(c);
-                mPlacement->setBuilt(true);
-            }
-        }
+        mPlacingType = (mPlacingType + 1) % 3;
     }
 }
 
-void GameState::movePlacement(sf::Vector2i const& coords)
-{
-    if (mPlacement != nullptr)
-    {
-        mPlacement->clearTiles();
-        mPlacement->generate(coords.x,coords.y);
-        switch (mPlacingType)
-        {
-            case 0: mPlacingCollide = mWorld.collide(coords); break;
-            case 1: mPlacingCollide = mWorld.collide(coords); break;
-            case 2: mPlacingCollide = mWorld.collide(coords); break;
-            case 3: mPlacingCollide = !mWorld.buildingPlacing<Hall>(coords.x,coords.y); break;
-            case 4: mPlacingCollide = !mWorld.buildingPlacing<Market>(coords.x,coords.y); break;
-            case 5: mPlacingCollide = !mWorld.buildingPlacing<Barrack>(coords.x,coords.y); break;
-            default: mPlacingCollide = false; break;
-        }
-        mPlacement->setColor((mPlacingCollide) ? sf::Color::Red : sf::Color::Green);
-    }
-}
-
-void GameState::handleUnit(sf::Event const& event)
+void GameState::handleSelection(sf::Event const& event)
 {
     sf::Vector2f p = NWorld::getPointerPositionView();
-
-    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::U)
-    {
-        mWorld.createUnit<Unit>(p.x,p.y);
-    }
-
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left && !mSelecting)
     {
         mSelecting = true;
         mSelectionZone.setPosition(p);
-        mSelectedUnits.clear();
+        mSelected.clear();
     }
     if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left && mSelecting)
     {
-        mSelectedUnits = mWorld.selectUnits(mSelectionZone.getGlobalBounds());
+        mSelected = mWorld.selectUnits(mSelectionZone.getGlobalBounds());
+        if (mSelected.size() == 0)
+        {
+            Building::Ptr building = mWorld.getBuilding(NIsometric::worldToCoords(p));
+            if (building != nullptr)
+            {
+                // TODO : Open Building Window
+            }
+        }
         mSelecting = false;
         mSelectionZone.setSize({0.f, 0.f});
     }
@@ -218,12 +177,113 @@ void GameState::handleUnit(sf::Event const& event)
     {
         mSelectionZone.setSize(p - mSelectionZone.getPosition());
     }
+}
 
-    if (mSelectedUnits.size() > 0 && event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Middle)
+void GameState::handleUnit(sf::Event const& event)
+{
+    sf::Vector2f p = NWorld::getPointerPositionView();
+
+    // TEMPORARY Add an unit
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::U)
     {
-        for (std::size_t i = 0; i < mSelectedUnits.size(); i++)
+        mWorld.createUnit<Unit>(mWorld.getLocalPlayerId(),p);
+    }
+
+
+    if (mSelected.size() > 0 && event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right)
+    {
+        sf::Vector2f pos = NWorld::getPointerPositionView();
+        sf::Vector2i coords = NIsometric::worldToCoords(pos);
+        Building::Ptr building = mWorld.getBuilding(coords);
+        Resource::Ptr resource = mWorld.getResource(coords);
+        Unit::Ptr unit = mWorld.getUnit(pos);
+        bool handled = false;
+        if (building != nullptr)
         {
-            mSelectedUnits[i]->positionOrder(NWorld::getPointerPositionView());
+            if (building->getOwnerId() == mWorld.getLocalPlayerId())
+            {
+                if (building->isBuilt())
+                {
+                    for (std::size_t i = 0; i < mSelected.size(); i++)
+                    {
+                        // Give resources
+                        //mSelected[i]->giveResource(building.get());
+                    }
+                }
+                else
+                {
+                    for (std::size_t i = 0; i < mSelected.size(); i++)
+                    {
+                        if (mSelected[i]->getType() == Units::Citizen)
+                        {
+                            // Build it
+                            //mSelected[i]->build(building.get());
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (std::size_t i = 0; i < mSelected.size(); i++)
+                {
+                    if (mSelected[i]->getType() == Units::Soldier)
+                    {
+                        // Attack and rob
+                    }
+                }
+            }
+            handled = true;
+        }
+        else if (resource != nullptr)
+        {
+            for (std::size_t i = 0; i < mSelected.size(); i++)
+            {
+                if (mSelected[i]->getType() == Units::Citizen)
+                {
+                    // Gather resources
+                    mSelected[i]->positionOrder(resource->getEntryPoint());
+                    //mSelected[i]->gatherResource(resource.get());
+                }
+            }
+            handled = true;
+        }
+        else if (unit != nullptr)
+        {
+            if (unit->getOwnerId() == mWorld.getLocalPlayerId())
+            {
+                for (std::size_t i = 0; i < mSelected.size(); i++)
+                {
+                    if (mSelected[i]->getType() == Units::Soldier)
+                    {
+                        // Attack and rob
+                    }
+                }
+                handled = true;
+            }
+        }
+
+        if (!handled)
+        {
+            // Go
+            for (std::size_t i = 0; i < mSelected.size(); i++)
+            {
+                if (!mWorld.collide(NIsometric::worldToCoords(pos)))
+                {
+                    if (i > 0)
+                    {
+                        bool ok = false;
+                        do
+                        {
+                            pos = NWorld::getPointerPositionView() + sf::Vector2f(NMath::randomDev(0.f,40.f),NMath::randomDev(0.f,40.f));
+                            if (!mWorld.collide(NIsometric::worldToCoords(pos)))
+                            {
+                                ok = true;
+                            }
+                        } while (!ok);
+                    }
+                    mSelected[i]->positionOrder(pos);
+                }
+            }
         }
     }
 }
@@ -247,7 +307,17 @@ void GameState::handleViewMovement(sf::Time dt)
     {
         mvt.x++;
     }
-    NWorld::getCameraManager().getView().move(dt.asSeconds() * 1000.f * mvt);
+    NWorld::getCameraManager().getView().move(dt.asSeconds() * mCameraSpeed * mvt);
+}
+
+float GameState::getCameraSpeed()
+{
+    return mCameraSpeed * getCameraZoom();
+}
+
+float GameState::getCameraZoom()
+{
+    return 1.f;
 }
 
 void GameState::onDeactivate()

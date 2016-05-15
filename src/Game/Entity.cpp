@@ -59,10 +59,21 @@ void Entity::removeResource(std::size_t resourceId, int value)
     mResources[resourceId] -= value;
 }
 
+int Entity::moveResource(std::size_t resourceId)
+{
+    int amount = getResourceAmount(resourceId);
+    removeResource(resourceId,amount);
+    return amount;
+}
+
 int Entity::moveResource(std::size_t resourceId, int value)
 {
-    removeResource(resourceId,value);
-    return value;
+    if (hasResourceAmount(resourceId,value))
+    {
+        removeResource(resourceId,value);
+        return value;
+    }
+    return 0;
 }
 
 bool Entity::hasResource(std::size_t resourceId) const

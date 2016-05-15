@@ -1,28 +1,13 @@
 #include "Quarry.hpp"
 
-Quarry::Quarry() : Resource(0,0)
+Quarry::Quarry()
 {
     mType = Buildings::Quarry;
-    generate(0,0);
-    addResource(Resources::Rock,1000);
 }
 
-Quarry::Quarry(int x, int y) : Resource(x,y)
+Quarry::Quarry(sf::Vector2i const& coords) : Resource(coords)
 {
     mType = Buildings::Quarry;
-    generate(x,y);
+    addTile(coords,"building",sf::IntRect(1024,0,256,256));
     addResource(Resources::Rock,1000);
-}
-
-std::vector<std::pair<sf::Vector2i,sf::IntRect>> Quarry::getTiles(int x, int y)
-{
-    std::vector<sf::Vector2i> tilesBP = Building::getTilesBlueprint(x,y);
-    std::vector<std::pair<sf::Vector2i,sf::IntRect>> tiles;
-    for (std::size_t i = 0; i < tilesBP.size(); i++)
-    {
-        tiles.emplace_back();
-        tiles.back().first = tilesBP[i];
-    }
-    tiles[0].second = sf::IntRect(1024,0,256,256);
-    return tiles;
 }

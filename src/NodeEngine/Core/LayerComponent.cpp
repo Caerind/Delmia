@@ -47,11 +47,6 @@ sf::Vector2i NLayerComponent::getCoords() const
     return mCoords;
 }
 
-sf::Vector2i NLayerComponent::getCoords() const
-{
-    return mCoords;
-}
-
 bool NLayerComponent::loadFromCode(std::string const& code)
 {
     sf::Vector2i coords;
@@ -138,6 +133,18 @@ void NLayerComponent::render(sf::RenderTarget& target)
 sf::FloatRect NLayerComponent::getBounds() const
 {
     return getFinalTransform().transformRect(sf::FloatRect(0, 0, mTileSize.x * mLayerSize.x, mTileSize.y * mLayerSize.y));
+}
+
+void NLayerComponent::fill(int id)
+{
+    sf::Vector2i coords;
+    for (coords.x = 0; coords.x < mLayerSize.x; coords.x++)
+    {
+        for (coords.y = 0; coords.y < mLayerSize.y; coords.y++)
+        {
+            setTileId(coords,id);
+        }
+    }
 }
 
 void NLayerComponent::setTileId(sf::Vector2i const& coords, int id)

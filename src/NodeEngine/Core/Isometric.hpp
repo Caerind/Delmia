@@ -28,6 +28,8 @@ sf::Vector2f coordsToWorld(sf::Vector2i const& coords); // center of the tile
 sf::Vector2i coordsToChunk(sf::Vector2i const& coords);
 sf::Vector2i coordsToRelative(sf::Vector2i const& coords);
 
+sf::Vector2i relativeToCoords(sf::Vector2i const& chunk, sf::Vector2i const& relative);
+
 std::vector<sf::Vector2i> getNeighboors(sf::Vector2i const& coords, bool diag = false);
 std::vector<sf::Vector2i> pathfinding(sf::Vector2i const& begin, sf::Vector2i const& end, std::function<bool(sf::Vector2i const& coords)> collisions);
 

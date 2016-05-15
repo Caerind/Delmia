@@ -4,6 +4,8 @@
 #include "../../NodeEngine/Utils/ClockedTask.hpp"
 
 Unit::Unit()
+: PlayerOwned(nullptr)
+, mThread(&Unit::calculatePath, this)
 {
     mType = Units::DefaultUnit;
 
@@ -16,14 +18,16 @@ Unit::Unit()
     mMovingTime = sf::Time::Zero;
 }
 
-Unit::Unit(float x, float y)
+Unit::Unit(Player* player, sf::Vector2f const& pos)
+: PlayerOwned(player)
+, mThread(&Unit::calculatePath, this)
 {
-    mType = Units::DefaultUnit;
+    mType = Units::Citizen; // TODO : Change
 
     attachComponent(&mSprite);
     mSprite.setPositionZ(1.f);
     initSprite("unit",{61,121},{30.f,110.f});
-    setPosition(x,y);
+    setPosition(pos);
 
     mSpeed = 300.f;
     mMovingTime = sf::Time::Zero;
@@ -124,28 +128,34 @@ void Unit::updateTextureRect()
 
 void Unit::calculatePath()
 {
+    std::vector<sf::Vector2i> tPath;
     sf::Vector2i b = NIsometric::worldToCoords(getPosition());
     sf::Vector2i e = NIsometric::worldToCoords(mPositionOrder);
-    NClockedTask t([b,e,this]()
+    NClockedTask t([b,e,&tPath,this]()
     {
-        mPath = NIsometric::pathfinding(b,e,[this](sf::Vector2i const& coords)->bool{return mWorld->collide(coords);});
+        tPath = NIsometric::pathfinding(b,e,[this](sf::Vector2i const& coords)->bool{return mWorld->collide(coords);});
     });
+
+    sf::Lock lock(mMutex);
     std::cout << "Path in : " << t.execute().asSeconds() << "s" << std::endl;
+    mPath = tPath;
     mPathDone = true;
+    if (mPath.size() == 0)
+    {
+        mPathDone = false;
+        mPositionOrder = sf::Vector2f();
+    }
 }
 
-void Unit::onBuildingAdded(std::vector<sf::Vector2i> tiles)
+void Unit::onBuildingAdded(sf::Vector2i const& coords)
 {
     bool recalculated = false;
     for (std::size_t i = 0; i < mPath.size(); i++)
     {
-        for (std::size_t j = 0; j < tiles.size(); j++)
+        if (!recalculated && mPath[i] == coords)
         {
-            if (!recalculated && mPath[i] == tiles[j])
-            {
-                calculatePath();
-                recalculated = true;
-            }
+            calculatePath();
+            recalculated = true;
         }
     }
 }
@@ -169,7 +179,7 @@ void Unit::tick(sf::Time dt)
         {
             sf::Vector2f p = NIsometric::coordsToWorld(mPath.front());
             moveToDest(p, dt);
-            if (getLength(p - getPosition()) < 50.f)
+            if (getLength(p - getPosition()) < 100.f)
             {
                 erase(mPath, 0);
             }
@@ -179,12 +189,34 @@ void Unit::tick(sf::Time dt)
             moveToDest(mPositionOrder, dt);
         }
 
-        if (getLength(mPositionOrder - getPosition()) < 50.f)
+        if (getLength(mPositionOrder - getPosition()) < 30.f)
         {
             mPositionOrder = sf::Vector2f();
             mPathDone = false;
             mMovingTime = sf::Time::Zero;
             updateTextureRect();
+        }
+    }
+}
+
+void Unit::takeResource(Entity* entity, std::size_t resourceId, int amount)
+{
+    if (entity != nullptr)
+    {
+        if (entity->hasResourceAmount(resourceId,amount))
+        {
+            addResource(resourceId,entity->moveResource(resourceId,amount));
+        }
+    }
+}
+
+void Unit::giveResource(Entity* entity)
+{
+    for (auto itr = mResources.begin(); itr != mResources.end(); itr++)
+    {
+        if (entity != nullptr)
+        {
+            entity->addResource(itr->first,moveResource(itr->first));
         }
     }
 }
