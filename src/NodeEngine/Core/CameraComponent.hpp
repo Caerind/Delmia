@@ -16,7 +16,7 @@ class NCameraComponent : public NComponent
         void onScaledThis();
         void onRotatedThis();
 
-    private:
+    protected:
         sf::View mView;
 };
 
