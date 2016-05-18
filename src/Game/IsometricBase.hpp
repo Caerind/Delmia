@@ -1,8 +1,8 @@
 #ifndef ISOMETRICBASE_HPP
 #define ISOMETRICBASE_HPP
 
-#include "../../NodeEngine/Core/SpriteComponent.hpp"
-#include "../../NodeEngine/Core/Isometric.hpp"
+#include "../NodeEngine/Core/SpriteComponent.hpp"
+#include "../NodeEngine/Core/Isometric.hpp"
 
 class IsometricBase
 {

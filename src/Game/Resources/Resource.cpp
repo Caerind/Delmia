@@ -1,5 +1,5 @@
 #include "Resource.hpp"
-#include "World.hpp"
+#include "../World.hpp"
 
 Resource::Resource()
 : IsometricBase()
