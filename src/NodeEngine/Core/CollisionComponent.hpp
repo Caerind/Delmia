@@ -14,7 +14,7 @@ class NCollisionComponent : public NComponent
         void setPointCount(std::size_t index);
         std::size_t getPointCount() const;
 
-        bool contains(sf::Vector2f const& position);
+        bool contains(sf::Vector2f const& point);
         bool intersect(NCollisionComponent* component);
 
     protected:

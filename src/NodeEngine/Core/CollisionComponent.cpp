@@ -31,15 +31,42 @@ std::size_t NCollisionComponent::getPointCount() const
     return mPoints.size();
 }
 
-bool NCollisionComponent::contains(sf::Vector2f const& position)
+bool NCollisionComponent::contains(sf::Vector2f const& point)
 {
-    // TODO : Collision
-    return false;
+    sf::Vector2f p = point - getFinalPosition();
+    for (std::size_t i = 0; i < mPoints.size(); i++)
+    {
+        sf::Vector2f a = getPoint(i);
+        sf::Vector2f b = (i == getPointCount() - 1) ? getPoint(0) - a : getPoint(i + 1) - a;
+        if (b.x * (p.y - a.y) - b.y * (p.x - a.x) < 0)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool NCollisionComponent::intersect(NCollisionComponent* component)
 {
-    // TODO : Collision
+    if (component == nullptr)
+    {
+        return false;
+    }
+
+    for (std::size_t i = 0; i < mPoints.size(); i++)
+    {
+        if (component->contains(getPoint(i) + getFinalPosition()))
+        {
+            return true;
+        }
+    }
+    for (std::size_t i = 0; i < component->getPointCount(); i++)
+    {
+        if (contains(component->getPoint(i) + component->getFinalPosition()))
+        {
+            return true;
+        }
+    }
     return false;
 }
 
