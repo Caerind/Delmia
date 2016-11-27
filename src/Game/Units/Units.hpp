@@ -7,9 +7,9 @@ namespace Units
 enum Type
 {
     DefaultUnit = 0,
-    Citizen,
-    Soldier,
-    Trader,
+    Citizen = 1,
+    Soldier = 2,
+    Trader = 3
 };
 
 } // namespace Units
